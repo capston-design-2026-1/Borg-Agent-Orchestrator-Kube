@@ -1,9 +1,18 @@
 # Orchestrator Stack Next Steps
 
 1. Create a Python 3.12 AIOpsLab validation environment, install AIOpsLab from GitHub, and run `AIOpsLabPolicyAgent` against a real problem ID.
-2. Validate live Prometheus/AIOpsLab telemetry fields (`sla_violations`, `completed_tasks`, `energy_watts`) against real workloads now that trace plumbing preserves them.
+2. Run `telemetry-reward-audit` against live Prometheus/AIOpsLab traces to validate reward coverage and SLA/completion/energy pressure.
 3. Tune PPO curriculum beyond smoke settings and compare trained checkpoints against the heuristic baseline using the same telemetry reward fields.
 4. Export representative trace-derived matrices with `export-brain-datasets`, retrain boosters, inspect `calibration_summary`, and only then promote thresholds.
+
+## Latest Session Note (2026-05-02 KST, telemetry reward audit slice)
+
+- Added `telemetry-reward-audit` CLI to replay trace rows through heuristic agents/referee and quantify telemetry reward pressure.
+- Audit reports include telemetry coverage, max SLA/completion/energy values, selected action counts, weighted score summary, and per-agent reward deltas from `sla_violations`, `completed_tasks`, and `energy_watts`.
+- Validation run status:
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests/test_telemetry_audit.py orchestrator_stack/tests/test_simulator.py -q`: success (`9 passed`)
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`56 passed`)
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python orchestrator_stack/run.py telemetry-reward-audit --trace <temp-live-shape-trace> --out <temp-audit.json>`: success
 
 ## Latest Session Note (2026-05-02 KST, calibration diagnostics slice)
 

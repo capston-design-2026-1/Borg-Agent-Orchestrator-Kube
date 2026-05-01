@@ -39,7 +39,8 @@ Read Agents.md, NEXT_STEPS.md, MAS_ARCHITECTURE.md, and README.md, inspect the l
 - Follow-up validation on 2026-05-02 KST: Layer 1 telemetry fields now survive metric rows into trace rows, and `export-brain-datasets` now writes reusable trace-derived risk/demand `.npz` matrices with feature metadata for calibration and diagnostics.
 - Follow-up implementation on 2026-05-02 KST: `architecture-status` now regenerates the orchestrator architecture completion/gap report from a repeatable CLI.
 - Follow-up implementation on 2026-05-02 KST: `diagnose-brain` now reports risk Brier score, expected/max calibration error, and named feature importances when given exported `.npz` datasets.
-- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `53 passed`.
+- Follow-up implementation on 2026-05-02 KST: `telemetry-reward-audit` now quantifies telemetry coverage and SLA/completion/energy reward deltas before PPO tuning.
+- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `56 passed`.
 
 ## Pipeline Status
 
