@@ -1,0 +1,18 @@
+{
+  "status": "blocked",
+  "python_executable": "/Users/theokim/Documents/aiopslab_validation_env/bin/python",
+  "python_version": "3.12.13",
+  "compatible_python": true,
+  "aiopslab_package_available": true,
+  "kube_config_available": false,
+  "kube_config_paths": [
+    "/Users/theokim/.kube/config"
+  ],
+  "import_errors": {
+    "aiopslab.orchestrator.orchestrator": "ConfigException: Invalid kube-config file. No configuration found."
+  },
+  "blockers": [
+    "Kubernetes config not found; set KUBECONFIG or create ~/.kube/config before live AIOpsLab runs",
+    "import check failed for aiopslab.orchestrator.orchestrator: ConfigException: Invalid kube-config file. No configuration found."
+  ]
+}
