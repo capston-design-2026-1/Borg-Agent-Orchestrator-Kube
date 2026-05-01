@@ -1,0 +1,47 @@
+[
+  {
+    "timestamp": 100,
+    "nodes": [
+      {"node_id": "n1", "cpu_util": 0.91, "mem_util": 0.86, "disk_util": 0.24, "net_util": 0.18, "power_state": "on"},
+      {"node_id": "n2", "cpu_util": 0.32, "mem_util": 0.28, "disk_util": 0.18, "net_util": 0.12, "power_state": "on"}
+    ],
+    "tasks": [{"task_id": "t1", "node_id": "n1", "urgency": 0.9, "queue_priority": 3, "alive": true}],
+    "p_fail_scores": {"n1": 0.88, "n2": 0.12},
+    "demand_projection": {"n1": 0.82, "n2": 0.22},
+    "queue_length": 75,
+    "energy_price": 0.14,
+    "sla_violations": 1,
+    "completed_tasks": 12,
+    "energy_watts": 310.0
+  },
+  {
+    "timestamp": 160,
+    "nodes": [
+      {"node_id": "n1", "cpu_util": 0.68, "mem_util": 0.61, "disk_util": 0.22, "net_util": 0.16, "power_state": "on"},
+      {"node_id": "n2", "cpu_util": 0.27, "mem_util": 0.24, "disk_util": 0.16, "net_util": 0.11, "power_state": "on"}
+    ],
+    "tasks": [{"task_id": "t2", "node_id": "n2", "urgency": 0.7, "queue_priority": 2, "alive": true}],
+    "p_fail_scores": {"n1": 0.42, "n2": 0.14},
+    "demand_projection": {"n1": 0.53, "n2": 0.18},
+    "queue_length": 35,
+    "energy_price": 0.12,
+    "sla_violations": 0,
+    "completed_tasks": 25,
+    "energy_watts": 260.0
+  },
+  {
+    "timestamp": 220,
+    "nodes": [
+      {"node_id": "n1", "cpu_util": 0.59, "mem_util": 0.57, "disk_util": 0.22, "net_util": 0.15, "power_state": "on"},
+      {"node_id": "n2", "cpu_util": 0.44, "mem_util": 0.38, "disk_util": 0.16, "net_util": 0.13, "power_state": "on"}
+    ],
+    "tasks": [{"task_id": "t3", "node_id": "n1", "urgency": 0.5, "queue_priority": 1, "alive": true}],
+    "p_fail_scores": {"n1": 0.34, "n2": 0.21},
+    "demand_projection": {"n1": 0.45, "n2": 0.37},
+    "queue_length": 15,
+    "energy_price": 0.11,
+    "sla_violations": 0,
+    "completed_tasks": 30,
+    "energy_watts": 240.0
+  }
+]
