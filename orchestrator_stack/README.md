@@ -106,6 +106,16 @@ Layer 2 now normalizes AIOpsLab-style nested payloads into the shared `Observati
 Layer 3 runtime inference is now wired through a predictor-backed backend wrapper, so `run`, `train-policy`, and PPO/Optuna evaluation paths all receive live XGBoost-enriched observations on both `reset()` and `step()`, not only the manual episode loop.
 
 ### 5. Train the Predictor Models (Layer 3)
+Export trace-derived NPZ datasets when you want a reusable calibration/diagnostics artifact before model training:
+```bash
+./.venv/bin/python orchestrator_stack/run.py export-brain-datasets \
+  --trace orchestrator_stack/examples/sample_trace.json \
+  --risk-out orchestrator_stack/examples/risk_train.npz \
+  --demand-out orchestrator_stack/examples/demand_train.npz
+```
+
+The exported files use the same feature contract as `train-brains`: `x`, `y`, `feature_names`, and `target_name`. This lets `diagnose-brain` and external calibration runs inspect the exact matrices used for risk and demand training.
+
 Train the XGBoost safety-risk and resource-demand models from the generated trace:
 ```bash
 ./.venv/bin/python orchestrator_stack/run.py train-brains \

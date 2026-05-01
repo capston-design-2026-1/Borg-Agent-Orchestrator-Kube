@@ -1,10 +1,20 @@
 # Orchestrator Stack Next Steps
 
 1. Create a Python 3.12 AIOpsLab validation environment, install AIOpsLab from GitHub, and run `AIOpsLabPolicyAgent` against a real problem ID.
-2. Connect live Prometheus/AIOpsLab telemetry fields (`sla_violations`, `completed_tasks`, `energy_watts`) into trace rows and validate telemetry-based rewards against real workloads.
+2. Validate live Prometheus/AIOpsLab telemetry fields (`sla_violations`, `completed_tasks`, `energy_watts`) against real workloads now that trace plumbing preserves them.
 3. Tune PPO curriculum beyond smoke settings and compare trained checkpoints against the heuristic baseline using the same telemetry reward fields.
-4. Retrain and calibrate risk/demand boosters on representative trace-derived matrices before promoting thresholds.
+4. Export representative trace-derived matrices with `export-brain-datasets`, retrain/calibrate risk and demand boosters, and only then promote thresholds.
 5. Promote architecture-status reporting into a repeatable CLI/report command if this comparison will be regenerated often.
+
+## Latest Session Note (2026-05-02 KST, trace-derived brain dataset slice)
+
+- Added `export-brain-datasets` CLI so trace rows can be materialized into reusable risk/demand `.npz` datasets before XGBoost training or diagnostics.
+- Added stable `FEATURE_NAMES` metadata beside the existing Layer 2 feature count so exported matrices carry column meaning.
+- Exported risk/demand datasets contain `x`, `y`, `feature_names`, and `target_name`, matching the existing `train-brains` feature contract.
+- Validation run status:
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests/test_brain_dataset_export.py orchestrator_stack/tests/test_feature_extractor.py orchestrator_stack/tests/test_predictor_runtime.py -q`: success (`7 passed`)
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`49 passed`)
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python orchestrator_stack/run.py export-brain-datasets --trace orchestrator_stack/examples/sample_trace.json --risk-out /private/tmp/.../risk_train.npz --demand-out /private/tmp/.../demand_train.npz`: success
 
 ## Latest Session Note (2026-04-28 KST, architecture gap closure slice)
 

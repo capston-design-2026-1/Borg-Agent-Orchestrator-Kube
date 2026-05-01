@@ -31,11 +31,13 @@ Read Agents.md, NEXT_STEPS.md, MAS_ARCHITECTURE.md, and README.md, inspect the l
 - The latest completed orchestrator tuning artifact that matches the current validated path is `reports/tuning/202604161029_optuna_orchestrator_reward_weights.md`; the older `reports/tuning/202604142305_optuna_orchestrator_policy_and_rewards.md` was generated before the 2026-04-16 PPO-backed tuning rewrite and should be treated as historical only.
 - Documentation sync for the current gate state is recorded in `reports/milestones/202604171027_orchestrator_e2e_gate_doc_sync_session1.md`.
 - Architecture gap closure on 2026-04-28 KST added CSV ingestion, Prometheus export, PettingZoo parallel bridge, expanded agent action spaces, XGBoost diagnostics, PPO curriculum stages, and an explicit AIOpsLab onboarding contract adapter under `orchestrator_stack/`.
-- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `42 passed`.
+- Orchestrator validation after the 2026-04-28 architecture slice passed with `42 passed`; newer validation status is listed below.
 
 
 - Follow-up validation on 2026-04-28 KST: PPO curriculum now runs locally after Ray fixes; PettingZoo bridge validated against the installed package; AIOpsLab install remains blocked in this Python 3.13 venv because upstream requires Python >=3.11,<3.13; telemetry reward fields are now implemented for future live SLA/energy/task metrics.
 - Current orchestrator architecture status report: `reports/evaluations/202604281536_orchestrator_architecture_status.md`.
+- Follow-up validation on 2026-05-02 KST: Layer 1 telemetry fields now survive metric rows into trace rows, and `export-brain-datasets` now writes reusable trace-derived risk/demand `.npz` matrices with feature metadata for calibration and diagnostics.
+- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `49 passed`.
 
 ## Pipeline Status
 
