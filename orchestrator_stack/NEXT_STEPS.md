@@ -15,14 +15,15 @@
 - Updated `AIOpsLabPolicyAgent.get_action()` to return one parser-compliant fenced AIOpsLab API call instead of raw JSON.
 - Updated `AIOpsLabBackend` to import `aiopslab.orchestrator.orchestrator.Orchestrator` directly because the upstream top-level package exposes no `orchestrator` attribute.
 - Strengthened preflight to perform real imports for `aiopslab.paths` and `aiopslab.orchestrator.orchestrator`.
+- Preflight now reports `kube_config_available` and the exact Kubernetes config paths checked before live AIOpsLab runs.
 - Current external preflight report: `reports/evaluations/202605020527_aiopslab_preflight.json`.
-- Remaining live blocker: upstream orchestrator import now reaches Kubernetes initialization and fails with `Invalid kube-config file. No configuration found.`
+- Remaining live blocker: no `KUBECONFIG` or `~/.kube/config`; upstream orchestrator import reaches Kubernetes initialization and fails with `Invalid kube-config file. No configuration found.`
 - Validation run status:
   - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests/test_simulator.py orchestrator_stack/tests/test_aiopslab_contract.py -q`: success (`9 passed`)
-  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests/test_aiopslab_preflight.py orchestrator_stack/tests/test_aiopslab_contract.py -q`: success (`6 passed`)
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests/test_aiopslab_preflight.py -q`: success (`4 passed`)
   - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`63 passed`)
   - `orchestrator_stack/scripts/setup_aiopslab_env.sh`: success
-  - `PYTHONPATH=orchestrator_stack ~/Documents/aiopslab_validation_env/bin/python orchestrator_stack/run.py aiopslab-preflight`: success; reported `status=blocked` on missing Kubernetes config after package import checks.
+  - `PYTHONPATH=orchestrator_stack ~/Documents/aiopslab_validation_env/bin/python orchestrator_stack/run.py aiopslab-preflight`: success; reported `status=blocked`, `kube_config_available=false`, and checked `/Users/theokim/.kube/config`.
 
 ## Latest Session Note (2026-05-02 KST, PPO comparison slice)
 

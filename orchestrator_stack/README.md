@@ -202,7 +202,7 @@ PYTHONPATH=orchestrator_stack ~/Documents/aiopslab_validation_env/bin/python \
   orchestrator_stack/run.py aiopslab-preflight
 ```
 
-Current status: Python 3.12 and the upstream `aiopslab` package install successfully. Live orchestrator import is still blocked until Kubernetes config is available (`Invalid kube-config file. No configuration found.`).
+Current status: Python 3.12 and the upstream `aiopslab` package install successfully. Live orchestrator import is still blocked until Kubernetes config is available. Preflight checks `KUBECONFIG` first, then `~/.kube/config`; this machine currently has neither.
 
 ## Current Validation Status
 
