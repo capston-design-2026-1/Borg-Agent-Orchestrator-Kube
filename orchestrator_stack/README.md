@@ -196,6 +196,8 @@ Use this before PPO tuning on live traces to verify that reward pressure is comi
 
 The repo `.venv` uses Python `3.13.12`, so use the separate Python 3.12 validation environment for upstream checks:
 ```bash
+orchestrator_stack/scripts/setup_aiopslab_env.sh
+
 PYTHONPATH=orchestrator_stack ~/Documents/aiopslab_validation_env/bin/python \
   orchestrator_stack/run.py aiopslab-preflight
 ```

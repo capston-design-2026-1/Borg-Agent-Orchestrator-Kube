@@ -10,6 +10,7 @@
 - Added `aiopslab-preflight` CLI to make live AIOpsLab readiness machine-checkable.
 - Installed Homebrew Python 3.12 and created `~/Documents/aiopslab_validation_env` for upstream AIOpsLab validation.
 - Installed upstream AIOpsLab from GitHub into that environment.
+- Added `orchestrator_stack/scripts/setup_aiopslab_env.sh` to recreate the Python 3.12 AIOpsLab validation environment and copy upstream `config.yml.example` to `config.yml` when needed.
 - Fixed `initialize_aiopslab_problem()` registration order after verifying upstream `Orchestrator.init_problem()` requires `agent_name` to exist first.
 - Updated `AIOpsLabPolicyAgent.get_action()` to return one parser-compliant fenced AIOpsLab API call instead of raw JSON.
 - Strengthened preflight to perform real imports for `aiopslab.paths` and `aiopslab.orchestrator.orchestrator`.
@@ -18,6 +19,7 @@
 - Validation run status:
   - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests/test_aiopslab_preflight.py orchestrator_stack/tests/test_aiopslab_contract.py -q`: success (`6 passed`)
   - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`62 passed`)
+  - `orchestrator_stack/scripts/setup_aiopslab_env.sh`: success
   - `PYTHONPATH=orchestrator_stack ~/Documents/aiopslab_validation_env/bin/python orchestrator_stack/run.py aiopslab-preflight`: success; reported `status=blocked` on missing Kubernetes config after package import checks.
 
 ## Latest Session Note (2026-05-02 KST, PPO comparison slice)
