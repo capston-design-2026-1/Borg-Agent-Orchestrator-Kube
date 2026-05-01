@@ -168,16 +168,26 @@ After completion, check `reports/` for a KST-timestamped Optuna report (e.g., `2
 ./.venv/bin/pytest orchestrator_stack/tests/
 ```
 
+### 5. Regenerate Architecture Status
+```bash
+./.venv/bin/python orchestrator_stack/run.py architecture-status \
+  --out reports/evaluations/manual_orchestrator_architecture_status.md
+```
+
+If `--out` is omitted, the command writes a KST-timestamped report under `reports/evaluations/`.
+
 ## Current Validation Status
 
-Latest checked behavior in this worktree is based on the 2026-04-16 KST validation slices:
+Latest checked behavior in this worktree is based on the 2026-05-02 KST validation slices:
 
 - Layer 1 contracts, Layer 2 normalization, Layer 4 referee/RLlib env behavior, and Layer 5 reward-weight tuning all passed compile and targeted smoke or unit validation in-session.
 - Layer 3 predictor observations are now injected at the backend seam, so manual episodes, heuristic evaluation, RLlib training, and PPO-backed Optuna trials share the same non-placeholder risk/demand observation path.
+- `export-brain-datasets` writes trace-derived risk/demand `.npz` matrices with feature metadata for calibration and diagnostics.
+- `architecture-status` regenerates the architecture completion/gap report as a repeatable CLI artifact.
+- Full orchestrator test suite currently passes with `51 passed`.
 - `tune` completed successfully after the PPO-tuning rewrite and emitted `reports/tuning/202604161029_optuna_orchestrator_reward_weights.md`.
 - `tune-policy-rewards` now reaches the PPO-backed RLlib trial path and fails closed with a structured `"status": "skipped"` result when macOS sandbox process-enumeration blocks `ray.init()`.
 - The older `reports/tuning/202604142305_optuna_orchestrator_policy_and_rewards.md` artifact predates the 2026-04-16 PPO-backed tuning rewrite and should be treated as historical, not as the current validation artifact for `tune-policy-rewards`.
-- Focused Layer 4 tests were smoke-invoked successfully, but `.venv/bin/pytest` could not run in-session because `pytest` is not installed in the repository virtualenv.
 
 ## Viewing Logs and Decision Traces
 

@@ -4,7 +4,15 @@
 2. Validate live Prometheus/AIOpsLab telemetry fields (`sla_violations`, `completed_tasks`, `energy_watts`) against real workloads now that trace plumbing preserves them.
 3. Tune PPO curriculum beyond smoke settings and compare trained checkpoints against the heuristic baseline using the same telemetry reward fields.
 4. Export representative trace-derived matrices with `export-brain-datasets`, retrain/calibrate risk and demand boosters, and only then promote thresholds.
-5. Promote architecture-status reporting into a repeatable CLI/report command if this comparison will be regenerated often.
+
+## Latest Session Note (2026-05-02 KST, repeatable architecture status slice)
+
+- Added `architecture-status` CLI to regenerate the orchestrator architecture completion/gap report instead of hand-writing one-off markdown.
+- Default output is `reports/evaluations/YYYYMMDDHHMM_orchestrator_architecture_status.md`; `--out` can target a specific path for smoke tests or manual reports.
+- Validation run status:
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests/test_architecture_report.py -q`: success (`2 passed`)
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python orchestrator_stack/run.py architecture-status --out /private/tmp/orchestrator_arch_status.md`: success
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`51 passed`)
 
 ## Latest Session Note (2026-05-02 KST, trace-derived brain dataset slice)
 

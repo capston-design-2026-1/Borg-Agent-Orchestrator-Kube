@@ -37,7 +37,8 @@ Read Agents.md, NEXT_STEPS.md, MAS_ARCHITECTURE.md, and README.md, inspect the l
 - Follow-up validation on 2026-04-28 KST: PPO curriculum now runs locally after Ray fixes; PettingZoo bridge validated against the installed package; AIOpsLab install remains blocked in this Python 3.13 venv because upstream requires Python >=3.11,<3.13; telemetry reward fields are now implemented for future live SLA/energy/task metrics.
 - Current orchestrator architecture status report: `reports/evaluations/202604281536_orchestrator_architecture_status.md`.
 - Follow-up validation on 2026-05-02 KST: Layer 1 telemetry fields now survive metric rows into trace rows, and `export-brain-datasets` now writes reusable trace-derived risk/demand `.npz` matrices with feature metadata for calibration and diagnostics.
-- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `49 passed`.
+- Follow-up implementation on 2026-05-02 KST: `architecture-status` now regenerates the orchestrator architecture completion/gap report from a repeatable CLI.
+- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `51 passed`.
 
 ## Pipeline Status
 
