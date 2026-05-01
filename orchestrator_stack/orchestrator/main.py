@@ -16,7 +16,12 @@ from orchestrator.layer3.predictors import (
     train_models_from_trace,
 )
 from orchestrator.layer4.agents import AgentARiskMitigator, AgentBEfficiencyOptimizer, AgentCGatekeeper
-from orchestrator.layer4.ppo_trainer import evaluate_heuristic_policy, train_curriculum_ppo, train_multiagent_ppo
+from orchestrator.layer4.ppo_trainer import (
+    compare_policy_training_to_heuristic,
+    evaluate_heuristic_policy,
+    train_curriculum_ppo,
+    train_multiagent_ppo,
+)
 from orchestrator.layer4.referee import resolve
 from orchestrator.layer5.optuna_tuner import tune_policy_and_rewards, tune_reward_weights
 from orchestrator.layer6.scoreboard import Scoreboard
@@ -132,7 +137,7 @@ def run_episode(config: OrchestratorConfig, verbose: bool = True) -> RunSummary:
 def run_policy_training(config: OrchestratorConfig, output_dir: str | Path) -> dict[str, Any]:
     rows = load_trace_rows(ensure_trace_exists(config))
     if config.ppo_curriculum:
-        return train_curriculum_ppo(
+        training_summary = train_curriculum_ppo(
             lambda: _build_predictor_runtime(rows, config),
             alpha=config.alpha,
             beta=config.beta,
@@ -140,20 +145,31 @@ def run_policy_training(config: OrchestratorConfig, output_dir: str | Path) -> d
             stages=config.ppo_curriculum,
             output_dir=output_dir,
         )
-    backend = _build_predictor_runtime(rows, config)
-    return train_multiagent_ppo(
-        backend,
+    else:
+        backend = _build_predictor_runtime(rows, config)
+        training_summary = train_multiagent_ppo(
+            backend,
+            alpha=config.alpha,
+            beta=config.beta,
+            gamma=config.gamma,
+            learning_rate=config.ppo_learning_rate,
+            train_iters=config.rllib_train_iters,
+            train_batch_size=config.ppo_train_batch_size,
+            minibatch_size=config.ppo_minibatch_size,
+            num_epochs=config.ppo_num_epochs,
+            rollout_fragment_length=config.ppo_rollout_fragment_length,
+            output_dir=output_dir,
+        )
+    heuristic_summary = evaluate_heuristic_policy(
+        _build_predictor_runtime(rows, config),
         alpha=config.alpha,
         beta=config.beta,
         gamma=config.gamma,
-        learning_rate=config.ppo_learning_rate,
-        train_iters=config.rllib_train_iters,
-        train_batch_size=config.ppo_train_batch_size,
-        minibatch_size=config.ppo_minibatch_size,
-        num_epochs=config.ppo_num_epochs,
-        rollout_fragment_length=config.ppo_rollout_fragment_length,
-        output_dir=output_dir,
+        steps=config.episode_steps,
     )
+    training_summary["heuristic_baseline"] = heuristic_summary
+    training_summary["policy_vs_heuristic"] = compare_policy_training_to_heuristic(training_summary, heuristic_summary)
+    return training_summary
 
 
 def tune_reward_layer(config: OrchestratorConfig, *, trials: int) -> dict[str, Any]:

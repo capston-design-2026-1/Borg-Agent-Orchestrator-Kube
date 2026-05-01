@@ -188,6 +188,42 @@ def train_curriculum_ppo(
     return {"status": "trained", "stages": stage_results, "stage_count": len(stage_results)}
 
 
+def policy_training_reward_mean(training_summary: dict[str, Any]) -> float | None:
+    if training_summary.get("status") != "trained":
+        return None
+    if "episode_reward_mean" in training_summary:
+        return float(training_summary["episode_reward_mean"])
+    stage_rewards = [
+        float(stage["episode_reward_mean"])
+        for stage in training_summary.get("stages", [])
+        if stage.get("status") == "trained" and "episode_reward_mean" in stage
+    ]
+    if not stage_rewards:
+        return None
+    return stage_rewards[-1]
+
+
+def compare_policy_training_to_heuristic(
+    training_summary: dict[str, Any],
+    heuristic_summary: dict[str, float | int],
+) -> dict[str, Any]:
+    policy_reward = policy_training_reward_mean(training_summary)
+    heuristic_average = float(heuristic_summary.get("avg_score", 0.0))
+    if policy_reward is None:
+        return {
+            "status": "skipped",
+            "reason": "policy training did not produce an episode_reward_mean",
+            "heuristic_avg_score": heuristic_average,
+        }
+    return {
+        "status": "compared",
+        "policy_episode_reward_mean": policy_reward,
+        "heuristic_avg_score": heuristic_average,
+        "delta_vs_heuristic": policy_reward - heuristic_average,
+        "beats_heuristic": policy_reward > heuristic_average,
+    }
+
+
 def evaluate_heuristic_policy(backend, *, alpha: float, beta: float, gamma: float, steps: int) -> dict[str, float | int]:
     obs = backend.reset()
     scoreboard = Scoreboard(alpha=alpha, beta=beta, gamma=gamma)

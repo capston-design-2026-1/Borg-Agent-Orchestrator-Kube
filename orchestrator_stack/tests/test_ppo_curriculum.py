@@ -65,3 +65,31 @@ def test_train_curriculum_ppo_runs_each_stage_with_fresh_backend(monkeypatch, tm
     assert len(calls) == 2
     assert calls[0]["train_iters"] == 1
     assert calls[1]["train_batch_size"] == 64
+
+
+def test_compare_policy_training_to_heuristic_reports_delta_for_curriculum():
+    result = ppo_trainer.compare_policy_training_to_heuristic(
+        {
+            "status": "trained",
+            "stages": [
+                {"status": "trained", "episode_reward_mean": 1.0},
+                {"status": "trained", "episode_reward_mean": 3.5},
+            ],
+        },
+        {"avg_score": 2.0},
+    )
+
+    assert result == {
+        "status": "compared",
+        "policy_episode_reward_mean": 3.5,
+        "heuristic_avg_score": 2.0,
+        "delta_vs_heuristic": 1.5,
+        "beats_heuristic": True,
+    }
+
+
+def test_compare_policy_training_to_heuristic_skips_untrained_policy():
+    result = ppo_trainer.compare_policy_training_to_heuristic({"status": "skipped"}, {"avg_score": 2.0})
+
+    assert result["status"] == "skipped"
+    assert result["heuristic_avg_score"] == 2.0
