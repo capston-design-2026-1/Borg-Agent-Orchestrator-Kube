@@ -204,6 +204,22 @@ def cmd_architecture_status(args: argparse.Namespace) -> None:
     print(json.dumps({"architecture_status_path": str(out)}, indent=2))
 
 
+def cmd_telemetry_reward_audit(args: argparse.Namespace) -> None:
+    from orchestrator.layer1.trace_ingestor import load_trace_rows
+    from orchestrator.layer6.telemetry_audit import audit_trace_telemetry_rewards, write_telemetry_audit_report
+
+    rows = load_trace_rows(args.trace)
+    report = audit_trace_telemetry_rewards(
+        rows,
+        alpha=args.alpha,
+        beta=args.beta,
+        gamma=args.gamma,
+        max_steps=args.max_steps,
+    )
+    out = write_telemetry_audit_report(report, args.out)
+    print(json.dumps({"telemetry_audit_path": str(out)}, indent=2))
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Borg full orchestrator")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -284,6 +300,15 @@ def build_parser() -> argparse.ArgumentParser:
     p_arch.add_argument("--out")
     p_arch.add_argument("--source-architecture", default="docs/project_architecture.pdf")
     p_arch.set_defaults(func=cmd_architecture_status)
+
+    p_telemetry = sub.add_parser("telemetry-reward-audit")
+    p_telemetry.add_argument("--trace", required=True)
+    p_telemetry.add_argument("--out", required=True)
+    p_telemetry.add_argument("--alpha", type=float, default=1.0)
+    p_telemetry.add_argument("--beta", type=float, default=0.6)
+    p_telemetry.add_argument("--gamma", type=float, default=0.8)
+    p_telemetry.add_argument("--max-steps", type=int)
+    p_telemetry.set_defaults(func=cmd_telemetry_reward_audit)
 
     return parser
 
