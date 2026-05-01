@@ -186,6 +186,8 @@ After building a trace that includes live `sla_violations`, `completed_tasks`, a
 
 Use this before PPO tuning on live traces to verify that reward pressure is coming from the intended SLA, completion, and energy signals.
 
+`train-policy` results include `heuristic_baseline` and `policy_vs_heuristic` fields. Treat PPO as not promoted until `policy_vs_heuristic.beats_heuristic` is true on representative telemetry-backed traces.
+
 ## Current Validation Status
 
 Latest checked behavior in this worktree is based on the 2026-05-02 KST validation slices:
@@ -195,7 +197,8 @@ Latest checked behavior in this worktree is based on the 2026-05-02 KST validati
 - `export-brain-datasets` writes trace-derived risk/demand `.npz` matrices with feature metadata for calibration and diagnostics.
 - `architecture-status` regenerates the architecture completion/gap report as a repeatable CLI artifact.
 - `telemetry-reward-audit` replays traces and reports telemetry coverage plus weighted SLA/completion/energy reward deltas.
-- Full orchestrator test suite currently passes with `56 passed`.
+- `train-policy` now reports PPO-vs-heuristic comparison fields so policy quality is explicit instead of inferred from raw training reward.
+- Full orchestrator test suite currently passes with `58 passed`.
 - `tune` completed successfully after the PPO-tuning rewrite and emitted `reports/tuning/202604161029_optuna_orchestrator_reward_weights.md`.
 - `tune-policy-rewards` now reaches the PPO-backed RLlib trial path and fails closed with a structured `"status": "skipped"` result when macOS sandbox process-enumeration blocks `ray.init()`.
 - The older `reports/tuning/202604142305_optuna_orchestrator_policy_and_rewards.md` artifact predates the 2026-04-16 PPO-backed tuning rewrite and should be treated as historical, not as the current validation artifact for `tune-policy-rewards`.

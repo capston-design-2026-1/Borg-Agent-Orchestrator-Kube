@@ -2,8 +2,17 @@
 
 1. Create a Python 3.12 AIOpsLab validation environment, install AIOpsLab from GitHub, and run `AIOpsLabPolicyAgent` against a real problem ID.
 2. Run `telemetry-reward-audit` against live Prometheus/AIOpsLab traces to validate reward coverage and SLA/completion/energy pressure.
-3. Tune PPO curriculum beyond smoke settings and compare trained checkpoints against the heuristic baseline using the same telemetry reward fields.
+3. Tune PPO curriculum beyond smoke settings until `policy_vs_heuristic.beats_heuristic` is true on representative telemetry-backed traces.
 4. Export representative trace-derived matrices with `export-brain-datasets`, retrain boosters, inspect `calibration_summary`, and only then promote thresholds.
+
+## Latest Session Note (2026-05-02 KST, PPO comparison slice)
+
+- `train-policy` now attaches `heuristic_baseline` and `policy_vs_heuristic` to PPO/curriculum training output.
+- `policy_vs_heuristic` reports PPO reward mean, heuristic average score, delta, and `beats_heuristic`, so policy quality is an explicit gate.
+- Validation run status:
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests/test_ppo_curriculum.py orchestrator_stack/tests/test_optuna_meta_tuning.py -q`: success (`6 passed`)
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`58 passed`)
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python orchestrator_stack/run.py train-policy --config orchestrator_stack/config/orchestrator.example.json --output-dir /private/tmp/.../rllib`: success; output included `heuristic_baseline`, `policy_vs_heuristic`, and `delta_vs_heuristic`.
 
 ## Latest Session Note (2026-05-02 KST, telemetry reward audit slice)
 

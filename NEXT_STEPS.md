@@ -40,7 +40,8 @@ Read Agents.md, NEXT_STEPS.md, MAS_ARCHITECTURE.md, and README.md, inspect the l
 - Follow-up implementation on 2026-05-02 KST: `architecture-status` now regenerates the orchestrator architecture completion/gap report from a repeatable CLI.
 - Follow-up implementation on 2026-05-02 KST: `diagnose-brain` now reports risk Brier score, expected/max calibration error, and named feature importances when given exported `.npz` datasets.
 - Follow-up implementation on 2026-05-02 KST: `telemetry-reward-audit` now quantifies telemetry coverage and SLA/completion/energy reward deltas before PPO tuning.
-- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `56 passed`.
+- Follow-up implementation on 2026-05-02 KST: `train-policy` now reports `heuristic_baseline` and `policy_vs_heuristic` so PPO promotion has an explicit baseline gate.
+- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `58 passed`.
 
 ## Pipeline Status
 
