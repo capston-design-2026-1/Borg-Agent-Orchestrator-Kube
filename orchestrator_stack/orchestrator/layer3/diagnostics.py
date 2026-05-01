@@ -40,6 +40,25 @@ def calibration_bins(y_true: Any, y_score: Any, *, bins: int = 10) -> list[dict[
     return output
 
 
+def calibration_summary(y_true: Any, y_score: Any, *, bins: int = 10) -> dict[str, float]:
+    np = _require_numpy()
+    true = np.asarray(y_true, dtype=float)
+    score = np.asarray(y_score, dtype=float).clip(0.0, 1.0)
+    binned = calibration_bins(true, score, bins=bins)
+    row_count = max(1, int(true.size))
+    expected_error = 0.0
+    max_error = 0.0
+    for item in binned:
+        gap = abs(float(item["predicted_rate"]) - float(item["observed_rate"]))
+        expected_error += (int(item["count"]) / row_count) * gap
+        max_error = max(max_error, gap)
+    return {
+        "brier_score": float(np.mean((score - true) ** 2)) if row_count else 0.0,
+        "expected_calibration_error": float(expected_error),
+        "max_calibration_error": float(max_error),
+    }
+
+
 def optimize_binary_threshold(y_true: Any, y_score: Any) -> dict[str, float]:
     np = _require_numpy()
     true = np.asarray(y_true, dtype=int)
@@ -63,32 +82,54 @@ def optimize_binary_threshold(y_true: Any, y_score: Any) -> dict[str, float]:
     return best
 
 
-def _feature_importance(booster: Any) -> dict[str, dict[str, float]]:
+def _feature_name(key: str, feature_names: Any | None = None) -> str:
+    if feature_names is None or not key.startswith("f"):
+        return key
+    try:
+        idx = int(key[1:])
+        if 0 <= idx < len(feature_names):
+            return str(feature_names[idx])
+    except (TypeError, ValueError):
+        return key
+    return key
+
+
+def _feature_importance(booster: Any, feature_names: Any | None = None) -> dict[str, dict[str, float]]:
     return {
-        importance_type: {str(key): float(value) for key, value in booster.get_score(importance_type=importance_type).items()}
+        importance_type: {
+            _feature_name(str(key), feature_names): float(value)
+            for key, value in booster.get_score(importance_type=importance_type).items()
+        }
         for importance_type in ("weight", "gain", "cover")
     }
 
 
-def _contribution_summary(booster: Any, x: Any) -> dict[str, float]:
+def _contribution_summary(booster: Any, x: Any, feature_names: Any | None = None) -> dict[str, float]:
     np = _require_numpy()
     xgb = _require_xgboost()
     contributions = booster.predict(xgb.DMatrix(x), pred_contribs=True)
     mean_abs = np.abs(contributions).mean(axis=0)
     return {
-        ("bias" if idx == len(mean_abs) - 1 else f"f{idx}"): float(value)
+        ("bias" if idx == len(mean_abs) - 1 else _feature_name(f"f{idx}", feature_names)): float(value)
         for idx, value in enumerate(mean_abs.tolist())
     }
 
 
-def _safe_contribution_summary(booster: Any, x: Any) -> dict[str, Any]:
+def _safe_contribution_summary(booster: Any, x: Any, feature_names: Any | None = None) -> dict[str, Any]:
     try:
-        return {"status": "ok", "mean_abs": _contribution_summary(booster, x)}
+        return {"status": "ok", "mean_abs": _contribution_summary(booster, x, feature_names=feature_names)}
     except Exception as exc:
         return {"status": "skipped", "reason": str(exc)}
 
 
-def diagnose_xgboost_model(*, model_path: str | Path, x: Any, y: Any | None = None, task: str) -> dict[str, Any]:
+def diagnose_xgboost_model(
+    *,
+    model_path: str | Path,
+    x: Any,
+    y: Any | None = None,
+    task: str,
+    feature_names: Any | None = None,
+) -> dict[str, Any]:
     xgb = _require_xgboost()
     booster = xgb.Booster()
     booster.load_model(str(model_path))
@@ -98,11 +139,13 @@ def diagnose_xgboost_model(*, model_path: str | Path, x: Any, y: Any | None = No
         "model_path": str(model_path),
         "task": task,
         "rows": int(len(predictions)),
-        "feature_importance": _feature_importance(booster),
-        "contribution_summary": _safe_contribution_summary(booster, x),
+        "feature_names": [str(name) for name in feature_names] if feature_names is not None else [],
+        "feature_importance": _feature_importance(booster, feature_names=feature_names),
+        "contribution_summary": _safe_contribution_summary(booster, x, feature_names=feature_names),
     }
     if y is not None and task == "risk":
         report["threshold"] = optimize_binary_threshold(y, predictions)
+        report["calibration_summary"] = calibration_summary(y, predictions)
         report["calibration_bins"] = calibration_bins(y, predictions)
     return report
 

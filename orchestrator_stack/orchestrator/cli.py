@@ -13,13 +13,21 @@ def _missing_dependency(exc: ModuleNotFoundError, context: str) -> SystemExit:
     )
 
 
-def _load_npz(path: Path) -> tuple[object, object]:
+def _load_npz_dataset(path: Path) -> dict[str, object]:
     try:
         import numpy as np
     except ModuleNotFoundError as exc:
         raise _missing_dependency(exc, "loading NPZ datasets") from exc
 
     data = np.load(path)
+    result: dict[str, object] = {"x": data["x"], "y": data["y"]}
+    if "feature_names" in data:
+        result["feature_names"] = data["feature_names"]
+    return result
+
+
+def _load_npz(path: Path) -> tuple[object, object]:
+    data = _load_npz_dataset(path)
     return data["x"], data["y"]
 
 
@@ -75,8 +83,14 @@ def cmd_diagnose_brain(args: argparse.Namespace) -> None:
     except ModuleNotFoundError as exc:
         raise _missing_dependency(exc, "loading Layer 3 diagnostics") from exc
 
-    x, y = _load_npz(Path(args.dataset))
-    report = diagnose_xgboost_model(model_path=args.model, x=x, y=y, task=args.task)
+    data = _load_npz_dataset(Path(args.dataset))
+    report = diagnose_xgboost_model(
+        model_path=args.model,
+        x=data["x"],
+        y=data["y"],
+        task=args.task,
+        feature_names=data.get("feature_names"),
+    )
     out = write_diagnostics_report(report, args.out)
     print(json.dumps({"diagnostics_path": str(out)}, indent=2))
 
