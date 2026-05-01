@@ -1,9 +1,18 @@
 # Orchestrator Stack Next Steps
 
-1. Create a Python 3.12 AIOpsLab validation environment, install AIOpsLab from GitHub, and run `AIOpsLabPolicyAgent` against a real problem ID.
+1. Create a Python 3.12 AIOpsLab validation environment, run `aiopslab-preflight` until it returns `ready`, install AIOpsLab from GitHub, and run `AIOpsLabPolicyAgent` against a real problem ID.
 2. Run `telemetry-reward-audit` against live Prometheus/AIOpsLab traces to validate reward coverage and SLA/completion/energy pressure.
 3. Tune PPO curriculum beyond smoke settings until `policy_vs_heuristic.beats_heuristic` is true on representative telemetry-backed traces.
 4. Export representative trace-derived matrices with `export-brain-datasets`, retrain boosters, inspect `calibration_summary`, and only then promote thresholds.
+
+## Latest Session Note (2026-05-02 KST, AIOpsLab preflight slice)
+
+- Added `aiopslab-preflight` CLI to make live AIOpsLab readiness machine-checkable.
+- Current repo `.venv` preflight result is blocked: Python `3.13.12` is outside AIOpsLab's `>=3.11,<3.13` requirement.
+- Validation run status:
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests/test_aiopslab_preflight.py orchestrator_stack/tests/test_aiopslab_contract.py -q`: success (`5 passed`)
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`61 passed`)
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python orchestrator_stack/run.py aiopslab-preflight`: success; reported `status=blocked` and the Python version blocker.
 
 ## Latest Session Note (2026-05-02 KST, PPO comparison slice)
 

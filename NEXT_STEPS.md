@@ -41,7 +41,8 @@ Read Agents.md, NEXT_STEPS.md, MAS_ARCHITECTURE.md, and README.md, inspect the l
 - Follow-up implementation on 2026-05-02 KST: `diagnose-brain` now reports risk Brier score, expected/max calibration error, and named feature importances when given exported `.npz` datasets.
 - Follow-up implementation on 2026-05-02 KST: `telemetry-reward-audit` now quantifies telemetry coverage and SLA/completion/energy reward deltas before PPO tuning.
 - Follow-up implementation on 2026-05-02 KST: `train-policy` now reports `heuristic_baseline` and `policy_vs_heuristic` so PPO promotion has an explicit baseline gate.
-- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `58 passed`.
+- Follow-up implementation on 2026-05-02 KST: `aiopslab-preflight` now reports whether the active interpreter can run upstream AIOpsLab; current `.venv` is blocked by Python `3.13.12`.
+- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `61 passed`.
 
 ## Pipeline Status
 
