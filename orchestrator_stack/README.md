@@ -194,7 +194,13 @@ Use this before PPO tuning on live traces to verify that reward pressure is comi
   --out reports/evaluations/manual_aiopslab_preflight.json
 ```
 
-The current repo `.venv` uses Python `3.13.12`, so this command reports the upstream compatibility blocker until a Python `>=3.11,<3.13` environment is used.
+The repo `.venv` uses Python `3.13.12`, so use the separate Python 3.12 validation environment for upstream checks:
+```bash
+PYTHONPATH=orchestrator_stack ~/Documents/aiopslab_validation_env/bin/python \
+  orchestrator_stack/run.py aiopslab-preflight
+```
+
+Current status: Python 3.12 and the upstream `aiopslab` package install successfully. Live orchestrator import is still blocked until Kubernetes config is available (`Invalid kube-config file. No configuration found.`).
 
 ## Current Validation Status
 
@@ -206,8 +212,8 @@ Latest checked behavior in this worktree is based on the 2026-05-02 KST validati
 - `architecture-status` regenerates the architecture completion/gap report as a repeatable CLI artifact.
 - `telemetry-reward-audit` replays traces and reports telemetry coverage plus weighted SLA/completion/energy reward deltas.
 - `train-policy` now reports PPO-vs-heuristic comparison fields so policy quality is explicit instead of inferred from raw training reward.
-- `aiopslab-preflight` reports whether the active interpreter can run the upstream AIOpsLab package.
-- Full orchestrator test suite currently passes with `61 passed`.
+- `aiopslab-preflight` now checks real upstream imports, not just package presence.
+- Full orchestrator test suite currently passes with `62 passed`.
 - `tune` completed successfully after the PPO-tuning rewrite and emitted `reports/tuning/202604161029_optuna_orchestrator_reward_weights.md`.
 - `tune-policy-rewards` now reaches the PPO-backed RLlib trial path and fails closed with a structured `"status": "skipped"` result when macOS sandbox process-enumeration blocks `ray.init()`.
 - The older `reports/tuning/202604142305_optuna_orchestrator_policy_and_rewards.md` artifact predates the 2026-04-16 PPO-backed tuning rewrite and should be treated as historical, not as the current validation artifact for `tune-policy-rewards`.
