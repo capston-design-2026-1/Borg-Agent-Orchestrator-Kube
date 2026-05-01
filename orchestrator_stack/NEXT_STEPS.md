@@ -13,12 +13,14 @@
 - Added `orchestrator_stack/scripts/setup_aiopslab_env.sh` to recreate the Python 3.12 AIOpsLab validation environment and copy upstream `config.yml.example` to `config.yml` when needed.
 - Fixed `initialize_aiopslab_problem()` registration order after verifying upstream `Orchestrator.init_problem()` requires `agent_name` to exist first.
 - Updated `AIOpsLabPolicyAgent.get_action()` to return one parser-compliant fenced AIOpsLab API call instead of raw JSON.
+- Updated `AIOpsLabBackend` to import `aiopslab.orchestrator.orchestrator.Orchestrator` directly because the upstream top-level package exposes no `orchestrator` attribute.
 - Strengthened preflight to perform real imports for `aiopslab.paths` and `aiopslab.orchestrator.orchestrator`.
 - Current external preflight report: `reports/evaluations/202605020527_aiopslab_preflight.json`.
 - Remaining live blocker: upstream orchestrator import now reaches Kubernetes initialization and fails with `Invalid kube-config file. No configuration found.`
 - Validation run status:
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests/test_simulator.py orchestrator_stack/tests/test_aiopslab_contract.py -q`: success (`9 passed`)
   - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests/test_aiopslab_preflight.py orchestrator_stack/tests/test_aiopslab_contract.py -q`: success (`6 passed`)
-  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`62 passed`)
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`63 passed`)
   - `orchestrator_stack/scripts/setup_aiopslab_env.sh`: success
   - `PYTHONPATH=orchestrator_stack ~/Documents/aiopslab_validation_env/bin/python orchestrator_stack/run.py aiopslab-preflight`: success; reported `status=blocked` on missing Kubernetes config after package import checks.
 
