@@ -12,6 +12,9 @@ def _sample_trace_row() -> dict:
         "tasks": [{"task_id": "t1", "node_id": "n1", "urgency": 0.8, "queue_priority": 2, "alive": True}],
         "queue_length": 1,
         "energy_price": 0.12,
+        "sla_violations": 0,
+        "completed_tasks": 2,
+        "energy_watts": 180.0,
     }
 
 
@@ -58,6 +61,16 @@ def test_load_trace_rows_rejects_invalid_task_alive_literal(tmp_path):
     path.write_text(json.dumps([bad]), encoding="utf-8")
 
     with pytest.raises(ValueError, match="field 'alive' must be bool-like"):
+        load_trace_rows(path)
+
+
+def test_load_trace_rows_rejects_negative_live_reward_metrics(tmp_path):
+    path = tmp_path / "trace.json"
+    bad = _sample_trace_row()
+    bad["sla_violations"] = -1
+    path.write_text(json.dumps([bad]), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="sla_violations.*non-negative"):
         load_trace_rows(path)
 
 

@@ -7,6 +7,7 @@ from typing import Any
 
 
 METRIC_KEYS = ("cpu_util", "mem_util", "disk_util", "net_util")
+TELEMETRY_REWARD_KEYS = ("sla_violations", "completed_tasks", "energy_watts")
 TRUE_LITERALS = {"1", "true", "t", "yes", "y", "on"}
 FALSE_LITERALS = {"0", "false", "f", "no", "n", "off"}
 
@@ -127,6 +128,14 @@ def _validate_grouped_row(row: dict[str, Any], row_index: int) -> None:
         _parse_non_negative_int(row["queue_length"], field="queue_length", row_index=row_index)
     if "energy_price" in row:
         _parse_float(row["energy_price"], field="energy_price", row_index=row_index)
+    if "sla_violations" in row:
+        _parse_non_negative_int(row["sla_violations"], field="sla_violations", row_index=row_index)
+    if "completed_tasks" in row:
+        _parse_non_negative_int(row["completed_tasks"], field="completed_tasks", row_index=row_index)
+    if "energy_watts" in row:
+        parsed_energy_watts = _parse_float(row["energy_watts"], field="energy_watts", row_index=row_index)
+        if parsed_energy_watts < 0:
+            raise ValueError(f"Schema drift: row[{row_index}] field 'energy_watts' must be non-negative, got {row['energy_watts']!r}.")
 
 
 def _validate_flat_row(row: dict[str, Any], row_index: int) -> None:
@@ -140,6 +149,22 @@ def _validate_flat_row(row: dict[str, Any], row_index: int) -> None:
         _parse_non_negative_int(row["queue_length"], field="queue_length", row_index=row_index)
     if "energy_price" in row:
         _parse_float(row["energy_price"], field="energy_price", row_index=row_index)
+    if "sla_violations" in row:
+        _parse_non_negative_int(row["sla_violations"], field="sla_violations", row_index=row_index)
+    if "completed_tasks" in row:
+        _parse_non_negative_int(row["completed_tasks"], field="completed_tasks", row_index=row_index)
+    if "energy_watts" in row:
+        parsed_energy_watts = _parse_float(row["energy_watts"], field="energy_watts", row_index=row_index)
+        if parsed_energy_watts < 0:
+            raise ValueError(f"Schema drift: row[{row_index}] field 'energy_watts' must be non-negative, got {row['energy_watts']!r}.")
+
+
+def _reward_telemetry(raw: dict[str, Any]) -> dict[str, int | float]:
+    return {
+        "sla_violations": max(0, int(raw.get("sla_violations", 0))),
+        "completed_tasks": max(0, int(raw.get("completed_tasks", 0))),
+        "energy_watts": max(0.0, _metric_value(raw.get("energy_watts", 0.0))),
+    }
 
 
 def prometheus_rows_to_trace(rows: list[dict[str, Any]], interval_seconds: int = 60) -> list[dict[str, Any]]:
@@ -169,6 +194,7 @@ def prometheus_rows_to_trace(rows: list[dict[str, Any]], interval_seconds: int =
                     "queue_length": max(0, int(row.get("queue_length", len(tasks)))),
                     "energy_price": max(0.0, _metric_value(row.get("energy_price", 0.1), 0.1)),
                     "task_death": _bool_value(row.get("task_death"), default=False),
+                    **_reward_telemetry(row),
                 }
             )
         return normalized
@@ -186,6 +212,9 @@ def prometheus_rows_to_trace(rows: list[dict[str, Any]], interval_seconds: int =
                 "queue_length": 0,
                 "energy_price": 0.1,
                 "task_death": False,
+                "sla_violations": 0,
+                "completed_tasks": 0,
+                "energy_watts": 0.0,
             },
         )
         node_id = str(raw.get("node_id", "unknown-node"))
@@ -199,6 +228,12 @@ def prometheus_rows_to_trace(rows: list[dict[str, Any]], interval_seconds: int =
             bucket["energy_price"] = max(0.0, _metric_value(raw["energy_price"], 0.1))
         if _bool_value(raw.get("task_death"), default=False):
             bucket["task_death"] = True
+        if "sla_violations" in raw:
+            bucket["sla_violations"] = max(int(bucket["sla_violations"]), max(0, int(raw["sla_violations"])))
+        if "completed_tasks" in raw:
+            bucket["completed_tasks"] = max(int(bucket["completed_tasks"]), max(0, int(raw["completed_tasks"])))
+        if "energy_watts" in raw:
+            bucket["energy_watts"] = max(float(bucket["energy_watts"]), max(0.0, _metric_value(raw["energy_watts"])))
 
     trace: list[dict[str, Any]] = []
     for ts in sorted(buckets.keys()):
@@ -213,6 +248,9 @@ def prometheus_rows_to_trace(rows: list[dict[str, Any]], interval_seconds: int =
                 "queue_length": int(bucket["queue_length"] or len(tasks)),
                 "energy_price": float(bucket["energy_price"]),
                 "task_death": bool(bucket["task_death"]),
+                "sla_violations": int(bucket["sla_violations"]),
+                "completed_tasks": int(bucket["completed_tasks"]),
+                "energy_watts": float(bucket["energy_watts"]),
             }
         )
     return trace

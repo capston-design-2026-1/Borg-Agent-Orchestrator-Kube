@@ -102,6 +102,11 @@ def validate_trace_rows(rows: list[dict[str, Any]], *, source: Path) -> None:
         _non_negative_int_like(raw_row.get("queue_length", 0), field="queue_length", row_index=row_index)
         _float_like(raw_row.get("energy_price", 0.1), field="energy_price", row_index=row_index)
         _bool_like(raw_row.get("task_death", False), field="task_death", row_index=row_index, default=False)
+        _non_negative_int_like(raw_row.get("sla_violations", 0), field="sla_violations", row_index=row_index)
+        _non_negative_int_like(raw_row.get("completed_tasks", 0), field="completed_tasks", row_index=row_index)
+        energy_watts = _float_like(raw_row.get("energy_watts", 0.0), field="energy_watts", row_index=row_index)
+        if energy_watts < 0:
+            raise ValueError(f"Trace contract error: row[{row_index}] field 'energy_watts' must be non-negative.")
 
 
 def load_trace_rows(path: str | Path) -> list[dict[str, Any]]:
