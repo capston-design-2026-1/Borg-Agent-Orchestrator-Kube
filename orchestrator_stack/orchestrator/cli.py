@@ -220,6 +220,17 @@ def cmd_telemetry_reward_audit(args: argparse.Namespace) -> None:
     print(json.dumps({"telemetry_audit_path": str(out)}, indent=2))
 
 
+def cmd_aiopslab_preflight(args: argparse.Namespace) -> None:
+    from orchestrator.layer2.aiopslab_preflight import aiopslab_preflight, write_aiopslab_preflight_report
+
+    report = aiopslab_preflight()
+    if args.out:
+        out = write_aiopslab_preflight_report(report, args.out)
+        print(json.dumps({"aiopslab_preflight_path": str(out), **report}, indent=2))
+    else:
+        print(json.dumps(report, indent=2))
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Borg full orchestrator")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -309,6 +320,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_telemetry.add_argument("--gamma", type=float, default=0.8)
     p_telemetry.add_argument("--max-steps", type=int)
     p_telemetry.set_defaults(func=cmd_telemetry_reward_audit)
+
+    p_aiopslab_preflight = sub.add_parser("aiopslab-preflight")
+    p_aiopslab_preflight.add_argument("--out")
+    p_aiopslab_preflight.set_defaults(func=cmd_aiopslab_preflight)
 
     return parser
 
