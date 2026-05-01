@@ -183,6 +183,13 @@ def cmd_full_process(args: argparse.Namespace) -> None:
     print(json.dumps(result, indent=2))
 
 
+def cmd_architecture_status(args: argparse.Namespace) -> None:
+    from orchestrator.layer6.architecture_report import write_architecture_status_report
+
+    out = write_architecture_status_report(out_path=args.out, source_architecture=args.source_architecture)
+    print(json.dumps({"architecture_status_path": str(out)}, indent=2))
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Borg full orchestrator")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -258,6 +265,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_full.add_argument("--config", required=True)
     p_full.add_argument("--trials", type=int, default=5)
     p_full.set_defaults(func=cmd_full_process)
+
+    p_arch = sub.add_parser("architecture-status")
+    p_arch.add_argument("--out")
+    p_arch.add_argument("--source-architecture", default="docs/project_architecture.pdf")
+    p_arch.set_defaults(func=cmd_architecture_status)
 
     return parser
 
