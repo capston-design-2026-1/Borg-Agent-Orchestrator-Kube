@@ -3,7 +3,16 @@
 1. Create a Python 3.12 AIOpsLab validation environment, install AIOpsLab from GitHub, and run `AIOpsLabPolicyAgent` against a real problem ID.
 2. Validate live Prometheus/AIOpsLab telemetry fields (`sla_violations`, `completed_tasks`, `energy_watts`) against real workloads now that trace plumbing preserves them.
 3. Tune PPO curriculum beyond smoke settings and compare trained checkpoints against the heuristic baseline using the same telemetry reward fields.
-4. Export representative trace-derived matrices with `export-brain-datasets`, retrain/calibrate risk and demand boosters, and only then promote thresholds.
+4. Export representative trace-derived matrices with `export-brain-datasets`, retrain boosters, inspect `calibration_summary`, and only then promote thresholds.
+
+## Latest Session Note (2026-05-02 KST, calibration diagnostics slice)
+
+- Enhanced `diagnose-brain` risk reports with `calibration_summary`: Brier score, expected calibration error, and max calibration error.
+- Diagnostics now read `feature_names` from exported `.npz` datasets and map XGBoost `f0`/`f1` keys to stable Layer 2 feature names when available.
+- Validation run status:
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests/test_diagnostics.py orchestrator_stack/tests/test_brain_dataset_export.py -q`: success (`6 passed`)
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`53 passed`)
+  - `export-brain-datasets` plus `diagnose-brain` smoke against `sample_trace.json` and the example risk model: success; report included `calibration_summary` and named feature importances.
 
 ## Latest Session Note (2026-05-02 KST, repeatable architecture status slice)
 

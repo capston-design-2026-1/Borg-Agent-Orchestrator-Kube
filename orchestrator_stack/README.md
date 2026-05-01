@@ -132,7 +132,7 @@ Generate model diagnostics after training:
   --task risk \
   --out reports/evaluations/risk_model_diagnostics.json
 ```
-Risk diagnostics include threshold optimization, calibration bins, XGBoost feature importance, and contribution summaries from XGBoost `pred_contribs`.
+Risk diagnostics include threshold optimization, calibration bins, Brier score, expected/max calibration error, XGBoost feature importance, and contribution summaries from XGBoost `pred_contribs`. Datasets exported by `export-brain-datasets` also carry feature names, so diagnostics can report `cpu_util`/`mem_util` style names instead of raw `f0`/`f1` keys.
 
 ## Testing the Architecture
 
@@ -184,7 +184,7 @@ Latest checked behavior in this worktree is based on the 2026-05-02 KST validati
 - Layer 3 predictor observations are now injected at the backend seam, so manual episodes, heuristic evaluation, RLlib training, and PPO-backed Optuna trials share the same non-placeholder risk/demand observation path.
 - `export-brain-datasets` writes trace-derived risk/demand `.npz` matrices with feature metadata for calibration and diagnostics.
 - `architecture-status` regenerates the architecture completion/gap report as a repeatable CLI artifact.
-- Full orchestrator test suite currently passes with `51 passed`.
+- Full orchestrator test suite currently passes with `53 passed`.
 - `tune` completed successfully after the PPO-tuning rewrite and emitted `reports/tuning/202604161029_optuna_orchestrator_reward_weights.md`.
 - `tune-policy-rewards` now reaches the PPO-backed RLlib trial path and fails closed with a structured `"status": "skipped"` result when macOS sandbox process-enumeration blocks `ray.init()`.
 - The older `reports/tuning/202604142305_optuna_orchestrator_policy_and_rewards.md` artifact predates the 2026-04-16 PPO-backed tuning rewrite and should be treated as historical, not as the current validation artifact for `tune-policy-rewards`.
