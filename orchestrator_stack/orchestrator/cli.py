@@ -223,7 +223,7 @@ def cmd_telemetry_reward_audit(args: argparse.Namespace) -> None:
 def cmd_aiopslab_preflight(args: argparse.Namespace) -> None:
     from orchestrator.layer2.aiopslab_preflight import aiopslab_preflight, write_aiopslab_preflight_report
 
-    report = aiopslab_preflight()
+    report = aiopslab_preflight(kube_config=args.kube_config)
     if args.out:
         out = write_aiopslab_preflight_report(report, args.out)
         print(json.dumps({"aiopslab_preflight_path": str(out), **report}, indent=2))
@@ -323,6 +323,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_aiopslab_preflight = sub.add_parser("aiopslab-preflight")
     p_aiopslab_preflight.add_argument("--out")
+    p_aiopslab_preflight.add_argument("--kube-config", help="Path list for Kubernetes config; defaults to KUBECONFIG or ~/.kube/config")
     p_aiopslab_preflight.set_defaults(func=cmd_aiopslab_preflight)
 
     return parser
