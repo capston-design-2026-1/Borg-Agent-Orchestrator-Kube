@@ -200,7 +200,8 @@ The repo `.venv` uses Python `3.13.12`, so use the separate Python 3.12 validati
 orchestrator_stack/scripts/setup_aiopslab_env.sh
 
 PYTHONPATH=orchestrator_stack ~/Documents/aiopslab_validation_env/bin/python \
-  orchestrator_stack/run.py aiopslab-preflight
+  orchestrator_stack/run.py aiopslab-preflight \
+  --kube-config ~/.kube/config
 ```
 
 Current status: Python 3.12 and the upstream `aiopslab` package install successfully. Live orchestrator import is still blocked until Kubernetes config is available. Preflight checks `KUBECONFIG` first, then `~/.kube/config`; this machine currently has neither.
@@ -217,7 +218,7 @@ Latest checked behavior in this worktree is based on the 2026-05-02 KST validati
 - `train-policy` now reports PPO-vs-heuristic comparison fields so policy quality is explicit instead of inferred from raw training reward.
 - `aiopslab-preflight` now checks real upstream imports, not just package presence.
 - `AIOpsLabBackend` now loads the real upstream `Orchestrator` class by module path and registers the policy agent before `init_problem()`.
-- Full orchestrator test suite currently passes with `63 passed`.
+- Full orchestrator test suite currently passes with `64 passed`.
 - `tune` completed successfully after the PPO-tuning rewrite and emitted `reports/tuning/202604161029_optuna_orchestrator_reward_weights.md`.
 - `tune-policy-rewards` now reaches the PPO-backed RLlib trial path and fails closed with a structured `"status": "skipped"` result when macOS sandbox process-enumeration blocks `ray.init()`.
 - The older `reports/tuning/202604142305_optuna_orchestrator_policy_and_rewards.md` artifact predates the 2026-04-16 PPO-backed tuning rewrite and should be treated as historical, not as the current validation artifact for `tune-policy-rewards`.
