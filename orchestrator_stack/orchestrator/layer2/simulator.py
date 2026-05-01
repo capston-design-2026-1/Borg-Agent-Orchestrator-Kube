@@ -748,6 +748,7 @@ class TraceDrivenTwinBackend:
 
 
 import logging
+import importlib
 
 logger = logging.getLogger(__name__)
 
@@ -756,6 +757,15 @@ try:
     HAS_AIOPSLAB = True
 except ImportError:
     HAS_AIOPSLAB = False
+
+
+def _load_aiopslab_orchestrator_class() -> Any | None:
+    try:
+        module = importlib.import_module("aiopslab.orchestrator.orchestrator")
+    except Exception as exc:  # pragma: no cover
+        logger.warning("aiopslab Orchestrator import failed: %s", exc)
+        return None
+    return getattr(module, "Orchestrator", None)
 
 
 class AIOpsLabBackend(SimulatorBackend):
@@ -849,8 +859,7 @@ class AIOpsLabBackend(SimulatorBackend):
         if not HAS_AIOPSLAB:
             return None
 
-        orchestrator_module = getattr(aiopslab, "orchestrator", None)
-        orchestrator_cls = getattr(orchestrator_module, "Orchestrator", None)
+        orchestrator_cls = _load_aiopslab_orchestrator_class()
         if orchestrator_cls is None:
             logger.warning("aiopslab package is available but Orchestrator class was not found.")
             return None
@@ -861,12 +870,16 @@ class AIOpsLabBackend(SimulatorBackend):
             logger.warning("Failed to create aiopslab orchestrator: %s", exc)
             return None
 
-        init_problem = getattr(orch, "init_problem", None)
-        if callable(init_problem):
-            try:
-                self._session = init_problem(self.problem_id)
-            except Exception as exc:  # pragma: no cover
-                logger.warning("aiopslab init_problem failed for %s: %s", self.problem_id, exc)
+        try:
+            from orchestrator.layer2.aiopslab_contract import AIOpsLabPolicyAgent, initialize_aiopslab_problem
+
+            self._session = initialize_aiopslab_problem(
+                orch,
+                problem_id=self.problem_id,
+                agent=AIOpsLabPolicyAgent(),
+            )
+        except Exception as exc:  # pragma: no cover
+            logger.warning("aiopslab init_problem failed for %s: %s", self.problem_id, exc)
         return orch
 
     def _invoke_orchestrator_reset(self) -> Any | None:

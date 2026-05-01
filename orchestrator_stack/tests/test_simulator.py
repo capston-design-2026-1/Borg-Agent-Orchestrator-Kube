@@ -181,3 +181,39 @@ def test_trace_driven_backend_rewards_live_sla_energy_and_completion_metrics():
     assert result.reward_by_agent["AgentA"] == -49.0
     assert result.reward_by_agent["AgentB"] == 3.0
     assert result.reward_by_agent["AgentC"] == 8.0
+
+
+def test_aiopslab_backend_loads_upstream_orchestrator_class(monkeypatch):
+    from orchestrator.layer2 import simulator
+
+    events = []
+
+    class FakeOrchestrator:
+        def register_agent(self, agent, name="agent"):
+            events.append(("register_agent", name, type(agent).__name__))
+            self.agent_name = name
+
+        def init_problem(self, problem_id):
+            events.append(("init_problem", problem_id, self.agent_name))
+            return "desc", "instructions", ["exec_shell"]
+
+        def get_current_state(self):
+            return {
+                "timestamp": 1,
+                "nodes": [{"node_id": "n1", "cpu_util": 0.1, "mem_util": 0.2, "disk_util": 0.1, "net_util": 0.1}],
+                "tasks": [],
+                "queue_length": 0,
+                "energy_price": 0.1,
+            }
+
+    monkeypatch.setattr(simulator, "HAS_AIOPSLAB", True)
+    monkeypatch.setattr(simulator, "_load_aiopslab_orchestrator_class", lambda: FakeOrchestrator)
+
+    backend = simulator.AIOpsLabBackend("problem-1")
+    obs = backend.reset()
+
+    assert obs.nodes[0].node_id == "n1"
+    assert events == [
+        ("register_agent", "agent", "AIOpsLabPolicyAgent"),
+        ("init_problem", "problem-1", "agent"),
+    ]
