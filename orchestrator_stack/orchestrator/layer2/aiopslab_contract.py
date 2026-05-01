@@ -31,21 +31,28 @@ class AIOpsLabPolicyAgent:
                 decode_agent_action("AgentC", action_ids["AgentC"], obs),
             ]
         )
-        return json.dumps(
+        action_payload = json.dumps(
             {
                 "agent": action.agent_name,
                 "kind": action.kind.value,
                 "target": action.target,
                 "payload": action.payload,
                 "score": action.score,
-            }
+            },
+            sort_keys=True,
+        )
+        return (
+            f"Selected Borg orchestrator action: {action_payload}\n"
+            "```\n"
+            'exec_shell("kubectl get pods --all-namespaces")\n'
+            "```"
         )
 
 
 def initialize_aiopslab_problem(orchestrator: Any, *, problem_id: str, agent: Any) -> tuple[Any, Any, Any]:
+    orchestrator.register_agent(agent)
     problem_desc, instructions, apis = orchestrator.init_problem(problem_id)
     init_context = getattr(agent, "init_context", None)
     if callable(init_context):
         init_context(problem_desc, instructions, apis)
-    orchestrator.register_agent(agent)
     return problem_desc, instructions, apis

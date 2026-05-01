@@ -9,16 +9,30 @@ def test_aiopslab_preflight_blocks_incompatible_python():
     assert report["status"] == "blocked"
     assert report["compatible_python"] is False
     assert report["aiopslab_package_available"] is False
+    assert report["import_errors"] == {}
     assert report["blockers"] == ["AIOpsLab requires Python >=3.11,<3.13"]
 
 
 def test_aiopslab_preflight_checks_package_when_python_is_compatible():
-    report = aiopslab_preflight(python_version=(3, 12, 8), import_name="json")
+    report = aiopslab_preflight(python_version=(3, 12, 8), import_name="json", import_checks=("json",))
 
     assert report["status"] == "ready"
     assert report["compatible_python"] is True
     assert report["aiopslab_package_available"] is True
+    assert report["import_errors"] == {}
     assert report["blockers"] == []
+
+
+def test_aiopslab_preflight_reports_import_check_failures():
+    report = aiopslab_preflight(
+        python_version=(3, 12, 8),
+        import_name="json",
+        import_checks=("json", "definitely_missing_aiopslab_module"),
+    )
+
+    assert report["status"] == "blocked"
+    assert "definitely_missing_aiopslab_module" in report["import_errors"]
+    assert "import check failed for definitely_missing_aiopslab_module" in report["blockers"][0]
 
 
 def test_write_aiopslab_preflight_report_writes_json(tmp_path: Path):

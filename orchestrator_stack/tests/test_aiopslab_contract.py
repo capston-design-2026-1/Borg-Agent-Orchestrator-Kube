@@ -7,13 +7,17 @@ from orchestrator.layer2.aiopslab_contract import AIOpsLabPolicyAgent, initializ
 class FakeOrchestrator:
     def __init__(self):
         self.registered = None
+        self.events = []
 
     def init_problem(self, problem_id):
         assert problem_id == "problem-1"
+        assert self.registered is not None
+        self.events.append("init_problem")
         return "desc", "instructions", ["get_metrics"]
 
     def register_agent(self, agent):
         self.registered = agent
+        self.events.append("register_agent")
 
 
 def test_initialize_aiopslab_problem_uses_confirmed_contract():
@@ -24,10 +28,11 @@ def test_initialize_aiopslab_problem_uses_confirmed_contract():
 
     assert context == ("desc", "instructions", ["get_metrics"])
     assert orchestrator.registered is agent
+    assert orchestrator.events == ["register_agent", "init_problem"]
     assert agent.problem_desc == "desc"
 
 
-def test_aiopslab_policy_agent_returns_serialized_orchestrator_action():
+def test_aiopslab_policy_agent_returns_parser_compliant_action():
     agent = AIOpsLabPolicyAgent()
     state = json.dumps(
         {
@@ -41,8 +46,10 @@ def test_aiopslab_policy_agent_returns_serialized_orchestrator_action():
         }
     )
 
-    action = json.loads(asyncio.run(agent.get_action(state)))
+    response = asyncio.run(agent.get_action(state))
 
-    assert action["agent"] == "AgentA"
-    assert action["kind"] == "migrate"
-    assert action["target"] == "n1"
+    assert '"agent": "AgentA"' in response
+    assert '"kind": "migrate"' in response
+    assert '"target": "n1"' in response
+    assert response.count("```") == 2
+    assert 'exec_shell("kubectl get pods --all-namespaces")' in response
