@@ -25,6 +25,13 @@
   - `orchestrator_stack/scripts/setup_aiopslab_env.sh`: success
   - `PYTHONPATH=orchestrator_stack ~/Documents/aiopslab_validation_env/bin/python orchestrator_stack/run.py aiopslab-preflight`: success; reported `status=blocked`, `kube_config_available=false`, and checked `/Users/theokim/.kube/config`.
 
+## Latest Session Note (2026-05-02 KST, telemetry example slice)
+
+- Added `orchestrator_stack/examples/sample_telemetry_trace.json` as a small grouped trace with live reward telemetry fields.
+- Recorded `reports/evaluations/202605020534_sample_telemetry_reward_audit.json` from that trace.
+- Audit result: telemetry coverage `1.0`, max SLA violations `1`, max completed tasks `25`, max energy watts `310.0`, selected actions `migrate=1` and `throttle=1`.
+- Use this fixture as the local regression sample before replacing it with real Prometheus/AIOpsLab telemetry traces.
+
 ## Latest Session Note (2026-05-02 KST, PPO comparison slice)
 
 - `train-policy` now attaches `heuristic_baseline` and `policy_vs_heuristic` to PPO/curriculum training output.

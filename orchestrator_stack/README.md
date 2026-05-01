@@ -185,6 +185,7 @@ After building a trace that includes live `sla_violations`, `completed_tasks`, a
 ```
 
 Use this before PPO tuning on live traces to verify that reward pressure is coming from the intended SLA, completion, and energy signals.
+For a local fixture, run the same command against `orchestrator_stack/examples/sample_telemetry_trace.json`; the latest committed audit is `reports/evaluations/202605020534_sample_telemetry_reward_audit.json`.
 
 `train-policy` results include `heuristic_baseline` and `policy_vs_heuristic` fields. Treat PPO as not promoted until `policy_vs_heuristic.beats_heuristic` is true on representative telemetry-backed traces.
 

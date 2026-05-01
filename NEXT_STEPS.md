@@ -42,6 +42,7 @@ Read Agents.md, NEXT_STEPS.md, MAS_ARCHITECTURE.md, and README.md, inspect the l
 - Follow-up implementation on 2026-05-02 KST: `telemetry-reward-audit` now quantifies telemetry coverage and SLA/completion/energy reward deltas before PPO tuning.
 - Follow-up implementation on 2026-05-02 KST: `train-policy` now reports `heuristic_baseline` and `policy_vs_heuristic` so PPO promotion has an explicit baseline gate.
 - Follow-up implementation on 2026-05-02 KST: Python 3.12 and upstream AIOpsLab are installed in `~/Documents/aiopslab_validation_env`; `orchestrator_stack/scripts/setup_aiopslab_env.sh` now recreates that environment; adapter contract was aligned to upstream registration/parser/import behavior; live blocker is missing Kubernetes config (`KUBECONFIG` or `~/.kube/config`).
+- Follow-up implementation on 2026-05-02 KST: `orchestrator_stack/examples/sample_telemetry_trace.json` and `reports/evaluations/202605020534_sample_telemetry_reward_audit.json` now provide a local telemetry reward audit fixture.
 - Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `63 passed`.
 
 ## Pipeline Status
