@@ -155,3 +155,38 @@ def train_models_from_trace(rows: list[dict], risk_out: str | Path, demand_out: 
     risk_path = train_safety_model(matrices.x, matrices.y_risk, risk_out)
     demand_path = train_demand_model(matrices.x, matrices.y_demand, demand_out)
     return risk_path, demand_path
+
+
+def export_training_datasets_from_trace(
+    rows: list[dict],
+    risk_out: str | Path,
+    demand_out: str | Path,
+) -> tuple[Path, Path]:
+    np = _require_numpy()
+    from orchestrator.layer2.feature_extractor import FEATURE_NAMES, trace_rows_to_training_matrices
+
+    matrices = trace_rows_to_training_matrices(rows)
+    if not isinstance(matrices.x, np.ndarray):
+        raise TypeError("expected numpy-backed training matrices from trace rows")
+
+    feature_names = np.asarray(FEATURE_NAMES)
+    risk_path = Path(risk_out)
+    demand_path = Path(demand_out)
+    risk_path.parent.mkdir(parents=True, exist_ok=True)
+    demand_path.parent.mkdir(parents=True, exist_ok=True)
+
+    np.savez(
+        risk_path,
+        x=matrices.x,
+        y=matrices.y_risk.astype("int32"),
+        feature_names=feature_names,
+        target_name=np.asarray("risk_label"),
+    )
+    np.savez(
+        demand_path,
+        x=matrices.x,
+        y=matrices.y_demand.astype("float32"),
+        feature_names=feature_names,
+        target_name=np.asarray("demand_target"),
+    )
+    return risk_path, demand_path

@@ -9,7 +9,17 @@ from orchestrator.layer1.collector import prometheus_rows_to_trace
 from orchestrator.layer2.simulator import state_to_observation
 from orchestrator.types import Observation
 
-FEATURE_COUNT = 8
+FEATURE_NAMES = (
+    "cpu_util",
+    "mem_util",
+    "disk_util",
+    "net_util",
+    "task_pressure",
+    "queue_pressure",
+    "energy_price",
+    "power_state_on",
+)
+FEATURE_COUNT = len(FEATURE_NAMES)
 
 
 @dataclass(slots=True)

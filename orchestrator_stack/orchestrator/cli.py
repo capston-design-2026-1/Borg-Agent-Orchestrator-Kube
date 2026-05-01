@@ -93,6 +93,18 @@ def cmd_train_brains(args: argparse.Namespace) -> None:
     print(json.dumps({"risk_model": str(risk), "demand_model": str(demand)}, indent=2))
 
 
+def cmd_export_brain_datasets(args: argparse.Namespace) -> None:
+    try:
+        from orchestrator.layer1.trace_ingestor import load_trace_rows
+        from orchestrator.layer3.predictors import export_training_datasets_from_trace
+    except ModuleNotFoundError as exc:
+        raise _missing_dependency(exc, "exporting trace-driven brain datasets") from exc
+
+    rows = load_trace_rows(args.trace)
+    risk, demand = export_training_datasets_from_trace(rows, args.risk_out, args.demand_out)
+    print(json.dumps({"risk_dataset": str(risk), "demand_dataset": str(demand)}, indent=2))
+
+
 def cmd_train_brains_from_config(args: argparse.Namespace) -> None:
     try:
         from orchestrator.config import OrchestratorConfig
@@ -212,6 +224,12 @@ def build_parser() -> argparse.ArgumentParser:
     p_train_brains.add_argument("--risk-out", required=True)
     p_train_brains.add_argument("--demand-out", required=True)
     p_train_brains.set_defaults(func=cmd_train_brains)
+
+    p_export_brain_datasets = sub.add_parser("export-brain-datasets")
+    p_export_brain_datasets.add_argument("--trace", required=True)
+    p_export_brain_datasets.add_argument("--risk-out", required=True)
+    p_export_brain_datasets.add_argument("--demand-out", required=True)
+    p_export_brain_datasets.set_defaults(func=cmd_export_brain_datasets)
 
     p_train_brains_cfg = sub.add_parser("train-brains-from-config")
     p_train_brains_cfg.add_argument("--config", required=True)
