@@ -23,7 +23,7 @@ ARCHITECTURE_ITEMS = (
     ArchitectureItem(
         "AIOpsLab simulator / cluster state engine",
         "Partially implemented",
-        "Trace-driven twin and local AIOpsLab-style fallback work; live upstream validation still needs Python 3.12",
+        "Trace-driven twin, local fallback, Python 3.12 validation env, and upstream package preflight; live run still needs Kubernetes config",
     ),
     ArchitectureItem(
         "Feature extractor",
@@ -82,8 +82,9 @@ ARCHITECTURE_ITEMS = (
 
 NEXT_ENGINEERING_WORK = (
     "Create a Python 3.12 AIOpsLab validation environment and run `AIOpsLabPolicyAgent` against a real problem ID.",
-    "Validate live Prometheus/AIOpsLab telemetry fields against real workloads.",
-    "Tune PPO curriculum beyond smoke settings and compare checkpoints against the heuristic baseline.",
+    "Provide Kubernetes config for the AIOpsLab validation environment and rerun `aiopslab-preflight` until ready.",
+    "Validate live Prometheus/AIOpsLab telemetry fields with `telemetry-reward-audit`.",
+    "Tune PPO curriculum until `policy_vs_heuristic.beats_heuristic` is true on representative telemetry traces.",
     "Export representative trace-derived matrices, retrain/calibrate boosters, and promote thresholds only after diagnostics.",
 )
 
@@ -112,15 +113,16 @@ def architecture_status_markdown(
             "",
             "## Current Validation Baseline",
             "",
-            "- Full test suite: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` -> `49 passed` on 2026-05-02 KST.",
+            "- Full test suite: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` -> `62 passed` on 2026-05-02 KST.",
             "- `export-brain-datasets` smoke ran against `orchestrator_stack/examples/sample_trace.json` and wrote risk/demand NPZ files.",
-            "- PPO curriculum smoke previously completed runtime wiring but did not prove policy quality.",
+            "- `train-policy` smoke reports `heuristic_baseline` and `policy_vs_heuristic` gates.",
+            "- `aiopslab-preflight` is ready for Python/package checks in `~/Documents/aiopslab_validation_env` but blocked on Kubernetes config.",
             "",
             "## External Blockers",
             "",
-            "- Live AIOpsLab validation still needs a Python `>=3.11,<3.13` environment; current repo `.venv` uses Python 3.13.",
-            "- Real SLA/energy/task reward replacement needs live Prometheus/AIOpsLab payloads.",
-            "- PPO policy quality remains open until longer telemetry-backed training beats the heuristic baseline.",
+            "- Live AIOpsLab validation still needs a valid Kubernetes config; Python 3.12 and the upstream package are installed in `~/Documents/aiopslab_validation_env`.",
+            "- Real SLA/energy/task reward replacement needs live Prometheus/AIOpsLab payloads audited by `telemetry-reward-audit`.",
+            "- PPO policy quality remains open until `policy_vs_heuristic.beats_heuristic` is true on telemetry-backed traces.",
             "",
             "## Recommended Next Engineering Work",
             "",

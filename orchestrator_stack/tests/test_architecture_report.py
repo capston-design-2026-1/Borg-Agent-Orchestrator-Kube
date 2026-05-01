@@ -10,6 +10,8 @@ def test_architecture_status_markdown_reports_current_gaps():
     assert "Trace-derived brain datasets" in report
     assert "export-brain-datasets" in report
     assert "Live AIOpsLab validation" in report
+    assert "Kubernetes config" in report
+    assert "62 passed" in report
 
 
 def test_write_architecture_status_report_uses_requested_path(tmp_path):
