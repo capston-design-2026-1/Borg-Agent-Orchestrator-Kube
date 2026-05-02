@@ -1,0 +1,37 @@
+{
+  "trace_path": "reports/evaluations/202605022020_aiopslab_mitigation_prometheus_kube_trace.json",
+  "risk_model_path": "orchestrator_stack/examples/models/live_full_phase/risk_model.json",
+  "demand_model_path": "orchestrator_stack/examples/models/live_full_phase/demand_model.json",
+  "use_aiopslab_backend": false,
+  "episode_steps": 15,
+  "alpha": 1.0,
+  "beta": 0.6,
+  "gamma": 0.8,
+  "ppo_curriculum": [
+    {
+      "train_iters": 4,
+      "learning_rate": 0.0003,
+      "train_batch_size": 256,
+      "minibatch_size": 64,
+      "num_epochs": 2,
+      "rollout_fragment_length": 64
+    },
+    {
+      "train_iters": 10,
+      "learning_rate": 0.0002,
+      "train_batch_size": 512,
+      "minibatch_size": 128,
+      "num_epochs": 3,
+      "rollout_fragment_length": 128
+    },
+    {
+      "train_iters": 16,
+      "learning_rate": 0.0001,
+      "train_batch_size": 512,
+      "minibatch_size": 128,
+      "num_epochs": 3,
+      "rollout_fragment_length": 128
+    }
+  ],
+  "random_seed": 303
+}
