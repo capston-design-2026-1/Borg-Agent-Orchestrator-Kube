@@ -1,7 +1,14 @@
 # Orchestrator Stack Next Steps
 
 1. Expand the current three-family policy gate suite with another full-phase AIOpsLab family when available.
-2. Replace model-derived energy watts with a measured or externally calibrated node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
+2. Replace calibrated utilization-derived energy watts with a direct measured node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
+
+## Latest Session Note (2026-05-03 KST, power calibration metadata slice)
+
+- Added explicit `PowerCalibration` support to Kubernetes trace capture.
+- Live trace rows now include `power_calibration` metadata beside `energy_watts`.
+- Added `--power-calibration` to `scripts/run_aiopslab_noop_smoke.py` so thesis runs can record the calibration coefficients used for utilization-derived watts.
+- Added `orchestrator_stack/config/kind_power_calibration.example.json` as the editable calibration template.
 
 ## Latest Session Note (2026-05-03 KST, repeated-seed controlled ablation slice)
 

@@ -285,6 +285,8 @@ The example config now also exposes PPO knobs used by both `train-policy` and `t
 Set `random_seed` for repeatable PPO runs. If `ppo_curriculum` is present, `train-policy` runs each stage in order with its own PPO batch and iteration settings under separate runtime subdirectories; stage seeds derive from `random_seed` unless a stage-specific `seed` is provided.
 For controlled ablations, set `use_predictor_runtime=false` to bypass Layer 3 prediction enrichment and set `preserve_live_sla_risk=false` to disable hard preservation of live SLA-risk evidence in the trace twin.
 
+For energy telemetry, live Kubernetes capture writes `power_calibration` metadata next to `energy_watts`. Pass `--power-calibration orchestrator_stack/config/kind_power_calibration.example.json` to `scripts/run_aiopslab_noop_smoke.py` to make the utilization-to-watts calibration explicit; replace the example coefficients with measured node calibration when a wattmeter, IPMI, RAPL, or equivalent exporter is available.
+
 ## Notes
 
 - The default config uses `rllib_train_iters=1` for fast local smoke tests.

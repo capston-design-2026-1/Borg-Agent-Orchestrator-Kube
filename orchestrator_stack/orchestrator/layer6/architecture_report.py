@@ -76,13 +76,13 @@ ARCHITECTURE_ITEMS = (
     ArchitectureItem(
         "Real SLA/energy/task reward metrics",
         "Implemented for live traces",
-        "`sla_violations`, `completed_tasks`, `energy_watts`, and Prometheus CPU/memory utilization preserved into trace rows",
+        "`sla_violations`, `completed_tasks`, `energy_watts`, Prometheus CPU/memory utilization, and power-calibration metadata preserved into trace rows",
     ),
 )
 
 NEXT_ENGINEERING_WORK = (
     "Expand the current three-entry multi-family gate suite with another full-phase AIOpsLab family when available.",
-    "Add measured or externally calibrated node-power telemetry when a power exporter is available.",
+    "Replace calibrated utilization-based power estimates with direct measured node-power telemetry when a power exporter is available.",
     "Keep thesis-ready tables synchronized with new raw JSON artifacts for reproducible evaluation appendices.",
 )
 
@@ -111,7 +111,7 @@ def architecture_status_markdown(
             "",
             "## Current Validation Baseline",
             "",
-            "- Full test suite: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` -> `82 passed` on 2026-05-03 KST.",
+            "- Full test suite: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` -> `83 passed` on 2026-05-03 KST.",
             "- `export-brain-datasets` smoke ran against `orchestrator_stack/examples/sample_trace.json` and wrote risk/demand NPZ files.",
             "- `train-policy` smoke reports `heuristic_baseline` and `policy_vs_heuristic` gates.",
             "- Live Kind/AIOpsLab validation uses `~/Documents/aiopslab_validation_env/kubeconfig` and covers no-op, Hotel Reservation misconfiguration, and SocialNetwork Kubernetes target-port misconfiguration.",
@@ -127,7 +127,7 @@ def architecture_status_markdown(
             "## Remaining Research Gaps",
             "",
             "- PPO quality is proven on three held-out gate-suite entries and three repeated seeds for all three reported families; controlled repeated-seed ablations are recorded for the Prometheus mitigation trace.",
-            "- Energy watts remain model-derived from utilization unless a measured node-power exporter is added.",
+            "- Energy watts now carry explicit calibration metadata, but remain utilization-derived unless a measured node-power exporter is added.",
             "",
             "## Recommended Next Engineering Work",
             "",

@@ -188,7 +188,7 @@ Key diagnostics:
 
 ## Current Scientific Limitations
 
-- Current latest mitigation CPU and memory signals come from Prometheus/node-exporter, but energy watts are still model-derived rather than measured by hardware power telemetry.
+- Current latest mitigation CPU and memory signals come from Prometheus/node-exporter. Energy watts now carry explicit calibration metadata, but are still utilization-derived rather than measured by hardware power telemetry.
 - Current validated full-phase fault families are Hotel Reservation application misconfiguration, SocialNetwork Kubernetes target-port misconfiguration, and SocialNetwork scale-to-zero operation error; external validity still requires broader held-out multi-family testing.
 - Kind is a local control plane; production cluster behavior may differ in scheduling, resource pressure, and exporter availability.
 - PPO pass is validated on enriched mitigation traces, including one Prometheus/node-exporter slice, on two SocialNetwork full-phase families, on the current three-entry multi-family gate suite, and across three seeds for all three reported families. Broader external coverage remains open.
