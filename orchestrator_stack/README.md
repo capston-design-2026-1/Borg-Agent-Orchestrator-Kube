@@ -189,6 +189,19 @@ For a local fixture, run the same command against `orchestrator_stack/examples/s
 
 `train-policy` results include `heuristic_baseline` and `policy_vs_heuristic` fields. Treat PPO as not promoted until `policy_vs_heuristic.beats_heuristic` is true on representative telemetry-backed traces.
 
+### 6.5 Export Thesis Evaluation Tables
+After live validation and policy training, convert raw JSON evidence into thesis-ready Markdown and CSV tables:
+```bash
+./.venv/bin/python orchestrator_stack/run.py thesis-tables \
+  --evaluation-dir reports/evaluations \
+  --out-md reports/evaluations/manual_thesis_evaluation_tables.md \
+  --out-csv-dir reports/evaluations/manual_thesis_tables
+```
+
+Latest committed table export:
+- Markdown: `reports/evaluations/202605022050_thesis_evaluation_tables.md`
+- CSV directory: `reports/evaluations/202605022050_thesis_tables`
+
 ### 7. Check AIOpsLab Readiness
 ```bash
 ./.venv/bin/python orchestrator_stack/run.py aiopslab-preflight \
@@ -241,7 +254,7 @@ Latest checked behavior in this worktree is based on the 2026-05-02 KST validati
 - `aiopslab-preflight` now checks real upstream imports, not just package presence.
 - `AIOpsLabBackend` now loads the real upstream `Orchestrator` class by module path and registers the policy agent before `init_problem()`.
 - Live AIOpsLab no-op validation now runs on a real Kind Kubernetes cluster and records a correct detection result.
-- Full orchestrator test suite currently passes with `76 passed`.
+- Full orchestrator test suite currently passes with `78 passed`.
 - `tune` completed successfully after the PPO-tuning rewrite and emitted `reports/tuning/202604161029_optuna_orchestrator_reward_weights.md`.
 - `tune-policy-rewards` now reaches the PPO-backed RLlib trial path and fails closed with a structured `"status": "skipped"` result when macOS sandbox process-enumeration blocks `ray.init()`.
 - The older `reports/tuning/202604142305_optuna_orchestrator_policy_and_rewards.md` artifact predates the 2026-04-16 PPO-backed tuning rewrite and should be treated as historical, not as the current validation artifact for `tune-policy-rewards`.
