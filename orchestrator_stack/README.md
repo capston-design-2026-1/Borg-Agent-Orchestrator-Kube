@@ -278,7 +278,7 @@ The orchestrator now provides verbose step-by-step logging of agent decisions. W
 
 To see more training logs from Ray RLlib, increase the `"rllib_train_iters"` value in your `.json` config.
 The example config now also exposes PPO knobs used by both `train-policy` and `tune-policy-rewards`: `ppo_learning_rate`, `ppo_train_batch_size`, `ppo_minibatch_size`, `ppo_num_epochs`, and `ppo_rollout_fragment_length`.
-If `ppo_curriculum` is present, `train-policy` runs each stage in order with its own PPO batch and iteration settings under separate runtime subdirectories.
+Set `random_seed` for repeatable PPO runs. If `ppo_curriculum` is present, `train-policy` runs each stage in order with its own PPO batch and iteration settings under separate runtime subdirectories; stage seeds derive from `random_seed` unless a stage-specific `seed` is provided.
 
 ## Notes
 
