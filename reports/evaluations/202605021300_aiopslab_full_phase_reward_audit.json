@@ -1,0 +1,25 @@
+{
+  "steps": 10,
+  "telemetry_steps": 10,
+  "telemetry_coverage": 1.0,
+  "score": {
+    "steps": 10,
+    "total": -322.98522448,
+    "average": -32.298522448,
+    "agent_a": -390.0,
+    "agent_b": 98.35795919999997,
+    "agent_c": 10.0
+  },
+  "telemetry_reward_delta": {
+    "AgentA": -400.0,
+    "AgentB": 38.357959199999996,
+    "AgentC": 0.0,
+    "weighted_total": -376.98522448
+  },
+  "max_sla_violations": 1,
+  "max_completed_tasks": 0,
+  "max_energy_watts": 116.420408,
+  "actions": {
+    "dvfs": 10
+  }
+}
