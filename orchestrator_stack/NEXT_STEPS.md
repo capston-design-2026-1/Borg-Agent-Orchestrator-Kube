@@ -1,9 +1,34 @@
 # Orchestrator Stack Next Steps
 
-1. Add action-rich traces where multiple non-`dvfs` actions are actually selected/evaluated; current live traces are telemetry-rich but the heuristic/referee path still resolves to `dvfs` on every step.
-2. Tune PPO again after action diversity exists; current periodic mitigation trace nearly improves but still misses the corrected heuristic total-score gate.
-3. Add direct Prometheus/node-exporter utilization queries and replace the current Kubernetes resource-request energy proxy once stable query names are locked for the local chart.
-4. Expand beyond Hotel Reservation misconfig to one more stable AIOpsLab fault family after action-diverse capture exists.
+1. Add direct Prometheus/node-exporter utilization queries and replace the current Kubernetes resource-request energy proxy once stable query names are locked for the local chart.
+2. Expand beyond Hotel Reservation misconfig to one more stable AIOpsLab fault family with detection/localization/analysis/mitigation coverage.
+3. Build a held-out multi-family trace corpus and require PPO to beat heuristic total score across held-out traces, not only the enriched mitigation slice.
+4. Add thesis-ready statistical tables: repeated seeds, confidence intervals, and ablations for no risk derivation vs risk derivation vs SLA risk preservation.
+
+## Latest Session Note (2026-05-02 KST, thesis-grade action-diversity slice)
+
+- Added live Kubernetes control signals to trace rows:
+  - `p_fail_scores` from unhealthy pod phases/readiness/restarts plus node utilization
+  - `demand_projection` from node resource requests
+- Preserved live SLA risk inside the trace twin so synthetic action deltas cannot erase hard evidence from baseline trace rows.
+- Re-ran enriched periodic mitigation on Kind:
+  - output `reports/evaluations/202605021350_aiopslab_mitigation_enriched_live_summary.json`
+  - `success=true`
+  - captured `24` live Kubernetes rows
+- Action audit changed from mostly `dvfs` to safety-dominant behavior:
+  - `replicate=21`
+  - `dvfs=2`
+- PPO gate now passes on the enriched live mitigation trace:
+  - config `orchestrator_stack/config/aiopslab_enriched_mitigation_kind.json`
+  - output `reports/evaluations/202605021400_aiopslab_enriched_mitigation_train_policy.json`
+  - policy episode reward `-991.63369384`
+  - heuristic total score `-1118.325216304`
+  - delta `+126.69152246399995`
+  - `beats_heuristic=true`
+- Added thesis-grade validation report:
+  - `reports/evaluations/202605022005_thesis_grade_orchestrator_validation.md`
+- Validation run status:
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`73 passed`)
 
 ## Latest Session Note (2026-05-02 KST, periodic mitigation capture slice)
 

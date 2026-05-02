@@ -49,7 +49,8 @@ Read Agents.md, NEXT_STEPS.md, MAS_ARCHITECTURE.md, and README.md, inspect the l
 - Follow-up validation on 2026-05-02 KST: `misconfig_app_hotel_res-detection-1` now runs live on Kind with correct `Yes` detection and Kubernetes trace capture; combined no-op+fault PPO remains below heuristic, so longer localization/analysis/mitigation traces are the next blocking work.
 - Follow-up validation on 2026-05-02 KST: misconfig localization, analysis, and mitigation now run live on Kind with correct task-specific submissions; full-phase trace has 11 Kubernetes-derived rows and live retrained brain models/diagnostics, but PPO still remains below the corrected heuristic total-score gate.
 - Follow-up validation on 2026-05-02 KST: periodic Kubernetes capture now records 26-row live mitigation traces and PPO nearly closes the gate but still remains below heuristic total score by `-16.72244079999996`; next blocker is action diversity/reward design, not basic kube ingestion.
-- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `72 passed`.
+- Follow-up validation on 2026-05-02 KST: live Kubernetes risk/demand derivation plus SLA risk preservation produces action-diverse audits (`replicate=21`, `dvfs=2`) and PPO now beats heuristic on the enriched mitigation trace by `+126.69152246399995`; thesis-grade report recorded at `reports/evaluations/202605022005_thesis_grade_orchestrator_validation.md`.
+- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `73 passed`.
 
 ## Pipeline Status
 

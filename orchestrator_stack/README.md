@@ -225,6 +225,7 @@ Live trace PPO config: `orchestrator_stack/config/aiopslab_live_kind.json`. Curr
 Fault detection validation: `reports/evaluations/202605021230_aiopslab_misconfig_detection_live_summary.json` records `Detection Accuracy=Correct` for `misconfig_app_hotel_res-detection-1` on Kind. Combined no-op+fault trace config is `orchestrator_stack/config/aiopslab_combined_kind.json`; current PPO gate remains closed there too, with `reports/evaluations/202605021235_aiopslab_combined_train_policy.json` recording `beats_heuristic=false`.
 Full-phase validation now covers misconfig localization, analysis, and mitigation on Kind. `reports/evaluations/202605021300_aiopslab_full_phase_kube_trace.json` has 11 Kubernetes-derived rows across no-op plus misconfig detection/localization/analysis/mitigation. `reports/evaluations/202605021310_aiopslab_full_phase_train_policy_fixed_gate.json` uses corrected total-score comparison and still records `beats_heuristic=false`. Live trace-derived predictors are under `orchestrator_stack/examples/models/live_full_phase/`; diagnostics are `reports/evaluations/202605021315_aiopslab_full_phase_risk_diagnostics.json` and `reports/evaluations/202605021315_aiopslab_full_phase_demand_diagnostics.json`.
 Periodic mitigation capture: run `orchestrator_stack/scripts/run_aiopslab_noop_smoke.py` with `--capture-interval-seconds 2` to collect intra-run Kubernetes transitions. Latest periodic trace is `reports/evaluations/202605021325_aiopslab_misconfig_mitigation_periodic_kube_trace.json`; PPO gate output is `reports/evaluations/202605021330_aiopslab_periodic_mitigation_train_policy.json` and remains `beats_heuristic=false` by `-16.72244079999996` total score.
+Thesis-grade validation: `reports/evaluations/202605022005_thesis_grade_orchestrator_validation.md` summarizes the live Kubernetes/AIOpsLab evidence, limitations, and next research gates. Latest enriched mitigation PPO result is `reports/evaluations/202605021400_aiopslab_enriched_mitigation_train_policy.json`, with `beats_heuristic=true` and delta `+126.69152246399995` after deriving Kubernetes risk/demand signals and preserving live SLA risk.
 
 ## Current Validation Status
 
@@ -239,7 +240,7 @@ Latest checked behavior in this worktree is based on the 2026-05-02 KST validati
 - `aiopslab-preflight` now checks real upstream imports, not just package presence.
 - `AIOpsLabBackend` now loads the real upstream `Orchestrator` class by module path and registers the policy agent before `init_problem()`.
 - Live AIOpsLab no-op validation now runs on a real Kind Kubernetes cluster and records a correct detection result.
-- Full orchestrator test suite currently passes with `72 passed`.
+- Full orchestrator test suite currently passes with `73 passed`.
 - `tune` completed successfully after the PPO-tuning rewrite and emitted `reports/tuning/202604161029_optuna_orchestrator_reward_weights.md`.
 - `tune-policy-rewards` now reaches the PPO-backed RLlib trial path and fails closed with a structured `"status": "skipped"` result when macOS sandbox process-enumeration blocks `ray.init()`.
 - The older `reports/tuning/202604142305_optuna_orchestrator_policy_and_rewards.md` artifact predates the 2026-04-16 PPO-backed tuning rewrite and should be treated as historical, not as the current validation artifact for `tune-policy-rewards`.
