@@ -1,0 +1,16 @@
+{
+  "problem_id": "noop_detection_hotel_reservation-1",
+  "final_state": "SubmissionStatus.VALID_SUBMISSION",
+  "history_len": 4,
+  "results": {
+    "Detection Accuracy": "Correct",
+    "TTD": 0.3109419345855713,
+    "steps": 2,
+    "in_tokens": 1261,
+    "out_tokens": 68
+  },
+  "results_dir": "/private/tmp/aiopslab_results",
+  "trace_rows": 2,
+  "trace_out": "reports/evaluations/202605021205_aiopslab_noop_kube_trace.json",
+  "capture_errors": []
+}
