@@ -1,0 +1,1428 @@
+[
+  {
+    "timestamp": 1777761924,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.095,
+        "mem_util": 0.037006796210392406,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-gm6fs",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-kube-state-metrics-6c78fbbd9d-p5xbk",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-prometheus-blackbox-exporter-5ccf9dd886-g6cpr",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-prometheus-node-exporter-fmgwl",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-prometheus-pushgateway-6fdd899989-hzt96",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-server-58bc5d6547-4jlsz",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/compose-post-service-9f655fc76-2m9k8",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/home-timeline-redis-6b6b6fff59-2n9lc",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/home-timeline-service-b549995fb-4xt6t",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/jaeger-7b9499ff6f-8w5v4",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/media-frontend-55cdc699d6-vzwz5",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/media-memcached-5d5cc65bfd-fkz8b",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/media-mongodb-5c8c8f6dfc-sj4j4",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/media-service-5fcb6f6cc6-h6jvb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/nginx-thrift-7d675945b-qjfgh",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/post-storage-memcached-b9c74b448-jhhfx",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/post-storage-mongodb-7cd4898849-wj5m8",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/post-storage-service-59479466b5-577ph",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/social-graph-mongodb-746569d75c-6q2nx",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/social-graph-redis-b685479d6-c78vn",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/social-graph-service-7cdd9fc6c-s4pzn",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/text-service-858d896c7-bz2kw",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/unique-id-service-57db4df994-z4bgk",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/url-shorten-memcached-67b885ccd8-82xzg",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/url-shorten-mongodb-868fcb9dc8-kzpl7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/url-shorten-service-7977864d9d-5qgvt",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-memcached-6f5854c646-s5kqg",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-mention-service-f7f59857-rm5l5",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-mongodb-774dc7db66-zbx4t",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-timeline-mongodb-6fd4f49f4d-nvv7k",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-timeline-redis-849b7795f-ssztf",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-timeline-service-6bb8db5b8-hqfjb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 0,
+    "completed_tasks": 0,
+    "energy_watts": 93.620408,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.065202
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.065202
+    },
+    "telemetry_sources": [
+      "kubernetes_api"
+    ]
+  },
+  {
+    "timestamp": 1777761924,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.095,
+        "mem_util": 0.037006796210392406,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-gm6fs",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-kube-state-metrics-6c78fbbd9d-p5xbk",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-prometheus-blackbox-exporter-5ccf9dd886-g6cpr",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-prometheus-node-exporter-fmgwl",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-prometheus-pushgateway-6fdd899989-hzt96",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-server-58bc5d6547-4jlsz",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/compose-post-service-9f655fc76-2m9k8",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/home-timeline-redis-6b6b6fff59-2n9lc",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/home-timeline-service-b549995fb-4xt6t",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/jaeger-7b9499ff6f-8w5v4",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/media-frontend-55cdc699d6-vzwz5",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/media-memcached-5d5cc65bfd-fkz8b",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/media-mongodb-5c8c8f6dfc-sj4j4",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/media-service-5fcb6f6cc6-h6jvb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/nginx-thrift-7d675945b-qjfgh",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/post-storage-memcached-b9c74b448-jhhfx",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/post-storage-mongodb-7cd4898849-wj5m8",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/post-storage-service-59479466b5-577ph",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/social-graph-mongodb-746569d75c-6q2nx",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/social-graph-redis-b685479d6-c78vn",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/social-graph-service-7cdd9fc6c-s4pzn",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/text-service-858d896c7-bz2kw",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/unique-id-service-57db4df994-z4bgk",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/url-shorten-memcached-67b885ccd8-82xzg",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/url-shorten-mongodb-868fcb9dc8-kzpl7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/url-shorten-service-7977864d9d-5qgvt",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-memcached-6f5854c646-s5kqg",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-mention-service-f7f59857-rm5l5",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-mongodb-774dc7db66-zbx4t",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-timeline-mongodb-6fd4f49f4d-nvv7k",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-timeline-redis-849b7795f-ssztf",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-timeline-service-6bb8db5b8-hqfjb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 0,
+    "completed_tasks": 0,
+    "energy_watts": 93.620408,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.065202
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.065202
+    },
+    "telemetry_sources": [
+      "kubernetes_api"
+    ]
+  },
+  {
+    "timestamp": 1777761927,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.095,
+        "mem_util": 0.037006796210392406,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-gm6fs",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-kube-state-metrics-6c78fbbd9d-p5xbk",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-prometheus-blackbox-exporter-5ccf9dd886-g6cpr",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-prometheus-node-exporter-fmgwl",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-prometheus-pushgateway-6fdd899989-hzt96",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-server-58bc5d6547-4jlsz",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/compose-post-service-9f655fc76-2m9k8",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/home-timeline-redis-6b6b6fff59-2n9lc",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/home-timeline-service-b549995fb-4xt6t",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/jaeger-7b9499ff6f-8w5v4",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/media-frontend-55cdc699d6-vzwz5",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/media-memcached-5d5cc65bfd-fkz8b",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/media-mongodb-5c8c8f6dfc-sj4j4",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/media-service-5fcb6f6cc6-h6jvb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/nginx-thrift-7d675945b-qjfgh",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/post-storage-memcached-b9c74b448-jhhfx",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/post-storage-mongodb-7cd4898849-wj5m8",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/post-storage-service-59479466b5-577ph",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/social-graph-mongodb-746569d75c-6q2nx",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/social-graph-redis-b685479d6-c78vn",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/social-graph-service-7cdd9fc6c-s4pzn",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/text-service-858d896c7-bz2kw",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/unique-id-service-57db4df994-z4bgk",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/url-shorten-memcached-67b885ccd8-82xzg",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/url-shorten-mongodb-868fcb9dc8-kzpl7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/url-shorten-service-7977864d9d-5qgvt",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-memcached-6f5854c646-s5kqg",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-mention-service-f7f59857-rm5l5",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-mongodb-774dc7db66-zbx4t",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-service-7977b9b569-xtvxp",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-timeline-mongodb-6fd4f49f4d-nvv7k",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-timeline-redis-849b7795f-ssztf",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-timeline-service-6bb8db5b8-hqfjb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 0,
+    "completed_tasks": 0,
+    "energy_watts": 93.620408,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.065202
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.065202
+    },
+    "telemetry_sources": [
+      "kubernetes_api"
+    ]
+  },
+  {
+    "timestamp": 1777761927,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.095,
+        "mem_util": 0.037006796210392406,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-gm6fs",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-kube-state-metrics-6c78fbbd9d-p5xbk",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-prometheus-blackbox-exporter-5ccf9dd886-g6cpr",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-prometheus-node-exporter-fmgwl",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-prometheus-pushgateway-6fdd899989-hzt96",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-server-58bc5d6547-4jlsz",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/compose-post-service-9f655fc76-2m9k8",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/home-timeline-redis-6b6b6fff59-2n9lc",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/home-timeline-service-b549995fb-4xt6t",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/jaeger-7b9499ff6f-8w5v4",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/media-frontend-55cdc699d6-vzwz5",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/media-memcached-5d5cc65bfd-fkz8b",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/media-mongodb-5c8c8f6dfc-sj4j4",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/media-service-5fcb6f6cc6-h6jvb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/nginx-thrift-7d675945b-qjfgh",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/post-storage-memcached-b9c74b448-jhhfx",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/post-storage-mongodb-7cd4898849-wj5m8",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/post-storage-service-59479466b5-577ph",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/social-graph-mongodb-746569d75c-6q2nx",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/social-graph-redis-b685479d6-c78vn",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/social-graph-service-7cdd9fc6c-s4pzn",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/text-service-858d896c7-bz2kw",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/unique-id-service-57db4df994-z4bgk",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/url-shorten-memcached-67b885ccd8-82xzg",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/url-shorten-mongodb-868fcb9dc8-kzpl7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/url-shorten-service-7977864d9d-5qgvt",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-memcached-6f5854c646-s5kqg",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-mention-service-f7f59857-rm5l5",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-mongodb-774dc7db66-zbx4t",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-service-7977b9b569-xtvxp",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-timeline-mongodb-6fd4f49f4d-nvv7k",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-timeline-redis-849b7795f-ssztf",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-timeline-service-6bb8db5b8-hqfjb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 0,
+    "completed_tasks": 0,
+    "energy_watts": 93.620408,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.065202
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.065202
+    },
+    "telemetry_sources": [
+      "kubernetes_api"
+    ]
+  },
+  {
+    "timestamp": 1777761930,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.095,
+        "mem_util": 0.037006796210392406,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-gm6fs",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-kube-state-metrics-6c78fbbd9d-p5xbk",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-prometheus-blackbox-exporter-5ccf9dd886-g6cpr",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-prometheus-node-exporter-fmgwl",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "observe/prometheus-prometheus-pushgateway-6fdd899989-hzt96",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "observe/prometheus-server-58bc5d6547-4jlsz",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/compose-post-service-9f655fc76-2m9k8",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/home-timeline-redis-6b6b6fff59-2n9lc",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/home-timeline-service-b549995fb-4xt6t",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/jaeger-7b9499ff6f-8w5v4",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/media-frontend-55cdc699d6-vzwz5",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/media-memcached-5d5cc65bfd-fkz8b",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/media-mongodb-5c8c8f6dfc-sj4j4",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/media-service-5fcb6f6cc6-h6jvb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/nginx-thrift-7d675945b-qjfgh",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/post-storage-memcached-b9c74b448-jhhfx",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/post-storage-mongodb-7cd4898849-wj5m8",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/post-storage-service-59479466b5-577ph",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/social-graph-mongodb-746569d75c-6q2nx",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/social-graph-redis-b685479d6-c78vn",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/social-graph-service-7cdd9fc6c-s4pzn",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/text-service-858d896c7-bz2kw",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/unique-id-service-57db4df994-z4bgk",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/url-shorten-memcached-67b885ccd8-82xzg",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/url-shorten-mongodb-868fcb9dc8-kzpl7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/url-shorten-service-7977864d9d-5qgvt",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-memcached-6f5854c646-s5kqg",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-mention-service-f7f59857-rm5l5",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-mongodb-774dc7db66-zbx4t",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-service-7977b9b569-xtvxp",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-timeline-mongodb-6fd4f49f4d-nvv7k",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-timeline-redis-849b7795f-ssztf",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/user-timeline-service-6bb8db5b8-hqfjb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": true,
+    "sla_violations": 1,
+    "completed_tasks": 0,
+    "energy_watts": 93.620408,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.95
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.065202
+    },
+    "telemetry_sources": [
+      "kubernetes_api"
+    ]
+  },
+  {
+    "timestamp": 1777761933,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.095,
+        "mem_util": 0.037006796210392406,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-gm6fs",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-social-network/compose-post-service-9f655fc76-2m9k8",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-social-network/home-timeline-service-b549995fb-4xt6t",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-social-network/media-service-5fcb6f6cc6-h6jvb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-social-network/nginx-thrift-7d675945b-qjfgh",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-social-network/post-storage-memcached-b9c74b448-jhhfx",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-social-network/post-storage-service-59479466b5-577ph",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-social-network/social-graph-service-7cdd9fc6c-s4pzn",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-social-network/text-service-858d896c7-bz2kw",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-social-network/unique-id-service-57db4df994-z4bgk",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-social-network/url-shorten-service-7977864d9d-5qgvt",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-social-network/user-memcached-6f5854c646-s5kqg",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-social-network/user-mention-service-f7f59857-rm5l5",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-social-network/user-service-7977b9b569-xtvxp",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-social-network/user-timeline-service-6bb8db5b8-hqfjb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": false
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": true,
+    "sla_violations": 2,
+    "completed_tasks": 2,
+    "energy_watts": 93.620408,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.95
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.065202
+    },
+    "telemetry_sources": [
+      "kubernetes_api"
+    ]
+  }
+]
