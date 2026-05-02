@@ -1,8 +1,19 @@
 # Orchestrator Stack Next Steps
 
-1. Build a held-out multi-family trace corpus and require PPO to beat heuristic total score across held-out traces, not only per-family enriched slices.
-2. Add repeated-seed statistical tables: confidence intervals and ablations for no risk derivation vs risk derivation vs SLA risk preservation vs Prometheus enrichment.
+1. Add repeated-seed statistical tables: confidence intervals and ablations for no risk derivation vs risk derivation vs SLA risk preservation vs Prometheus enrichment.
+2. Expand the multi-family gate suite beyond two held-out entries with another full-phase family from the AIOpsLab catalog.
 3. Replace model-derived energy watts with a measured or externally calibrated node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
+
+## Latest Session Note (2026-05-03 KST, multi-family gate suite slice)
+
+- Added `policy-gate-suite` CLI to make multi-family PPO promotion machine-checkable.
+- Added manifest `orchestrator_stack/config/aiopslab_multi_family_gate_suite.json`.
+- Generated report `reports/evaluations/202605030020_aiopslab_multi_family_policy_gate_suite.json`.
+- Held-out entries:
+  - Hotel Reservation Prometheus mitigation: `beats_heuristic=true`, delta `+77.23260686133335`
+  - SocialNetwork target-port full phase: `beats_heuristic=true`, delta `+18.01204388800005`
+- Suite result: `status=passed`, `heldout_passes=2/2`.
+- Conclusion: current two-family held-out gate passes; next blocker is repeated-seed statistics and expanding the suite to a third family.
 
 ## Latest Session Note (2026-05-03 KST, second-family PPO pass slice)
 
@@ -54,7 +65,7 @@
   - telemetry reward audits
   - PPO policy-vs-heuristic gates
 - Validation run status:
-  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`78 passed`)
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`80 passed`)
 
 ## Latest Session Note (2026-05-02 KST, Prometheus/node-exporter mitigation slice)
 
@@ -81,7 +92,7 @@
   - delta `+77.23260686133335`
   - `beats_heuristic=true`
 - Validation run status:
-  - superseded by thesis table export slice (`78 passed`)
+  - superseded by thesis table export slice (`80 passed`)
 
 ## Latest Session Note (2026-05-02 KST, thesis-grade action-diversity slice)
 

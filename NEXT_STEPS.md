@@ -55,7 +55,8 @@ Read Agents.md, NEXT_STEPS.md, MAS_ARCHITECTURE.md, and README.md, inspect the l
 - Follow-up planning on 2026-05-02 KST: AIOpsLab problem catalog snapshot found `89` registered IDs and `8` full-phase candidate families; next recommended live family is `k8s_target_port-misconfig-*`.
 - Follow-up validation on 2026-05-02 KST: `k8s_target_port-misconfig-*` now validates a second live full-phase AIOpsLab family on SocialNetwork; PPO is close but below heuristic by `-5.581706111999949`, making multi-family policy robustness the next blocker.
 - Follow-up validation on 2026-05-03 KST: stronger PPO curriculum now beats heuristic on `k8s_target_port-misconfig-*` by `+18.01204388800005`; next blocker is held-out multi-family generalization and repeated-seed statistics.
-- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `78 passed`.
+- Follow-up implementation on 2026-05-03 KST: `policy-gate-suite` now checks held-out multi-family PPO gates from a manifest; current suite passes `2/2` entries across Hotel Reservation and SocialNetwork.
+- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `80 passed`.
 
 ## Pipeline Status
 

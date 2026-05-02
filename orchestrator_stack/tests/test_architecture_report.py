@@ -13,7 +13,8 @@ def test_architecture_status_markdown_reports_current_gaps():
     assert "Prometheus/node-exporter enrichment covers all 15 rows" in report
     assert "k8s_target_port-misconfig-*" in report
     assert "+18.01204388800005" in report
-    assert "78 passed" in report
+    assert "passes `2/2` held-out entries" in report
+    assert "80 passed" in report
 
 
 def test_write_architecture_status_report_uses_requested_path(tmp_path):

@@ -109,6 +109,18 @@ This replaces the earlier CPU/memory resource-request proxy for the latest mitig
 
 This expands live external validity to a second full-phase fault family and closes the per-family PPO gate after a stronger curriculum. The remaining policy gap is held-out multi-family robustness rather than single-family validation.
 
+### Multi-Family Policy Gate Suite
+
+- Manifest: `orchestrator_stack/config/aiopslab_multi_family_gate_suite.json`
+- Report: `reports/evaluations/202605030020_aiopslab_multi_family_policy_gate_suite.json`
+- Suite status: `passed`
+- Held-out entries: 2
+- Held-out passes: 2
+- Hotel Reservation Prometheus mitigation delta: `+77.23260686133335`
+- SocialNetwork target-port full-phase delta: `+18.01204388800005`
+
+This is the first machine-checkable multi-family policy gate. It does not replace repeated-seed statistics, but it prevents thesis reporting from relying on unstructured manual inspection of policy JSON artifacts.
+
 ## Brain Model Evidence
 
 - Live full-phase risk dataset: `reports/evaluations/brain_live_full_phase/risk_dataset.npz`
@@ -130,13 +142,13 @@ Key diagnostics:
 - Current latest mitigation CPU and memory signals come from Prometheus/node-exporter, but energy watts are still model-derived rather than measured by hardware power telemetry.
 - Current validated full-phase fault families are Hotel Reservation application misconfiguration and SocialNetwork Kubernetes target-port misconfiguration; external validity still requires held-out multi-family testing.
 - Kind is a local control plane; production cluster behavior may differ in scheduling, resource pressure, and exporter availability.
-- PPO pass is validated on enriched mitigation traces, including one Prometheus/node-exporter slice, and on the second full-phase family after stronger curriculum, but not yet on a broad held-out multi-family trace corpus.
+- PPO pass is validated on enriched mitigation traces, including one Prometheus/node-exporter slice, on the second full-phase family after stronger curriculum, and on the current two-entry multi-family gate suite. Broader multi-family coverage and repeated seeds remain open.
 - Prometheus enrichment currently uses node-exporter CPU and memory utilization; additional PromQL mappings are still needed for service-level latency, queue pressure, and direct power signals if those exporters are available.
 
 ## Next Thesis-Grade Work
 
-1. Build a multi-family trace corpus and require PPO to beat heuristic total score across held-out traces.
-2. Add repeated-seed PPO runs for the Prometheus mitigation and `k8s_target_port` full-phase slices.
+1. Add repeated-seed PPO runs for the Prometheus mitigation and `k8s_target_port` full-phase slices.
+2. Expand the multi-family gate suite to a third full-phase family from the AIOpsLab catalog.
 3. Add statistical reporting: repeated seeds, confidence intervals, and ablation table for `no risk derivation`, `risk derivation only`, `risk preservation`, and `Prometheus enrichment`.
 4. Add direct power or calibrated energy telemetry if a node-power exporter is available.
 5. Keep thesis-ready tables synchronized with raw JSON artifacts for reproducible evaluation appendices.
