@@ -1,9 +1,37 @@
 # Orchestrator Stack Next Steps
 
-1. Provide a valid Kubernetes config for `~/Documents/aiopslab_validation_env`, run `aiopslab-preflight` until it returns `ready`, then run `AIOpsLabPolicyAgent` against a real problem ID.
-2. Run `telemetry-reward-audit` against live Prometheus/AIOpsLab traces to validate reward coverage and SLA/completion/energy pressure.
-3. Tune PPO curriculum beyond smoke settings until `policy_vs_heuristic.beats_heuristic` is true on representative telemetry-backed traces.
-4. Export representative trace-derived matrices with `export-brain-datasets`, retrain boosters, inspect `calibration_summary`, and only then promote thresholds.
+1. Export live Prometheus/AIOpsLab telemetry from the Kind-backed AIOpsLab run into trace rows, then run `telemetry-reward-audit` against that live trace.
+2. Tune PPO curriculum beyond smoke settings until `policy_vs_heuristic.beats_heuristic` is true on representative telemetry-backed traces.
+3. Export representative trace-derived matrices with `export-brain-datasets`, retrain boosters, inspect `calibration_summary`, and only then promote thresholds.
+4. Promote the Kind/AIOpsLab validation workflow from smoke to multi-problem coverage after the no-op path remains stable.
+
+## Latest Session Note (2026-05-02 KST, live AIOpsLab Kind validation slice)
+
+- Installed Kind and Helm, created a real local Kubernetes cluster `kind-borg-aiopslab`, and wrote kubeconfig at `~/Documents/aiopslab_validation_env/kubeconfig`.
+- Patched the AIOpsLab validation environment for local Kind usage:
+  - `k8s_host: localhost` in upstream `config.yml`
+  - observer `kubernetes_path` points to the generated kubeconfig
+  - upstream `aiopslab-applications` is linked from `~/Documents/AIOpsLab/aiopslab-applications`
+- Added `orchestrator_stack/scripts/setup_kind_cluster.sh` and `orchestrator_stack/scripts/run_aiopslab_noop_smoke.py` for repeatable cluster + live AIOpsLab validation.
+- Fixed `AIOpsLabPolicyAgent` for real AIOpsLab turn semantics:
+  - accepts natural-language action prompts, not only JSON state
+  - performs one parser-compliant observation action
+  - submits `No` on the no-op detection smoke path
+- Live AIOpsLab smoke result:
+  - problem `noop_detection_hotel_reservation-1`
+  - Hotel Reservation app deployed on Kind
+  - Prometheus and workload job ran
+  - agent/env loop executed
+  - final state `SubmissionStatus.VALID_SUBMISSION`
+  - result `Detection Accuracy=Correct`
+- Recorded artifacts:
+  - `reports/evaluations/202605021140_aiopslab_noop_live_session.json`
+  - `reports/evaluations/202605021141_aiopslab_noop_live_summary.json`
+  - `reports/evaluations/202605021141_aiopslab_preflight_ready.json`
+- Validation run status:
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests/test_aiopslab_contract.py -q`: success (`4 passed`)
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`66 passed`)
+  - `KUBECONFIG=~/Documents/aiopslab_validation_env/kubeconfig PYTHONPATH=orchestrator_stack ~/Documents/aiopslab_validation_env/bin/python orchestrator_stack/run.py aiopslab-preflight --kube-config ~/Documents/aiopslab_validation_env/kubeconfig`: success (`status=ready`)
 
 ## Latest Session Note (2026-05-02 KST, AIOpsLab preflight slice)
 

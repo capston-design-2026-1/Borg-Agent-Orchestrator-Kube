@@ -206,6 +206,19 @@ PYTHONPATH=orchestrator_stack ~/Documents/aiopslab_validation_env/bin/python \
 
 Current status: Python 3.12 and the upstream `aiopslab` package install successfully. Live orchestrator import is still blocked until Kubernetes config is available. Preflight checks `KUBECONFIG` first, then `~/.kube/config`; this machine currently has neither.
 
+For local live validation, create a Kind cluster and run the no-op AIOpsLab smoke:
+```bash
+orchestrator_stack/scripts/setup_kind_cluster.sh
+orchestrator_stack/scripts/setup_aiopslab_env.sh
+
+KUBECONFIG=~/Documents/aiopslab_validation_env/kubeconfig \
+PYTHONPATH=orchestrator_stack ~/Documents/aiopslab_validation_env/bin/python \
+  orchestrator_stack/scripts/run_aiopslab_noop_smoke.py \
+  --out reports/evaluations/manual_aiopslab_noop_live_summary.json
+```
+
+Latest live Kind result: `reports/evaluations/202605021141_aiopslab_noop_live_summary.json` with `Detection Accuracy=Correct`.
+
 ## Current Validation Status
 
 Latest checked behavior in this worktree is based on the 2026-05-02 KST validation slices:
@@ -218,7 +231,8 @@ Latest checked behavior in this worktree is based on the 2026-05-02 KST validati
 - `train-policy` now reports PPO-vs-heuristic comparison fields so policy quality is explicit instead of inferred from raw training reward.
 - `aiopslab-preflight` now checks real upstream imports, not just package presence.
 - `AIOpsLabBackend` now loads the real upstream `Orchestrator` class by module path and registers the policy agent before `init_problem()`.
-- Full orchestrator test suite currently passes with `64 passed`.
+- Live AIOpsLab no-op validation now runs on a real Kind Kubernetes cluster and records a correct detection result.
+- Full orchestrator test suite currently passes with `66 passed`.
 - `tune` completed successfully after the PPO-tuning rewrite and emitted `reports/tuning/202604161029_optuna_orchestrator_reward_weights.md`.
 - `tune-policy-rewards` now reaches the PPO-backed RLlib trial path and fails closed with a structured `"status": "skipped"` result when macOS sandbox process-enumeration blocks `ray.init()`.
 - The older `reports/tuning/202604142305_optuna_orchestrator_policy_and_rewards.md` artifact predates the 2026-04-16 PPO-backed tuning rewrite and should be treated as historical, not as the current validation artifact for `tune-policy-rewards`.
@@ -242,5 +256,5 @@ If `ppo_curriculum` is present, `train-policy` runs each stage in order with its
 - PPO checkpoints are written under `orchestrator_stack/runtime/rllib`.
 - `tune-policy-rewards` now scores each Optuna trial with a real PPO training run plus a small heuristic stability term; it is no longer a learning-rate-only placeholder objective.
 - In restricted macOS sandboxes, Ray may fail during `ray.init()` with a `PermissionError` from process enumeration. The command now returns a structured `"status": "skipped"` result in that case instead of crashing.
-- Direct validation against the live upstream AIOpsLab package/session API is still open; the current adapter coverage is based on normalized payload handling plus the local stateful fallback backend.
+- Direct validation against the live upstream AIOpsLab package/session API is now proven on the Kind no-op detection path; broader multi-problem validation remains open.
 - AIOpsLab agent onboarding now has an explicit contract adapter for the documented flow: `init_problem(problem_id)`, agent `init_context(...)`, `register_agent(agent)`, and async agent `get_action(state)`.
