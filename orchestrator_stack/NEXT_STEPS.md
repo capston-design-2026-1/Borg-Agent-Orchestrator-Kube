@@ -1,6 +1,6 @@
 # Orchestrator Stack Next Steps
 
-1. Expand beyond Hotel Reservation misconfig to one more stable AIOpsLab fault family with detection/localization/analysis/mitigation coverage.
+1. Validate `k8s_target_port-misconfig-*` as the next stable AIOpsLab full-phase family beyond Hotel Reservation misconfiguration.
 2. Build a held-out multi-family trace corpus and require PPO to beat heuristic total score across held-out traces, not only the enriched mitigation slices.
 3. Add repeated-seed statistical tables: confidence intervals and ablations for no risk derivation vs risk derivation vs SLA risk preservation vs Prometheus enrichment.
 4. Replace model-derived energy watts with a measured or externally calibrated node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
@@ -8,6 +8,11 @@
 ## Latest Session Note (2026-05-02 KST, thesis table export slice)
 
 - Added `thesis-tables` CLI to convert raw validation JSON artifacts into thesis-ready tables.
+- Recorded AIOpsLab problem catalog snapshot:
+  - `reports/evaluations/202605022055_aiopslab_problem_catalog.md`
+  - `89` registered problem IDs
+  - `8` full-phase candidate families
+  - recommended next live family: `k8s_target_port-misconfig-*`
 - Generated current appendix artifacts:
   - Markdown `reports/evaluations/202605022050_thesis_evaluation_tables.md`
   - CSV directory `reports/evaluations/202605022050_thesis_tables`

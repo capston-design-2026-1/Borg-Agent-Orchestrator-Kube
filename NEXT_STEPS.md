@@ -52,6 +52,7 @@ Read Agents.md, NEXT_STEPS.md, MAS_ARCHITECTURE.md, and README.md, inspect the l
 - Follow-up validation on 2026-05-02 KST: live Kubernetes risk/demand derivation plus SLA risk preservation produces action-diverse audits (`replicate=21`, `dvfs=2`) and PPO now beats heuristic on the enriched mitigation trace by `+126.69152246399995`; thesis-grade report recorded at `reports/evaluations/202605022005_thesis_grade_orchestrator_validation.md`.
 - Follow-up validation on 2026-05-02 KST: live Prometheus/node-exporter enrichment now supplies CPU and memory utilization to all `15` rows of the latest mitigation trace, and PPO beats heuristic on that Prometheus-enriched trace by `+77.23260686133335`.
 - Follow-up implementation on 2026-05-02 KST: `thesis-tables` now exports live-task, reward-audit, and PPO-gate JSON artifacts into Markdown/CSV tables; latest export is `reports/evaluations/202605022050_thesis_evaluation_tables.md`.
+- Follow-up planning on 2026-05-02 KST: AIOpsLab problem catalog snapshot found `89` registered IDs and `8` full-phase candidate families; next recommended live family is `k8s_target_port-misconfig-*`.
 - Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `78 passed`.
 
 ## Pipeline Status
