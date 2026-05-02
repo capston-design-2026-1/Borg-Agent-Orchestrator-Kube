@@ -1,0 +1,6 @@
+{
+  "idle_watts": 80.0,
+  "cpu_full_scale_watts": 120.0,
+  "mem_full_scale_watts": 60.0,
+  "source": "default_utilization_model; replace with measured node calibration when available"
+}
