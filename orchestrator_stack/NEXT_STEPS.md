@@ -1,9 +1,55 @@
 # Orchestrator Stack Next Steps
 
-1. Extend live AIOpsLab capture beyond two-turn detection runs: collect longer localization/analysis/mitigation traces so PPO sees enough state/action transitions to learn above heuristic.
-2. Tune PPO curriculum again after collecting longer telemetry-backed traces; current no-op+misconfig detection traces do not beat heuristic.
-3. Export representative trace-derived matrices with `export-brain-datasets`, retrain boosters, inspect `calibration_summary`, and only then promote thresholds.
-4. Replace the current Kubernetes resource-request energy proxy with direct Prometheus/node-exporter utilization queries once stable query names are locked for the local chart.
+1. Replace repeated single-cluster snapshots with higher-frequency trace capture during each live AIOpsLab run, so PPO sees state transitions before and after mitigation rather than duplicate same-second rows.
+2. Tune PPO curriculum again after higher-frequency telemetry is captured; current full-phase trace trains but does not beat the heuristic total-score gate.
+3. Add direct Prometheus/node-exporter utilization queries and replace the current Kubernetes resource-request energy proxy once stable query names are locked for the local chart.
+4. Expand beyond Hotel Reservation misconfig to one more stable AIOpsLab fault family after the capture loop records richer intra-run transitions.
+
+## Latest Session Note (2026-05-02 KST, full-phase live AIOpsLab slice)
+
+- Added task-specific AIOpsLab submissions:
+  - `--submission-code` supports detection/localization/analysis/mitigation final calls such as `submit(["geo"])`, `submit({...})`, and `submit()`.
+  - repeatable `--pre-submit-command` runs remediation commands before final mitigation submit.
+- Ran live Kind-backed `misconfig_app_hotel_res-localization-1`:
+  - `Localization Accuracy=100.0`
+  - `success=true`
+  - captured `2` Kubernetes trace rows
+- Ran live Kind-backed `misconfig_app_hotel_res-analysis-1`:
+  - `system_level_correct=true`
+  - `fault_type_correct=true`
+  - `success=true`
+  - captured `2` Kubernetes trace rows
+- Ran live Kind-backed `misconfig_app_hotel_res-mitigation-1`:
+  - remediation command set `deployment/geo` back to `yinfangchen/hotelreservation:latest` and waited for rollout
+  - `success=true`
+  - captured `3` Kubernetes trace rows
+- Fixed PPO gate comparison: policy episode return is now compared against heuristic episode total score, not heuristic average score.
+- Built full-phase live trace:
+  - `reports/evaluations/202605021300_aiopslab_full_phase_kube_trace.json`
+  - includes no-op detection plus misconfig detection/localization/analysis/mitigation
+  - `11` real Kubernetes-derived rows
+- Full-phase telemetry audit:
+  - telemetry coverage `1.0`
+  - max SLA violations `1`
+  - weighted telemetry reward delta `-376.98522448`
+- Full-phase PPO gate:
+  - config `orchestrator_stack/config/aiopslab_full_phase_kind.json`
+  - output `reports/evaluations/202605021310_aiopslab_full_phase_train_policy_fixed_gate.json`
+  - policy episode reward `-340.60037413333333`
+  - heuristic total score `-312.98522448`
+  - `beats_heuristic=false`
+- Exported full-phase live brain datasets and retrained predictors:
+  - `reports/evaluations/brain_live_full_phase/risk_dataset.npz`
+  - `reports/evaluations/brain_live_full_phase/demand_dataset.npz`
+  - `orchestrator_stack/examples/models/live_full_phase/risk_model.json`
+  - `orchestrator_stack/examples/models/live_full_phase/demand_model.json`
+- Brain diagnostics:
+  - risk rows `11`, Brier score `0.14887345848485453`, expected calibration error `0.010636160319501708`
+  - demand rows `11`, active feature importance on `cpu_util` and `task_pressure`
+- Validation run status:
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests/test_aiopslab_contract.py -q`: success (`7 passed`)
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests/test_ppo_curriculum.py -q`: success (`4 passed`)
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`71 passed`)
 
 ## Latest Session Note (2026-05-02 KST, live trace PPO gate slice)
 

@@ -47,7 +47,8 @@ Read Agents.md, NEXT_STEPS.md, MAS_ARCHITECTURE.md, and README.md, inspect the l
 - Follow-up implementation on 2026-05-02 KST: live Kind/AIOpsLab run now exports Kubernetes-derived trace rows from `kubectl get nodes/pods/jobs -A -o json`, and `reports/evaluations/202605021205_aiopslab_noop_kube_reward_audit.json` validates telemetry reward audit coverage against that real trace.
 - Follow-up validation on 2026-05-02 KST: live-trace PPO training is wired through `orchestrator_stack/config/aiopslab_live_kind.json`, but both smoke and stronger curricula remain below the heuristic baseline on the two-row no-op trace; multi-problem live trace capture is now the blocking next orchestrator job.
 - Follow-up validation on 2026-05-02 KST: `misconfig_app_hotel_res-detection-1` now runs live on Kind with correct `Yes` detection and Kubernetes trace capture; combined no-op+fault PPO remains below heuristic, so longer localization/analysis/mitigation traces are the next blocking work.
-- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `69 passed`.
+- Follow-up validation on 2026-05-02 KST: misconfig localization, analysis, and mitigation now run live on Kind with correct task-specific submissions; full-phase trace has 11 Kubernetes-derived rows and live retrained brain models/diagnostics, but PPO still remains below the corrected heuristic total-score gate.
+- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `71 passed`.
 
 ## Pipeline Status
 
