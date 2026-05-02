@@ -1,0 +1,54 @@
+{
+  "status": "trained",
+  "stages": [
+    {
+      "stage": 1,
+      "status": "trained",
+      "checkpoint": "/private/tmp/borg_aiopslab_live_rllib_stronger/stage_01",
+      "train_iters": 2,
+      "episode_reward_mean": 2.92954592,
+      "train_batch_size": 64,
+      "minibatch_size": 32,
+      "num_epochs": 2,
+      "rollout_fragment_length": 16,
+      "learning_rate": 0.0003
+    },
+    {
+      "stage": 2,
+      "status": "trained",
+      "checkpoint": "/private/tmp/borg_aiopslab_live_rllib_stronger/stage_02",
+      "train_iters": 5,
+      "episode_reward_mean": 7.460795919999999,
+      "train_batch_size": 128,
+      "minibatch_size": 64,
+      "num_epochs": 3,
+      "rollout_fragment_length": 32,
+      "learning_rate": 0.0002
+    },
+    {
+      "stage": 3,
+      "status": "trained",
+      "checkpoint": "/private/tmp/borg_aiopslab_live_rllib_stronger/stage_03",
+      "train_iters": 8,
+      "episode_reward_mean": 6.757670919999999,
+      "train_batch_size": 128,
+      "minibatch_size": 64,
+      "num_epochs": 3,
+      "rollout_fragment_length": 32,
+      "learning_rate": 0.0001
+    }
+  ],
+  "stage_count": 3,
+  "heuristic_baseline": {
+    "steps": 1,
+    "total_score": 8.701477552,
+    "avg_score": 8.701477552
+  },
+  "policy_vs_heuristic": {
+    "status": "compared",
+    "policy_episode_reward_mean": 6.757670919999999,
+    "heuristic_avg_score": 8.701477552,
+    "delta_vs_heuristic": -1.9438066320000011,
+    "beats_heuristic": false
+  }
+}
