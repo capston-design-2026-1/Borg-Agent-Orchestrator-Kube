@@ -1,9 +1,34 @@
 # Orchestrator Stack Next Steps
 
-1. Export live Prometheus/AIOpsLab telemetry from the Kind-backed AIOpsLab run into trace rows, then run `telemetry-reward-audit` against that live trace.
-2. Tune PPO curriculum beyond smoke settings until `policy_vs_heuristic.beats_heuristic` is true on representative telemetry-backed traces.
-3. Export representative trace-derived matrices with `export-brain-datasets`, retrain boosters, inspect `calibration_summary`, and only then promote thresholds.
-4. Promote the Kind/AIOpsLab validation workflow from smoke to multi-problem coverage after the no-op path remains stable.
+1. Tune PPO curriculum beyond smoke settings until `policy_vs_heuristic.beats_heuristic` is true on representative telemetry-backed traces.
+2. Export representative trace-derived matrices with `export-brain-datasets`, retrain boosters, inspect `calibration_summary`, and only then promote thresholds.
+3. Promote the Kind/AIOpsLab validation workflow from no-op smoke to multi-problem coverage.
+4. Replace the current Kubernetes resource-request energy proxy with direct Prometheus/node-exporter utilization queries once stable query names are locked for the local chart.
+
+## Latest Session Note (2026-05-02 KST, live Kubernetes telemetry audit slice)
+
+- Added `orchestrator.layer1.kubernetes_trace` to export real Kubernetes API snapshots into orchestrator trace rows from `kubectl get nodes/pods/jobs -A -o json`.
+- Added `--trace-out` to `orchestrator_stack/scripts/run_aiopslab_noop_smoke.py`, so the AIOpsLab agent captures live Kind cluster state while the Hotel Reservation app and workload are still running and before upstream cleanup removes namespaces.
+- Re-ran live AIOpsLab no-op detection on Kind with trace capture:
+  - problem `noop_detection_hotel_reservation-1`
+  - final state `SubmissionStatus.VALID_SUBMISSION`
+  - result `Detection Accuracy=Correct`
+  - captured `2` Kubernetes-derived trace rows
+  - captured `20` live target pods
+  - max SLA violations `0`
+  - max energy watts `116.420408`
+- Ran `telemetry-reward-audit` against the live Kubernetes trace:
+  - telemetry coverage `1.0`
+  - selected action `dvfs=1`
+  - weighted telemetry reward delta `2.3014775519999997`
+- Recorded artifacts:
+  - `reports/evaluations/202605021205_aiopslab_noop_live_summary.json`
+  - `reports/evaluations/202605021205_aiopslab_noop_kube_trace.json`
+  - `reports/evaluations/202605021205_aiopslab_noop_kube_reward_audit.json`
+- Validation run status:
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests/test_kubernetes_trace.py -q`: success (`2 passed`)
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests/test_kubernetes_trace.py orchestrator_stack/tests/test_aiopslab_contract.py -q`: success (`6 passed`)
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`68 passed`)
 
 ## Latest Session Note (2026-05-02 KST, live AIOpsLab Kind validation slice)
 

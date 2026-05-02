@@ -44,7 +44,8 @@ Read Agents.md, NEXT_STEPS.md, MAS_ARCHITECTURE.md, and README.md, inspect the l
 - Follow-up implementation on 2026-05-02 KST: Python 3.12 and upstream AIOpsLab are installed in `~/Documents/aiopslab_validation_env`; `orchestrator_stack/scripts/setup_aiopslab_env.sh` now recreates that environment; adapter contract was aligned to upstream registration/parser/import behavior; live blocker is missing Kubernetes config (`KUBECONFIG` or `~/.kube/config`).
 - Follow-up implementation on 2026-05-02 KST: `orchestrator_stack/examples/sample_telemetry_trace.json` and `reports/evaluations/202605020534_sample_telemetry_reward_audit.json` now provide a local telemetry reward audit fixture.
 - Follow-up implementation on 2026-05-02 KST: Kind cluster `kind-borg-aiopslab` and kubeconfig `~/Documents/aiopslab_validation_env/kubeconfig` were created; live upstream AIOpsLab no-op detection ran on Kubernetes and produced `Detection Accuracy=Correct`.
-- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `66 passed`.
+- Follow-up implementation on 2026-05-02 KST: live Kind/AIOpsLab run now exports Kubernetes-derived trace rows from `kubectl get nodes/pods/jobs -A -o json`, and `reports/evaluations/202605021205_aiopslab_noop_kube_reward_audit.json` validates telemetry reward audit coverage against that real trace.
+- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `68 passed`.
 
 ## Pipeline Status
 

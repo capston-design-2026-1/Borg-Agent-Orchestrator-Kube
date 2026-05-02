@@ -214,10 +214,13 @@ orchestrator_stack/scripts/setup_aiopslab_env.sh
 KUBECONFIG=~/Documents/aiopslab_validation_env/kubeconfig \
 PYTHONPATH=orchestrator_stack ~/Documents/aiopslab_validation_env/bin/python \
   orchestrator_stack/scripts/run_aiopslab_noop_smoke.py \
-  --out reports/evaluations/manual_aiopslab_noop_live_summary.json
+  --out reports/evaluations/manual_aiopslab_noop_live_summary.json \
+  --trace-out reports/evaluations/manual_aiopslab_noop_kube_trace.json
 ```
 
-Latest live Kind result: `reports/evaluations/202605021141_aiopslab_noop_live_summary.json` with `Detection Accuracy=Correct`.
+Latest live Kind result: `reports/evaluations/202605021205_aiopslab_noop_live_summary.json` with `Detection Accuracy=Correct`.
+Latest live Kubernetes-derived trace: `reports/evaluations/202605021205_aiopslab_noop_kube_trace.json`.
+Latest live telemetry audit: `reports/evaluations/202605021205_aiopslab_noop_kube_reward_audit.json` with telemetry coverage `1.0`.
 
 ## Current Validation Status
 
