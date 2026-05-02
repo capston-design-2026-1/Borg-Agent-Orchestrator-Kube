@@ -183,6 +183,37 @@ def test_trace_driven_backend_rewards_live_sla_energy_and_completion_metrics():
     assert result.reward_by_agent["AgentC"] == 8.0
 
 
+def test_trace_driven_backend_preserves_live_sla_risk_after_action_delta():
+    rows = [
+        {
+            "timestamp": 100,
+            "nodes": [{"node_id": "n1", "cpu_util": 0.1, "mem_util": 0.1, "disk_util": 0.0, "net_util": 0.0}],
+            "tasks": [{"task_id": "t1", "node_id": "n1", "urgency": 0.8, "queue_priority": 1, "alive": True}],
+            "queue_length": 0,
+            "energy_price": 0.1,
+            "sla_violations": 1,
+            "p_fail_scores": {"n1": 0.95},
+            "demand_projection": {"n1": 0.1},
+        },
+        {
+            "timestamp": 102,
+            "nodes": [{"node_id": "n1", "cpu_util": 0.1, "mem_util": 0.1, "disk_util": 0.0, "net_util": 0.0}],
+            "tasks": [{"task_id": "t1", "node_id": "n1", "urgency": 0.8, "queue_priority": 1, "alive": True}],
+            "queue_length": 0,
+            "energy_price": 0.1,
+            "sla_violations": 1,
+            "p_fail_scores": {"n1": 0.95},
+            "demand_projection": {"n1": 0.1},
+        },
+    ]
+
+    backend = TraceDrivenTwinBackend(rows)
+    backend.reset()
+    result = backend.step(AgentAction("AgentA", ActionKind.REPLICATE, target="n1"))
+
+    assert result.next_observation.p_fail_scores["n1"] == 0.95
+
+
 def test_aiopslab_backend_loads_upstream_orchestrator_class(monkeypatch):
     from orchestrator.layer2 import simulator
 

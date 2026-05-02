@@ -303,17 +303,15 @@ def _apply_action_deltas(current_obs: Observation, simulated_obs: Observation, b
     merged.sla_violations = max(simulated_obs.sla_violations, baseline_obs.sla_violations)
     merged.completed_tasks = max(simulated_obs.completed_tasks, baseline_obs.completed_tasks)
     merged.energy_watts = max(simulated_obs.energy_watts, baseline_obs.energy_watts)
-    merged.p_fail_scores = {
-        node.node_id: max(
-            0.0,
-            min(
-                1.0,
-                0.6 * simulated_obs.p_fail_scores.get(node.node_id, 0.0)
-                + 0.4 * baseline_obs.p_fail_scores.get(node.node_id, simulated_obs.p_fail_scores.get(node.node_id, 0.0)),
-            ),
-        )
-        for node in merged.nodes
-    }
+    merged.p_fail_scores = {}
+    for node in merged.nodes:
+        simulated_risk = simulated_obs.p_fail_scores.get(node.node_id, 0.0)
+        baseline_risk = baseline_obs.p_fail_scores.get(node.node_id, simulated_risk)
+        blended_risk = (0.6 * simulated_risk) + (0.4 * baseline_risk)
+        # Live SLA violations are hard evidence; do not let synthetic action deltas erase them.
+        if baseline_obs.sla_violations > 0:
+            blended_risk = max(blended_risk, baseline_risk)
+        merged.p_fail_scores[node.node_id] = max(0.0, min(1.0, blended_risk))
     merged.demand_projection = {
         node.node_id: max(
             0.0,
