@@ -1,0 +1,103 @@
+{
+  "status": "passed",
+  "sets": [
+    {
+      "evaluation_set": "hotel_reservation_prometheus_mitigation",
+      "seeds": [
+        101,
+        202,
+        303
+      ],
+      "runs": [
+        {
+          "seed": 101,
+          "artifact": "reports/evaluations/repeated_seeds/202605030030_aiopslab_prometheus_mitigation_seed_101.json",
+          "status": "compared",
+          "policy_episode_reward_mean": -688.5379272911111,
+          "heuristic_total_score": -740.276089708,
+          "heuristic_avg_score": -52.87686355057143,
+          "delta_vs_heuristic": 51.73816241688883,
+          "beats_heuristic": true
+        },
+        {
+          "seed": 202,
+          "artifact": "reports/evaluations/repeated_seeds/202605030030_aiopslab_prometheus_mitigation_seed_202.json",
+          "status": "compared",
+          "policy_episode_reward_mean": -658.2490384022223,
+          "heuristic_total_score": -740.276089708,
+          "heuristic_avg_score": -52.87686355057143,
+          "delta_vs_heuristic": 82.02705130577772,
+          "beats_heuristic": true
+        },
+        {
+          "seed": 303,
+          "artifact": "reports/evaluations/repeated_seeds/202605030030_aiopslab_prometheus_mitigation_seed_303.json",
+          "status": "compared",
+          "policy_episode_reward_mean": -666.0073717355557,
+          "heuristic_total_score": -740.276089708,
+          "heuristic_avg_score": -52.87686355057143,
+          "delta_vs_heuristic": 74.26871797244428,
+          "beats_heuristic": true
+        }
+      ],
+      "pass_count": 3,
+      "run_count": 3,
+      "pass_rate": 1.0,
+      "mean_delta_vs_heuristic": 69.34464389837028,
+      "std_delta_vs_heuristic": 15.733374610873856,
+      "min_delta_vs_heuristic": 51.73816241688883,
+      "max_delta_vs_heuristic": 82.02705130577772,
+      "mean_policy_episode_reward": -670.9314458096297,
+      "mean_heuristic_total_score": -740.2760897080001
+    },
+    {
+      "evaluation_set": "social_network_k8s_target_port_full_phase",
+      "seeds": [
+        101,
+        202,
+        303
+      ],
+      "runs": [
+        {
+          "seed": 101,
+          "artifact": "reports/evaluations/repeated_seeds/202605030030_k8s_target_port_full_phase_seed_101.json",
+          "status": "compared",
+          "policy_episode_reward_mean": -313.8823902799999,
+          "heuristic_total_score": -324.347559168,
+          "heuristic_avg_score": -20.271722448,
+          "delta_vs_heuristic": 10.46516888800005,
+          "beats_heuristic": true
+        },
+        {
+          "seed": 202,
+          "artifact": "reports/evaluations/repeated_seeds/202605030030_k8s_target_port_full_phase_seed_202.json",
+          "status": "compared",
+          "policy_episode_reward_mean": -321.4448902799999,
+          "heuristic_total_score": -324.347559168,
+          "heuristic_avg_score": -20.271722448,
+          "delta_vs_heuristic": 2.9026688880000506,
+          "beats_heuristic": true
+        },
+        {
+          "seed": 303,
+          "artifact": "reports/evaluations/repeated_seeds/202605030030_k8s_target_port_full_phase_seed_303.json",
+          "status": "compared",
+          "policy_episode_reward_mean": -314.8667652799999,
+          "heuristic_total_score": -324.347559168,
+          "heuristic_avg_score": -20.271722448,
+          "delta_vs_heuristic": 9.48079388800005,
+          "beats_heuristic": true
+        }
+      ],
+      "pass_count": 3,
+      "run_count": 3,
+      "pass_rate": 1.0,
+      "mean_delta_vs_heuristic": 7.616210554666718,
+      "std_delta_vs_heuristic": 4.111612192037126,
+      "min_delta_vs_heuristic": 2.9026688880000506,
+      "max_delta_vs_heuristic": 10.46516888800005,
+      "mean_policy_episode_reward": -316.73134861333324,
+      "mean_heuristic_total_score": -324.347559168
+    }
+  ]
+}
