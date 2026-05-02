@@ -80,18 +80,28 @@ class CapturingAIOpsLabPolicyAgent(AIOpsLabPolicyAgent):
         self.namespace_prefixes = namespace_prefixes
         self.trace_rows: list[dict] = []
         self.capture_errors: list[str] = []
+        self._capture_lock = threading.Lock()
+
+    def capture_snapshot(self) -> None:
+        try:
+            row = capture_kubernetes_trace_row(
+                kubeconfig=self.kubeconfig,
+                namespace_prefixes=self.namespace_prefixes,
+            )
+            with self._capture_lock:
+                self.trace_rows.append(row)
+        except Exception as exc:  # pragma: no cover - live cluster diagnostics only.
+            with self._capture_lock:
+                self.capture_errors.append(str(exc))
 
     async def get_action(self, state: str) -> str:
-        try:
-            self.trace_rows.append(
-                capture_kubernetes_trace_row(
-                    kubeconfig=self.kubeconfig,
-                    namespace_prefixes=self.namespace_prefixes,
-                )
-            )
-        except Exception as exc:  # pragma: no cover - live cluster diagnostics only.
-            self.capture_errors.append(str(exc))
+        self.capture_snapshot()
         return await super().get_action(state)
+
+
+def _periodic_trace_capture(agent: CapturingAIOpsLabPolicyAgent, interval_seconds: float, stop: threading.Event) -> None:
+    while not stop.wait(interval_seconds):
+        agent.capture_snapshot()
 
 
 def run_smoke(args: argparse.Namespace) -> dict:
@@ -119,7 +129,19 @@ def run_smoke(args: argparse.Namespace) -> dict:
             pre_submit_commands=args.pre_submit_command,
         )
         initialize_aiopslab_problem(orch, problem_id=args.problem_id, agent=agent)
+        capture_stop = threading.Event()
+        capture_thread = None
+        if args.capture_interval_seconds > 0:
+            capture_thread = threading.Thread(
+                target=_periodic_trace_capture,
+                args=(agent, args.capture_interval_seconds, capture_stop),
+                daemon=True,
+            )
+            capture_thread.start()
         result = asyncio.run(orch.start_problem(max_steps=args.max_steps))
+        if capture_thread is not None:
+            capture_stop.set()
+            capture_thread.join(timeout=5)
     finally:
         stop.set()
         watcher.join(timeout=5)
@@ -156,6 +178,12 @@ def main() -> None:
         action="append",
         default=[],
         help="Shell command to execute after observation and before final submission. Repeatable.",
+    )
+    parser.add_argument(
+        "--capture-interval-seconds",
+        type=float,
+        default=0.0,
+        help="Also capture Kubernetes trace rows periodically during the agent/env loop; disabled by default.",
     )
     parser.add_argument("--out")
     args = parser.parse_args()
