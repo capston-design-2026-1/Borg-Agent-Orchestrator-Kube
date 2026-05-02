@@ -2,7 +2,9 @@ import json
 
 from orchestrator.layer1.kubernetes_trace import (
     enrich_trace_row_with_prometheus,
+    estimate_node_power_watts,
     kubernetes_snapshot_to_trace_row,
+    load_power_calibration,
     parse_cpu_milli,
     parse_memory_bytes,
     write_kubernetes_trace,
@@ -63,6 +65,7 @@ def test_kubernetes_snapshot_to_trace_row_uses_real_kube_payload_shape():
     assert row["completed_tasks"] == 3
     assert row["queue_length"] == 1
     assert row["energy_watts"] > 0
+    assert row["power_calibration"]["source"] == "default_utilization_model"
     assert row["p_fail_scores"]["kind-control-plane"] == 0.95
     assert row["demand_projection"]["kind-control-plane"] > 0.0
     assert {task["task_id"] for task in row["tasks"]} == {
@@ -98,7 +101,27 @@ def test_enrich_trace_row_with_prometheus_overrides_node_utilization():
     assert enriched["demand_projection"]["kind-control-plane"] == 0.47
     assert enriched["p_fail_scores"]["kind-control-plane"] == 0.47
     assert enriched["energy_watts"] == 176.0
+    assert enriched["power_calibration"]["source"] == "default_utilization_model"
     assert enriched["telemetry_sources"] == ["kubernetes_api", "prometheus_node_exporter"]
+
+
+def test_power_calibration_file_controls_energy_estimate(tmp_path):
+    calibration_path = tmp_path / "power.json"
+    calibration_path.write_text(
+        json.dumps(
+            {
+                "idle_watts": 50.0,
+                "cpu_full_scale_watts": 100.0,
+                "mem_full_scale_watts": 25.0,
+                "source": "bench-calibrated-kind-node",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    calibration = load_power_calibration(calibration_path)
+
+    assert estimate_node_power_watts(0.5, 0.4, calibration) == 110.0
 
 
 def test_capture_kubernetes_trace_row_falls_back_when_prometheus_fails(monkeypatch):

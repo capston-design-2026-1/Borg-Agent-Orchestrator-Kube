@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import subprocess
 import time
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
@@ -23,6 +24,48 @@ MEMORY_UNITS = {
     "P": 1000**5,
     "E": 1000**6,
 }
+
+
+@dataclass(frozen=True, slots=True)
+class PowerCalibration:
+    idle_watts: float = 80.0
+    cpu_full_scale_watts: float = 120.0
+    mem_full_scale_watts: float = 60.0
+    source: str = "default_utilization_model"
+
+    @classmethod
+    def from_mapping(cls, payload: dict[str, Any]) -> "PowerCalibration":
+        return cls(
+            idle_watts=max(0.0, float(payload.get("idle_watts", cls.idle_watts))),
+            cpu_full_scale_watts=max(0.0, float(payload.get("cpu_full_scale_watts", cls.cpu_full_scale_watts))),
+            mem_full_scale_watts=max(0.0, float(payload.get("mem_full_scale_watts", cls.mem_full_scale_watts))),
+            source=str(payload.get("source", cls.source)),
+        )
+
+
+DEFAULT_POWER_CALIBRATION = PowerCalibration()
+
+
+def load_power_calibration(path: str | Path | None) -> PowerCalibration:
+    if path is None:
+        return DEFAULT_POWER_CALIBRATION
+    payload = json.loads(Path(path).expanduser().read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("power calibration file must contain a JSON object")
+    return PowerCalibration.from_mapping(payload)
+
+
+def estimate_node_power_watts(cpu_util: float, mem_util: float, calibration: PowerCalibration | None = None) -> float:
+    calibrated = calibration or DEFAULT_POWER_CALIBRATION
+    return (
+        calibrated.idle_watts
+        + (calibrated.cpu_full_scale_watts * _bounded_ratio(cpu_util))
+        + (calibrated.mem_full_scale_watts * _bounded_ratio(mem_util))
+    )
+
+
+def _attach_power_metadata(row: dict[str, Any], calibration: PowerCalibration) -> None:
+    row["power_calibration"] = asdict(calibration)
 
 
 def parse_cpu_milli(value: str | int | float | None) -> float:
@@ -119,12 +162,15 @@ def _sample_for_node(samples: dict[str, float], node_id: str, node_count: int) -
 def enrich_trace_row_with_prometheus(
     row: dict[str, Any],
     samples: dict[str, dict[str, float]],
+    *,
+    power_calibration: PowerCalibration | None = None,
 ) -> dict[str, Any]:
     nodes = row.get("nodes", [])
     if not isinstance(nodes, list) or not nodes:
         return row
 
     total_energy = 0.0
+    calibration = power_calibration or DEFAULT_POWER_CALIBRATION
     p_fail_scores = dict(row.get("p_fail_scores", {}))
     demand_projection = dict(row.get("demand_projection", {}))
     node_count = len(nodes)
@@ -143,11 +189,12 @@ def enrich_trace_row_with_prometheus(
         utilization_risk = (0.55 * cpu_util) + (0.35 * mem_util)
         p_fail_scores[node_id] = round(min(1.0, max(float(p_fail_scores.get(node_id, 0.0)), utilization_risk)), 6)
         demand_projection[node_id] = round(_bounded_ratio((0.55 * cpu_util) + (0.35 * mem_util)), 6)
-        total_energy += 80.0 + (120.0 * cpu_util) + (60.0 * mem_util)
+        total_energy += estimate_node_power_watts(cpu_util, mem_util, calibration)
 
     row["p_fail_scores"] = p_fail_scores
     row["demand_projection"] = demand_projection
     row["energy_watts"] = round(total_energy, 6)
+    _attach_power_metadata(row, calibration)
     row["telemetry_sources"] = sorted(set(row.get("telemetry_sources", ["kubernetes_api"])) | {"prometheus_node_exporter"})
     return row
 
@@ -159,6 +206,7 @@ def kubernetes_snapshot_to_trace_row(
     jobs_payload: dict[str, Any] | None = None,
     timestamp: int | None = None,
     namespace_prefixes: tuple[str, ...] = ("test-", "default"),
+    power_calibration: PowerCalibration | None = None,
 ) -> dict[str, Any]:
     pods = pods_payload.get("items", [])
     jobs = (jobs_payload or {}).get("items", [])
@@ -171,6 +219,7 @@ def kubernetes_snapshot_to_trace_row(
     p_fail_scores: dict[str, float] = {}
     demand_projection: dict[str, float] = {}
     total_energy = 0.0
+    calibration = power_calibration or DEFAULT_POWER_CALIBRATION
     for node in nodes_payload.get("items", []):
         name = node.get("metadata", {}).get("name", "unknown-node")
         allocatable = node.get("status", {}).get("allocatable", {})
@@ -195,7 +244,7 @@ def kubernetes_snapshot_to_trace_row(
         utilization_risk = (0.55 * cpu_util) + (0.35 * mem_util)
         p_fail_scores[name] = round(min(1.0, max(health_risk, utilization_risk)), 6)
         demand_projection[name] = round(min(1.0, max(0.0, (0.55 * cpu_util) + (0.35 * mem_util))), 6)
-        node_energy = 80.0 + (120.0 * cpu_util) + (60.0 * mem_util)
+        node_energy = estimate_node_power_watts(cpu_util, mem_util, calibration)
         total_energy += node_energy
         nodes.append(
             {
@@ -224,7 +273,7 @@ def kubernetes_snapshot_to_trace_row(
     queue_length = sum(1 for pod in target_pods if pod.get("status", {}).get("phase") == "Pending")
     task_death = any(not task["alive"] for task in tasks)
 
-    return {
+    row = {
         "timestamp": int(timestamp if timestamp is not None else time.time()),
         "nodes": nodes,
         "tasks": tasks,
@@ -237,6 +286,8 @@ def kubernetes_snapshot_to_trace_row(
         "p_fail_scores": p_fail_scores,
         "demand_projection": demand_projection,
     }
+    _attach_power_metadata(row, calibration)
+    return row
 
 
 def capture_kubernetes_trace_row(
@@ -244,18 +295,20 @@ def capture_kubernetes_trace_row(
     kubeconfig: str | Path,
     namespace_prefixes: tuple[str, ...] = ("test-", "default"),
     prometheus_base_url: str | None = None,
+    power_calibration: PowerCalibration | None = None,
 ) -> dict[str, Any]:
     row = kubernetes_snapshot_to_trace_row(
         nodes_payload=_kubectl_json(kubeconfig, "nodes"),
         pods_payload=_kubectl_json(kubeconfig, "pods"),
         jobs_payload=_kubectl_json(kubeconfig, "jobs"),
         namespace_prefixes=namespace_prefixes,
+        power_calibration=power_calibration,
     )
     row["telemetry_sources"] = ["kubernetes_api"]
     if prometheus_base_url:
         try:
             samples = query_node_exporter_utilization(prometheus_base_url)
-            row = enrich_trace_row_with_prometheus(row, samples)
+            row = enrich_trace_row_with_prometheus(row, samples, power_calibration=power_calibration)
         except Exception as exc:
             row["prometheus_error"] = str(exc)
     return row
