@@ -1,9 +1,30 @@
 # Orchestrator Stack Next Steps
 
-1. Validate `k8s_target_port-misconfig-*` as the next stable AIOpsLab full-phase family beyond Hotel Reservation misconfiguration.
+1. Improve policy learning on the second full-phase family: `k8s_target_port-misconfig-*` PPO is close but still below heuristic by `-5.581706111999949`.
 2. Build a held-out multi-family trace corpus and require PPO to beat heuristic total score across held-out traces, not only the enriched mitigation slices.
 3. Add repeated-seed statistical tables: confidence intervals and ablations for no risk derivation vs risk derivation vs SLA risk preservation vs Prometheus enrichment.
 4. Replace model-derived energy watts with a measured or externally calibrated node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
+
+## Latest Session Note (2026-05-02 KST, second-family AIOpsLab validation slice)
+
+- Ran live Kind-backed `k8s_target_port-misconfig-*` on the SocialNetwork app:
+  - detection `reports/evaluations/202605022100_k8s_target_port_detection_live_summary.json`: `Detection Accuracy=Correct`
+  - localization `reports/evaluations/202605022105_k8s_target_port_localization_live_summary.json`: `Localization Accuracy=100.0`, `success=true`
+  - analysis `reports/evaluations/202605022110_k8s_target_port_analysis_live_summary.json`: `system_level_correct=true`, `fault_type_correct=true`, `success=true`
+  - mitigation `reports/evaluations/202605022120_k8s_target_port_mitigation_live_summary.json`: `success=true`
+- Built second-family full-phase trace:
+  - trace `reports/evaluations/202605022125_k8s_target_port_full_phase_kube_trace.json`
+  - rows `17`
+  - telemetry coverage `1.0`
+  - actions `dvfs=13`, `replicate=3`
+- PPO gate on second-family full-phase trace:
+  - config `orchestrator_stack/config/aiopslab_k8s_target_port_full_phase_kind.json`
+  - output `reports/evaluations/202605022130_k8s_target_port_full_phase_train_policy.json`
+  - policy episode reward `-329.9292652799999`
+  - heuristic total score `-324.347559168`
+  - delta `-5.581706111999949`
+  - `beats_heuristic=false`
+- Conclusion: external validity improved from one full-phase fault family to two; next blocker is PPO robustness on multi-family traces, not live Kubernetes integration.
 
 ## Latest Session Note (2026-05-02 KST, thesis table export slice)
 

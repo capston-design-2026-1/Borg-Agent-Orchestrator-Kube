@@ -36,6 +36,10 @@ The Borg-Agent-Orchestrator architecture is no longer validated only with synthe
 | Misconfig localization | `reports/evaluations/202605021245_aiopslab_misconfig_localization_live_summary.json` | `Localization Accuracy=100.0`, `success=true` |
 | Misconfig analysis | `reports/evaluations/202605021250_aiopslab_misconfig_analysis_live_summary.json` | `system_level_correct=true`, `fault_type_correct=true`, `success=true` |
 | Misconfig mitigation | `reports/evaluations/202605021350_aiopslab_mitigation_enriched_live_summary.json` | `success=true` |
+| Target-port misconfig detection | `reports/evaluations/202605022100_k8s_target_port_detection_live_summary.json` | `Detection Accuracy=Correct` |
+| Target-port misconfig localization | `reports/evaluations/202605022105_k8s_target_port_localization_live_summary.json` | `Localization Accuracy=100.0`, `success=true` |
+| Target-port misconfig analysis | `reports/evaluations/202605022110_k8s_target_port_analysis_live_summary.json` | `system_level_correct=true`, `fault_type_correct=true`, `success=true` |
+| Target-port misconfig mitigation | `reports/evaluations/202605022120_k8s_target_port_mitigation_live_summary.json` | `success=true` |
 
 ## Reward And Policy Evidence
 
@@ -84,6 +88,23 @@ This is the first validated slice where the learned policy beats the determinist
 
 This replaces the earlier CPU/memory resource-request proxy for the latest mitigation validation slice with live node-exporter utilization. Energy remains model-derived from observed utilization rather than measured from hardware power telemetry.
 
+### Second-Family Full-Phase Trace
+
+- Fault family: `k8s_target_port-misconfig-*`
+- Application: AIOpsLab SocialNetwork
+- Trace: `reports/evaluations/202605022125_k8s_target_port_full_phase_kube_trace.json`
+- Reward audit: `reports/evaluations/202605022125_k8s_target_port_full_phase_reward_audit.json`
+- PPO gate: `reports/evaluations/202605022130_k8s_target_port_full_phase_train_policy.json`
+- Rows: 17
+- Telemetry coverage: `1.0`
+- Actions selected by heuristic audit: `dvfs=13`, `replicate=3`
+- Policy episode reward: `-329.9292652799999`
+- Heuristic total score: `-324.347559168`
+- Delta: `-5.581706111999949`
+- Gate: `beats_heuristic=false`
+
+This expands live external validity to a second full-phase fault family. The remaining policy gap is now robustness across families, because the learned policy does not yet beat the heuristic on this second-family trace.
+
 ## Brain Model Evidence
 
 - Live full-phase risk dataset: `reports/evaluations/brain_live_full_phase/risk_dataset.npz`
@@ -103,18 +124,18 @@ Key diagnostics:
 ## Current Scientific Limitations
 
 - Current latest mitigation CPU and memory signals come from Prometheus/node-exporter, but energy watts are still model-derived rather than measured by hardware power telemetry.
-- Current validated fault family is Hotel Reservation application misconfiguration; external validity requires at least one more fault family.
+- Current validated full-phase fault families are Hotel Reservation application misconfiguration and SocialNetwork Kubernetes target-port misconfiguration; external validity still requires held-out multi-family testing.
 - Kind is a local control plane; production cluster behavior may differ in scheduling, resource pressure, and exporter availability.
-- PPO pass is validated on enriched mitigation traces, including one Prometheus/node-exporter slice, not yet on a broad multi-family trace corpus.
+- PPO pass is validated on enriched mitigation traces, including one Prometheus/node-exporter slice, but not yet on the second full-phase family or a broad multi-family trace corpus.
 - Prometheus enrichment currently uses node-exporter CPU and memory utilization; additional PromQL mappings are still needed for service-level latency, queue pressure, and direct power signals if those exporters are available.
 
 ## Next Thesis-Grade Work
 
-1. Validate one additional AIOpsLab fault family with detection/localization/analysis/mitigation coverage.
+1. Improve PPO robustness on the second full-phase family and then on held-out multi-family traces.
 2. Build a multi-family trace corpus and require PPO to beat heuristic total score across held-out traces.
 3. Add statistical reporting: repeated seeds, confidence intervals, and ablation table for `no risk derivation`, `risk derivation only`, `risk preservation`, and `Prometheus enrichment`.
 4. Add direct power or calibrated energy telemetry if a node-power exporter is available.
-5. Separate thesis-ready tables from raw JSON artifacts for reproducible evaluation appendices.
+5. Keep thesis-ready tables synchronized with raw JSON artifacts for reproducible evaluation appendices.
 
 ## Validation Commands
 
