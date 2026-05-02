@@ -1,0 +1,17 @@
+{
+  "problem_id": "assign_to_non_existent_node_social_net-detection-1",
+  "final_state": "SubmissionStatus.VALID_SUBMISSION",
+  "history_len": 4,
+  "results": {
+    "Detection Accuracy": "Correct",
+    "TTD": 0.3578321933746338,
+    "steps": 2,
+    "in_tokens": 22,
+    "out_tokens": 69
+  },
+  "results_dir": "/private/tmp/aiopslab_results",
+  "trace_rows": 5,
+  "trace_out": "reports/evaluations/202605030250_assign_nonexistent_detection_kube_trace.json",
+  "capture_errors": [],
+  "prometheus_base_url": "http://127.0.0.1:19090"
+}
