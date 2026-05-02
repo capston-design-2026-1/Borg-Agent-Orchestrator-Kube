@@ -11,7 +11,8 @@ def test_architecture_status_markdown_reports_current_gaps():
     assert "export-brain-datasets" in report
     assert "Live Kind/AIOpsLab validation" in report
     assert "Prometheus/node-exporter enrichment covers all 15 rows" in report
-    assert "76 passed" in report
+    assert "k8s_target_port-misconfig-*" in report
+    assert "78 passed" in report
 
 
 def test_write_architecture_status_report_uses_requested_path(tmp_path):
