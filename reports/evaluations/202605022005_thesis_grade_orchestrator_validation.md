@@ -135,6 +135,18 @@ This is the first machine-checkable multi-family policy gate. It does not replac
 
 This strengthens the PPO evidence from one-off gate passes to seed-repeated gate passes on both reported live fault families.
 
+### Ablation Evidence Matrix
+
+- Matrix JSON: `reports/evaluations/202605030050_ablation_evidence_matrix.json`
+- Matrix table: `reports/evaluations/202605030050_ablation_evidence_matrix.md`
+- Full-phase before enrichment delta: `-27.615149653333333`
+- Periodic mitigation before SLA-risk preservation delta: `-16.72244079999996`
+- Risk/demand plus SLA-risk preservation delta: `+126.69152246399995`
+- Prometheus/node-exporter enrichment delta: `+77.23260686133335`
+- Second-family stronger curriculum delta: `+18.01204388800005`
+
+This matrix is sequential evidence across committed validation artifacts, not a fully controlled causal ablation. A controlled thesis ablation should rerun variants while holding fault family, trace length, and PPO budget fixed.
+
 ## Brain Model Evidence
 
 - Live full-phase risk dataset: `reports/evaluations/brain_live_full_phase/risk_dataset.npz`
@@ -161,7 +173,7 @@ Key diagnostics:
 
 ## Next Thesis-Grade Work
 
-1. Add ablation runs for `no risk derivation`, `risk derivation`, `SLA risk preservation`, and `Prometheus enrichment`.
+1. Run controlled ablations for `no risk derivation`, `risk derivation`, `SLA risk preservation`, and `Prometheus enrichment` with fixed trace and PPO budget.
 2. Expand the multi-family gate suite to a third full-phase family from the AIOpsLab catalog.
 3. Add statistical reporting: repeated seeds, confidence intervals, and ablation table for `no risk derivation`, `risk derivation only`, `risk preservation`, and `Prometheus enrichment`.
 4. Add direct power or calibrated energy telemetry if a node-power exporter is available.

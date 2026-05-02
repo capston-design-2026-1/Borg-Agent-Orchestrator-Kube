@@ -250,6 +250,7 @@ Prometheus/node-exporter validation: `reports/evaluations/202605022020_aiopslab_
 Second-family validation: `k8s_target_port-misconfig-*` now runs detection/localization/analysis/mitigation on the SocialNetwork app. Full-phase trace `reports/evaluations/202605022125_k8s_target_port_full_phase_kube_trace.json` has `17` Kubernetes rows. Initial PPO output `reports/evaluations/202605022130_k8s_target_port_full_phase_train_policy.json` was close but below heuristic; stronger PPO output `reports/evaluations/202605030010_k8s_target_port_full_phase_train_policy_stronger.json` now records `beats_heuristic=true` with delta `+18.01204388800005`.
 Multi-family gate suite: `reports/evaluations/202605030020_aiopslab_multi_family_policy_gate_suite.json` records `status=passed` with `2/2` held-out entries passing across Hotel Reservation Prometheus mitigation and SocialNetwork target-port full-phase validation.
 Repeated-seed PPO statistics: `reports/evaluations/202605030040_repeated_seed_ppo_summary.md` records `3/3` passing seeds for both Hotel Reservation Prometheus mitigation and SocialNetwork target-port full-phase validation.
+Ablation evidence matrix: `reports/evaluations/202605030050_ablation_evidence_matrix.md` compares sequential validation stages and explicitly marks the result as preliminary, not a fully controlled causal ablation.
 
 ## Current Validation Status
 

@@ -57,6 +57,7 @@ Read Agents.md, NEXT_STEPS.md, MAS_ARCHITECTURE.md, and README.md, inspect the l
 - Follow-up validation on 2026-05-03 KST: stronger PPO curriculum now beats heuristic on `k8s_target_port-misconfig-*` by `+18.01204388800005`; next blocker is held-out multi-family generalization and repeated-seed statistics.
 - Follow-up implementation on 2026-05-03 KST: `policy-gate-suite` now checks held-out multi-family PPO gates from a manifest; current suite passes `2/2` entries across Hotel Reservation and SocialNetwork.
 - Follow-up validation on 2026-05-03 KST: repeated-seed PPO statistics now pass `3/3` seeds for both Hotel Reservation Prometheus mitigation and SocialNetwork target-port full-phase slices.
+- Follow-up reporting on 2026-05-03 KST: preliminary ablation evidence matrix is recorded at `reports/evaluations/202605030050_ablation_evidence_matrix.md`; it is explicitly sequential evidence, not yet a controlled causal ablation.
 - Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `80 passed`.
 
 ## Pipeline Status

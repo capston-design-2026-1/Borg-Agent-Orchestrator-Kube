@@ -15,6 +15,7 @@ def test_architecture_status_markdown_reports_current_gaps():
     assert "+18.01204388800005" in report
     assert "passes `2/2` held-out entries" in report
     assert "passes `3/3` seeds" in report
+    assert "Ablation evidence matrix" in report
     assert "80 passed" in report
 
 

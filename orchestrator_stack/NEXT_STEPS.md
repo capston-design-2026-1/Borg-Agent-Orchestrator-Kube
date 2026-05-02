@@ -1,8 +1,21 @@
 # Orchestrator Stack Next Steps
 
-1. Add ablation tables for no risk derivation vs risk derivation vs SLA risk preservation vs Prometheus enrichment.
+1. Run controlled ablations with fixed fault family, trace length, and PPO budget for no risk derivation vs risk derivation vs SLA risk preservation vs Prometheus enrichment.
 2. Expand the multi-family gate suite beyond two held-out entries with another full-phase family from the AIOpsLab catalog.
 3. Replace model-derived energy watts with a measured or externally calibrated node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
+
+## Latest Session Note (2026-05-03 KST, ablation evidence matrix slice)
+
+- Generated preliminary ablation evidence matrix:
+  - `reports/evaluations/202605030050_ablation_evidence_matrix.json`
+  - `reports/evaluations/202605030050_ablation_evidence_matrix.md`
+- Matrix compares committed validation stages:
+  - full-phase before enrichment: delta `-27.615149653333333`
+  - periodic mitigation before SLA-risk preservation: delta `-16.72244079999996`
+  - risk/demand plus SLA-risk preservation: delta `+126.69152246399995`
+  - Prometheus/node-exporter enrichment: delta `+77.23260686133335`
+  - second-family stronger curriculum: delta `+18.01204388800005`
+- Method caveat is explicit: this is sequential evidence, not a fully controlled causal ablation. Next rigorous work is controlled reruns with family, trace length, and PPO budget fixed.
 
 ## Latest Session Note (2026-05-03 KST, repeated-seed PPO statistics slice)
 
@@ -16,7 +29,7 @@
 - Results:
   - Hotel Reservation Prometheus mitigation: pass rate `3/3`, mean delta `+69.34464389837028`, std delta `15.733374610873856`
   - SocialNetwork target-port full phase: pass rate `3/3`, mean delta `+7.616210554666718`, std delta `4.111612192037126`
-- Conclusion: current PPO gates are stable across three seeds for both reported families. Next thesis statistics blocker is ablation, not repeated-seed pass rate.
+- Conclusion: current PPO gates are stable across three seeds for both reported families. Preliminary ablation evidence is recorded in the 2026-05-03 ablation matrix slice.
 
 ## Latest Session Note (2026-05-03 KST, multi-family gate suite slice)
 
