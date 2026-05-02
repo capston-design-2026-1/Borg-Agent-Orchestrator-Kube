@@ -22,8 +22,8 @@ ARCHITECTURE_ITEMS = (
     ),
     ArchitectureItem(
         "AIOpsLab simulator / cluster state engine",
-        "Partially implemented",
-        "Trace-driven twin, local fallback, Python 3.12 validation env, and upstream package preflight; live run still needs Kubernetes config",
+        "Implemented for local validation",
+        "Trace-driven twin, local fallback, Python 3.12 validation env, Kind kubeconfig, upstream package preflight, and live AIOpsLab runs",
     ),
     ArchitectureItem(
         "Feature extractor",
@@ -75,17 +75,17 @@ ARCHITECTURE_ITEMS = (
     ArchitectureItem("Global scoreboard", "Implemented", "Weighted alpha/beta/gamma score aggregation"),
     ArchitectureItem(
         "Real SLA/energy/task reward metrics",
-        "Interface implemented",
-        "`sla_violations`, `completed_tasks`, and `energy_watts` preserved into trace rows",
+        "Implemented for live traces",
+        "`sla_violations`, `completed_tasks`, `energy_watts`, and Prometheus CPU/memory utilization preserved into trace rows",
     ),
 )
 
 NEXT_ENGINEERING_WORK = (
-    "Create a Python 3.12 AIOpsLab validation environment and run `AIOpsLabPolicyAgent` against a real problem ID.",
-    "Provide Kubernetes config for the AIOpsLab validation environment and rerun `aiopslab-preflight` until ready.",
-    "Validate live Prometheus/AIOpsLab telemetry fields with `telemetry-reward-audit`.",
-    "Tune PPO curriculum until `policy_vs_heuristic.beats_heuristic` is true on representative telemetry traces.",
-    "Export representative trace-derived matrices, retrain/calibrate boosters, and promote thresholds only after diagnostics.",
+    "Validate one additional AIOpsLab fault family beyond Hotel Reservation misconfiguration.",
+    "Build a held-out multi-family live trace corpus and require PPO to beat heuristic total score across held-out traces.",
+    "Add repeated-seed statistics, confidence intervals, and ablations for risk derivation, SLA risk preservation, and Prometheus enrichment.",
+    "Add measured or externally calibrated node-power telemetry when a power exporter is available.",
+    "Export thesis-ready tables from raw JSON artifacts for reproducible evaluation appendices.",
 )
 
 
@@ -113,16 +113,18 @@ def architecture_status_markdown(
             "",
             "## Current Validation Baseline",
             "",
-            "- Full test suite: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` -> `64 passed` on 2026-05-02 KST.",
+            "- Full test suite: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` -> `76 passed` on 2026-05-02 KST.",
             "- `export-brain-datasets` smoke ran against `orchestrator_stack/examples/sample_trace.json` and wrote risk/demand NPZ files.",
             "- `train-policy` smoke reports `heuristic_baseline` and `policy_vs_heuristic` gates.",
-            "- `aiopslab-preflight` is ready for Python/package checks in `~/Documents/aiopslab_validation_env` but blocked on Kubernetes config.",
+            "- Live Kind/AIOpsLab validation uses `~/Documents/aiopslab_validation_env/kubeconfig` and covers no-op plus misconfig detection/localization/analysis/mitigation.",
+            "- Prometheus/node-exporter enrichment covers all 15 rows in `reports/evaluations/202605022020_aiopslab_mitigation_prometheus_kube_trace.json`.",
+            "- PPO beats heuristic on the Prometheus-enriched mitigation trace by `+77.23260686133335` total reward.",
             "",
-            "## External Blockers",
+            "## Remaining Research Gaps",
             "",
-            "- Live AIOpsLab validation still needs a valid Kubernetes config; Python 3.12 and the upstream package are installed in `~/Documents/aiopslab_validation_env`, and `aiopslab-preflight --kube-config` can validate the config path.",
-            "- Real SLA/energy/task reward replacement needs live Prometheus/AIOpsLab payloads audited by `telemetry-reward-audit`.",
-            "- PPO policy quality remains open until `policy_vs_heuristic.beats_heuristic` is true on telemetry-backed traces.",
+            "- Current validated live fault family is still Hotel Reservation misconfiguration.",
+            "- PPO quality is proven on enriched mitigation slices, not yet on a held-out multi-family corpus.",
+            "- Energy watts remain model-derived from utilization unless a measured node-power exporter is added.",
             "",
             "## Recommended Next Engineering Work",
             "",

@@ -9,9 +9,9 @@ def test_architecture_status_markdown_reports_current_gaps():
     assert "Generated (KST): 2026-05-01 21:00" in report
     assert "Trace-derived brain datasets" in report
     assert "export-brain-datasets" in report
-    assert "Live AIOpsLab validation" in report
-    assert "Kubernetes config" in report
-    assert "64 passed" in report
+    assert "Live Kind/AIOpsLab validation" in report
+    assert "Prometheus/node-exporter enrichment covers all 15 rows" in report
+    assert "76 passed" in report
 
 
 def test_write_architecture_status_report_uses_requested_path(tmp_path):
