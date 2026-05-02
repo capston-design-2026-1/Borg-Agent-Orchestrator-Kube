@@ -1,9 +1,36 @@
 # Orchestrator Stack Next Steps
 
-1. Replace repeated single-cluster snapshots with higher-frequency trace capture during each live AIOpsLab run, so PPO sees state transitions before and after mitigation rather than duplicate same-second rows.
-2. Tune PPO curriculum again after higher-frequency telemetry is captured; current full-phase trace trains but does not beat the heuristic total-score gate.
+1. Add action-rich traces where multiple non-`dvfs` actions are actually selected/evaluated; current live traces are telemetry-rich but the heuristic/referee path still resolves to `dvfs` on every step.
+2. Tune PPO again after action diversity exists; current periodic mitigation trace nearly improves but still misses the corrected heuristic total-score gate.
 3. Add direct Prometheus/node-exporter utilization queries and replace the current Kubernetes resource-request energy proxy once stable query names are locked for the local chart.
-4. Expand beyond Hotel Reservation misconfig to one more stable AIOpsLab fault family after the capture loop records richer intra-run transitions.
+4. Expand beyond Hotel Reservation misconfig to one more stable AIOpsLab fault family after action-diverse capture exists.
+
+## Latest Session Note (2026-05-02 KST, periodic mitigation capture slice)
+
+- Added optional background Kubernetes capture to `orchestrator_stack/scripts/run_aiopslab_noop_smoke.py` with `--capture-interval-seconds`.
+- `write_kubernetes_trace()` now sorts rows by `timestamp`, preventing thread interleaving from writing out-of-order trace files.
+- Re-ran live Kind-backed `misconfig_app_hotel_res-mitigation-1` with periodic capture every `2` seconds:
+  - output `reports/evaluations/202605021325_aiopslab_misconfig_mitigation_periodic_live_summary.json`
+  - `success=true`
+  - captured `26` Kubernetes trace rows
+  - no capture errors
+- Periodic trace audit:
+  - output `reports/evaluations/202605021325_aiopslab_misconfig_mitigation_periodic_reward_audit.json`
+  - telemetry coverage `1.0`
+  - max SLA violations `2`
+  - max completed tasks `2`
+  - max energy watts `117.620408`
+  - weighted telemetry reward delta `-1237.4086612000003`
+- Periodic PPO gate:
+  - config `orchestrator_stack/config/aiopslab_periodic_mitigation_kind.json`
+  - output `reports/evaluations/202605021330_aiopslab_periodic_mitigation_train_policy.json`
+  - policy episode reward `-1219.131102`
+  - heuristic total score `-1202.4086612`
+  - delta `-16.72244079999996`
+  - `beats_heuristic=false`
+- Validation run status:
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests/test_kubernetes_trace.py -q`: success (`3 passed`)
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`72 passed`)
 
 ## Latest Session Note (2026-05-02 KST, full-phase live AIOpsLab slice)
 
