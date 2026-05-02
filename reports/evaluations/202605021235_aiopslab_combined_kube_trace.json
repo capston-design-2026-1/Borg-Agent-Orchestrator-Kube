@@ -1,0 +1,646 @@
+[
+  {
+    "timestamp": 1777690147,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.285,
+        "mem_util": 0.037006796210392406,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-k5qg8",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/consul-7cc67d4f58-xhbzh",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/frontend-8465c7bf94-hds7d",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/geo-675d59944c-q28kd",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 1,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/jaeger-684559c468-xj9p5",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-profile-5bfc8df5f6-kmmln",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-rate-f4dc945bb-5lwjt",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-reserve-9b8896b76-w69pp",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-geo-74dfb54dcb-wdzdl",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-profile-6c774db57-s46ns",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-rate-796fcd544c-5tb9x",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-recommendation-5d4df4567f-tn2p8",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-reservation-56bdb84bc9-qcvss",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-user-68d57b4cf9-pmrwb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/profile-64776bbdfc-ml9vr",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 1,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/rate-54bcbf97c7-g7b6m",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/recommendation-67967b4c67-h5tjd",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/reservation-754dcc99db-9hsdk",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/search-6c9869645-qncf8",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/user-76f8ddf8bb-ppq75",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 0,
+    "completed_tasks": 0,
+    "energy_watts": 116.420408
+  },
+  {
+    "timestamp": 1777690147,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.285,
+        "mem_util": 0.037006796210392406,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-k5qg8",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/consul-7cc67d4f58-xhbzh",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/frontend-8465c7bf94-hds7d",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/geo-675d59944c-q28kd",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 1,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/jaeger-684559c468-xj9p5",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-profile-5bfc8df5f6-kmmln",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-rate-f4dc945bb-5lwjt",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-reserve-9b8896b76-w69pp",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-geo-74dfb54dcb-wdzdl",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-profile-6c774db57-s46ns",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-rate-796fcd544c-5tb9x",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-recommendation-5d4df4567f-tn2p8",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-reservation-56bdb84bc9-qcvss",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-user-68d57b4cf9-pmrwb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/profile-64776bbdfc-ml9vr",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 1,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/rate-54bcbf97c7-g7b6m",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/recommendation-67967b4c67-h5tjd",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/reservation-754dcc99db-9hsdk",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/search-6c9869645-qncf8",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/user-76f8ddf8bb-ppq75",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 0,
+    "completed_tasks": 0,
+    "energy_watts": 116.420408
+  },
+  {
+    "timestamp": 1777690559,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.285,
+        "mem_util": 0.037006796210392406,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-sp6hs",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/consul-7cc67d4f58-z9vds",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/frontend-8465c7bf94-b992r",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/geo-7c88f458c9-wlkm7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/jaeger-684559c468-zvg7w",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-profile-5bfc8df5f6-jm8k9",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-rate-f4dc945bb-bp6n9",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-reserve-9b8896b76-2w9zl",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-geo-74dfb54dcb-d55h7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-profile-6c774db57-7sfgz",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-rate-796fcd544c-bvsnb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-recommendation-5d4df4567f-h9wzm",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-reservation-56bdb84bc9-wd4dl",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-user-68d57b4cf9-5t68j",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/profile-64776bbdfc-x9z58",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/rate-54bcbf97c7-k7b7q",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/recommendation-67967b4c67-cqvkt",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/reservation-754dcc99db-4fqrz",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/search-6c9869645-nkrxb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/user-76f8ddf8bb-n4rkj",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 1,
+    "completed_tasks": 0,
+    "energy_watts": 116.420408
+  },
+  {
+    "timestamp": 1777690559,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.285,
+        "mem_util": 0.037006796210392406,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-sp6hs",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/consul-7cc67d4f58-z9vds",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/frontend-8465c7bf94-b992r",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/geo-7c88f458c9-wlkm7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/jaeger-684559c468-zvg7w",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-profile-5bfc8df5f6-jm8k9",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-rate-f4dc945bb-bp6n9",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-reserve-9b8896b76-2w9zl",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-geo-74dfb54dcb-d55h7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-profile-6c774db57-7sfgz",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-rate-796fcd544c-bvsnb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-recommendation-5d4df4567f-h9wzm",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-reservation-56bdb84bc9-wd4dl",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-user-68d57b4cf9-5t68j",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/profile-64776bbdfc-x9z58",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/rate-54bcbf97c7-k7b7q",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/recommendation-67967b4c67-cqvkt",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/reservation-754dcc99db-4fqrz",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/search-6c9869645-nkrxb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/user-76f8ddf8bb-n4rkj",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 1,
+    "completed_tasks": 0,
+    "energy_watts": 116.420408
+  }
+]
