@@ -215,6 +215,14 @@ def cmd_thesis_tables(args: argparse.Namespace) -> None:
     print(json.dumps(result, indent=2))
 
 
+def cmd_policy_gate_suite(args: argparse.Namespace) -> None:
+    from orchestrator.layer6.policy_gate_suite import evaluate_policy_gate_suite, write_policy_gate_suite_report
+
+    report = evaluate_policy_gate_suite(args.manifest)
+    out = write_policy_gate_suite_report(report, args.out)
+    print(json.dumps({"policy_gate_suite_path": str(out), **report}, indent=2))
+
+
 def cmd_telemetry_reward_audit(args: argparse.Namespace) -> None:
     from orchestrator.layer1.trace_ingestor import load_trace_rows
     from orchestrator.layer6.telemetry_audit import audit_trace_telemetry_rewards, write_telemetry_audit_report
@@ -328,6 +336,11 @@ def build_parser() -> argparse.ArgumentParser:
     p_thesis_tables.add_argument("--out-md", required=True)
     p_thesis_tables.add_argument("--out-csv-dir")
     p_thesis_tables.set_defaults(func=cmd_thesis_tables)
+
+    p_gate_suite = sub.add_parser("policy-gate-suite")
+    p_gate_suite.add_argument("--manifest", required=True)
+    p_gate_suite.add_argument("--out", required=True)
+    p_gate_suite.set_defaults(func=cmd_policy_gate_suite)
 
     p_telemetry = sub.add_parser("telemetry-reward-audit")
     p_telemetry.add_argument("--trace", required=True)
