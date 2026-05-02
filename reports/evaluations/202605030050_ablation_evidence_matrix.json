@@ -1,0 +1,104 @@
+{
+  "status": "recorded",
+  "method_note": "Sequential evidence matrix from committed live-validation artifacts. It is thesis-useful but not a fully controlled causal ablation; controlled reruns should keep fault family, trace length, and PPO budget fixed.",
+  "rows": [
+    {
+      "label": "full_phase_before_enrichment",
+      "factor": "Live full-phase trace before enriched mitigation reward design",
+      "trace": "reports/evaluations/202605021300_aiopslab_full_phase_kube_trace.json",
+      "audit": "reports/evaluations/202605021300_aiopslab_full_phase_reward_audit.json",
+      "policy": "reports/evaluations/202605021310_aiopslab_full_phase_train_policy_fixed_gate.json",
+      "trace_rows": 11,
+      "telemetry_sources": [
+        ""
+      ],
+      "telemetry_coverage": 1.0,
+      "actions": {
+        "dvfs": 10
+      },
+      "policy_episode_reward_mean": -340.60037413333333,
+      "heuristic_total_score": -312.98522448,
+      "delta_vs_heuristic": -27.615149653333333,
+      "beats_heuristic": false
+    },
+    {
+      "label": "periodic_mitigation_before_risk_preservation",
+      "factor": "Periodic mitigation capture before SLA-risk preservation",
+      "trace": "reports/evaluations/202605021325_aiopslab_misconfig_mitigation_periodic_kube_trace.json",
+      "audit": "reports/evaluations/202605021325_aiopslab_misconfig_mitigation_periodic_reward_audit.json",
+      "policy": "reports/evaluations/202605021330_aiopslab_periodic_mitigation_train_policy.json",
+      "trace_rows": 26,
+      "telemetry_sources": [
+        ""
+      ],
+      "telemetry_coverage": 1.0,
+      "actions": {
+        "dvfs": 25
+      },
+      "policy_episode_reward_mean": -1219.131102,
+      "heuristic_total_score": -1202.4086612,
+      "delta_vs_heuristic": -16.72244079999996,
+      "beats_heuristic": false
+    },
+    {
+      "label": "risk_demand_plus_sla_preservation",
+      "factor": "Risk/demand derivation plus SLA-risk preservation",
+      "trace": "reports/evaluations/202605021350_aiopslab_mitigation_enriched_kube_trace.json",
+      "audit": "reports/evaluations/202605021355_aiopslab_mitigation_enriched_reward_audit_risk_preserved.json",
+      "policy": "reports/evaluations/202605021400_aiopslab_enriched_mitigation_train_policy.json",
+      "trace_rows": 24,
+      "telemetry_sources": [
+        ""
+      ],
+      "telemetry_coverage": 1.0,
+      "actions": {
+        "replicate": 21,
+        "dvfs": 2
+      },
+      "policy_episode_reward_mean": -991.63369384,
+      "heuristic_total_score": -1118.325216304,
+      "delta_vs_heuristic": 126.69152246399995,
+      "beats_heuristic": true
+    },
+    {
+      "label": "prometheus_node_exporter_enrichment",
+      "factor": "Prometheus/node-exporter CPU and memory enrichment",
+      "trace": "reports/evaluations/202605022020_aiopslab_mitigation_prometheus_kube_trace.json",
+      "audit": "reports/evaluations/202605022020_aiopslab_mitigation_prometheus_reward_audit.json",
+      "policy": "reports/evaluations/202605022025_aiopslab_prometheus_mitigation_train_policy.json",
+      "trace_rows": 15,
+      "telemetry_sources": [
+        "kubernetes_api+prometheus_node_exporter"
+      ],
+      "telemetry_coverage": 1.0,
+      "actions": {
+        "replicate": 13,
+        "dvfs": 1
+      },
+      "policy_episode_reward_mean": -663.0434828466666,
+      "heuristic_total_score": -740.276089708,
+      "delta_vs_heuristic": 77.23260686133335,
+      "beats_heuristic": true
+    },
+    {
+      "label": "second_family_stronger_curriculum",
+      "factor": "Second full-phase family plus stronger PPO curriculum",
+      "trace": "reports/evaluations/202605022125_k8s_target_port_full_phase_kube_trace.json",
+      "audit": "reports/evaluations/202605022125_k8s_target_port_full_phase_reward_audit.json",
+      "policy": "reports/evaluations/202605030010_k8s_target_port_full_phase_train_policy_stronger.json",
+      "trace_rows": 17,
+      "telemetry_sources": [
+        "kubernetes_api"
+      ],
+      "telemetry_coverage": 1.0,
+      "actions": {
+        "dvfs": 13,
+        "replicate": 3
+      },
+      "policy_episode_reward_mean": -306.3355152799999,
+      "heuristic_total_score": -324.347559168,
+      "delta_vs_heuristic": 18.01204388800005,
+      "beats_heuristic": true
+    }
+  ]
+}
