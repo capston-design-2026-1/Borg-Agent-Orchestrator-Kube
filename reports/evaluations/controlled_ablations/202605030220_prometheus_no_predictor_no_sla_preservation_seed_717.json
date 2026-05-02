@@ -1,0 +1,58 @@
+{
+  "status": "trained",
+  "stages": [
+    {
+      "stage": 1,
+      "status": "trained",
+      "checkpoint": "/Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator/orchestrator_stack/runtime/rllib/controlled_ablations/prometheus_no_predictor_no_sla_preservation_seed_717/stage_01",
+      "train_iters": 4,
+      "episode_reward_mean": -680.6893161800001,
+      "train_batch_size": 256,
+      "minibatch_size": 64,
+      "num_epochs": 2,
+      "rollout_fragment_length": 64,
+      "learning_rate": 0.0003,
+      "seed": 717
+    },
+    {
+      "stage": 2,
+      "status": "trained",
+      "checkpoint": "/Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator/orchestrator_stack/runtime/rllib/controlled_ablations/prometheus_no_predictor_no_sla_preservation_seed_717/stage_02",
+      "train_iters": 10,
+      "episode_reward_mean": -669.0045939577778,
+      "train_batch_size": 512,
+      "minibatch_size": 128,
+      "num_epochs": 3,
+      "rollout_fragment_length": 128,
+      "learning_rate": 0.0002,
+      "seed": 718
+    },
+    {
+      "stage": 3,
+      "status": "trained",
+      "checkpoint": "/Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator/orchestrator_stack/runtime/rllib/controlled_ablations/prometheus_no_predictor_no_sla_preservation_seed_717/stage_03",
+      "train_iters": 16,
+      "episode_reward_mean": -652.3018161800001,
+      "train_batch_size": 512,
+      "minibatch_size": 128,
+      "num_epochs": 3,
+      "rollout_fragment_length": 128,
+      "learning_rate": 0.0001,
+      "seed": 719
+    }
+  ],
+  "stage_count": 3,
+  "heuristic_baseline": {
+    "steps": 14,
+    "total_score": -733.276089708,
+    "avg_score": -52.37686355057143
+  },
+  "policy_vs_heuristic": {
+    "status": "compared",
+    "policy_episode_reward_mean": -652.3018161800001,
+    "heuristic_total_score": -733.276089708,
+    "heuristic_avg_score": -52.37686355057143,
+    "delta_vs_heuristic": 80.97427352799991,
+    "beats_heuristic": true
+  }
+}

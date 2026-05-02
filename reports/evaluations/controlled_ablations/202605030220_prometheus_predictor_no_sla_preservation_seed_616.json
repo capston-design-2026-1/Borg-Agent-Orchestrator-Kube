@@ -1,0 +1,58 @@
+{
+  "status": "trained",
+  "stages": [
+    {
+      "stage": 1,
+      "status": "trained",
+      "checkpoint": "/Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator/orchestrator_stack/runtime/rllib/controlled_ablations/prometheus_predictor_no_sla_preservation_seed_616/stage_01",
+      "train_iters": 4,
+      "episode_reward_mean": -700.88931618,
+      "train_batch_size": 256,
+      "minibatch_size": 64,
+      "num_epochs": 2,
+      "rollout_fragment_length": 64,
+      "learning_rate": 0.0003,
+      "seed": 616
+    },
+    {
+      "stage": 2,
+      "status": "trained",
+      "checkpoint": "/Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator/orchestrator_stack/runtime/rllib/controlled_ablations/prometheus_predictor_no_sla_preservation_seed_616/stage_02",
+      "train_iters": 10,
+      "episode_reward_mean": -697.7823717355556,
+      "train_batch_size": 512,
+      "minibatch_size": 128,
+      "num_epochs": 3,
+      "rollout_fragment_length": 128,
+      "learning_rate": 0.0002,
+      "seed": 617
+    },
+    {
+      "stage": 3,
+      "status": "trained",
+      "checkpoint": "/Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator/orchestrator_stack/runtime/rllib/controlled_ablations/prometheus_predictor_no_sla_preservation_seed_616/stage_03",
+      "train_iters": 16,
+      "episode_reward_mean": -669.0240384022222,
+      "train_batch_size": 512,
+      "minibatch_size": 128,
+      "num_epochs": 3,
+      "rollout_fragment_length": 128,
+      "learning_rate": 0.0001,
+      "seed": 618
+    }
+  ],
+  "stage_count": 3,
+  "heuristic_baseline": {
+    "steps": 14,
+    "total_score": -740.276089708,
+    "avg_score": -52.87686355057143
+  },
+  "policy_vs_heuristic": {
+    "status": "compared",
+    "policy_episode_reward_mean": -669.0240384022222,
+    "heuristic_total_score": -740.276089708,
+    "heuristic_avg_score": -52.87686355057143,
+    "delta_vs_heuristic": 71.25205130577774,
+    "beats_heuristic": true
+  }
+}
