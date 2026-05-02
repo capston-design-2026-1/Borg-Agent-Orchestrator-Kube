@@ -160,8 +160,6 @@ def run_smoke(args: argparse.Namespace) -> dict:
     try:
         orch = Orchestrator(results_dir=results_dir)
         namespace_prefixes = tuple(prefix.strip() for prefix in args.namespace_prefixes.split(",") if prefix.strip())
-        prometheus_process = _start_prometheus_port_forward(kubeconfig, args.prometheus_port_forward_port)
-        prometheus_base_url = f"http://127.0.0.1:{args.prometheus_port_forward_port}" if prometheus_process else None
         agent = CapturingAIOpsLabPolicyAgent(
             kubeconfig=kubeconfig,
             namespace_prefixes=namespace_prefixes,
@@ -171,6 +169,9 @@ def run_smoke(args: argparse.Namespace) -> dict:
             prometheus_base_url=prometheus_base_url,
         )
         initialize_aiopslab_problem(orch, problem_id=args.problem_id, agent=agent)
+        prometheus_process = _start_prometheus_port_forward(kubeconfig, args.prometheus_port_forward_port)
+        prometheus_base_url = f"http://127.0.0.1:{args.prometheus_port_forward_port}" if prometheus_process else None
+        agent.prometheus_base_url = prometheus_base_url
         capture_stop = threading.Event()
         capture_thread = None
         if args.capture_interval_seconds > 0:
