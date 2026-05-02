@@ -1,0 +1,189 @@
+{
+  "status": "passed",
+  "method": "Controlled repeated-seed ablation on the same Prometheus mitigation trace with fixed PPO curriculum and seeds 515, 616, and 717.",
+  "trace_path": "reports/evaluations/202605022020_aiopslab_mitigation_prometheus_kube_trace.json",
+  "seeds": [
+    515,
+    616,
+    717
+  ],
+  "rows": [
+    {
+      "variant": "no_predictor_no_sla_preservation",
+      "label": "No predictor runtime, no SLA-risk preservation",
+      "seed": 515,
+      "trace_path": "reports/evaluations/202605022020_aiopslab_mitigation_prometheus_kube_trace.json",
+      "config_path": "orchestrator_stack/config/controlled_ablations/prometheus_no_predictor_no_sla_preservation_seed_515.json",
+      "policy_gate_path": "reports/evaluations/controlled_ablations/202605030105_prometheus_no_predictor_no_sla_preservation_seed_515.json",
+      "policy_episode_reward_mean": -665.9101495133334,
+      "heuristic_total_score": -733.276089708,
+      "delta_vs_heuristic": 67.36594019466656,
+      "beats_heuristic": true
+    },
+    {
+      "variant": "predictor_no_sla_preservation",
+      "label": "Predictor runtime, no SLA-risk preservation",
+      "seed": 515,
+      "trace_path": "reports/evaluations/202605022020_aiopslab_mitigation_prometheus_kube_trace.json",
+      "config_path": "orchestrator_stack/config/controlled_ablations/prometheus_predictor_no_sla_preservation_seed_515.json",
+      "policy_gate_path": "reports/evaluations/controlled_ablations/202605030105_prometheus_predictor_no_sla_preservation_seed_515.json",
+      "policy_episode_reward_mean": -698.2490384022223,
+      "heuristic_total_score": -740.276089708,
+      "delta_vs_heuristic": 42.02705130577772,
+      "beats_heuristic": true
+    },
+    {
+      "variant": "predictor_sla_preservation",
+      "label": "Predictor runtime plus SLA-risk preservation",
+      "seed": 515,
+      "trace_path": "reports/evaluations/202605022020_aiopslab_mitigation_prometheus_kube_trace.json",
+      "config_path": "orchestrator_stack/config/controlled_ablations/prometheus_predictor_sla_preservation_seed_515.json",
+      "policy_gate_path": "reports/evaluations/controlled_ablations/202605030105_prometheus_predictor_sla_preservation_seed_515.json",
+      "policy_episode_reward_mean": -670.3462606244444,
+      "heuristic_total_score": -740.276089708,
+      "delta_vs_heuristic": 69.92982908355555,
+      "beats_heuristic": true
+    },
+    {
+      "variant": "no_predictor_no_sla_preservation",
+      "label": "No predictor runtime, no SLA-risk preservation",
+      "seed": 616,
+      "trace_path": "reports/evaluations/202605022020_aiopslab_mitigation_prometheus_kube_trace.json",
+      "config_path": "orchestrator_stack/config/controlled_ablations/prometheus_no_predictor_no_sla_preservation_seed_616.json",
+      "policy_gate_path": "reports/evaluations/controlled_ablations/202605030220_prometheus_no_predictor_no_sla_preservation_seed_616.json",
+      "policy_episode_reward_mean": -668.1323717355556,
+      "heuristic_total_score": -733.276089708,
+      "delta_vs_heuristic": 65.14371797244439,
+      "beats_heuristic": true
+    },
+    {
+      "variant": "predictor_no_sla_preservation",
+      "label": "Predictor runtime, no SLA-risk preservation",
+      "seed": 616,
+      "trace_path": "reports/evaluations/202605022020_aiopslab_mitigation_prometheus_kube_trace.json",
+      "config_path": "orchestrator_stack/config/controlled_ablations/prometheus_predictor_no_sla_preservation_seed_616.json",
+      "policy_gate_path": "reports/evaluations/controlled_ablations/202605030220_prometheus_predictor_no_sla_preservation_seed_616.json",
+      "policy_episode_reward_mean": -669.0240384022222,
+      "heuristic_total_score": -740.276089708,
+      "delta_vs_heuristic": 71.25205130577774,
+      "beats_heuristic": true
+    },
+    {
+      "variant": "predictor_sla_preservation",
+      "label": "Predictor runtime plus SLA-risk preservation",
+      "seed": 616,
+      "trace_path": "reports/evaluations/202605022020_aiopslab_mitigation_prometheus_kube_trace.json",
+      "config_path": "orchestrator_stack/config/controlled_ablations/prometheus_predictor_sla_preservation_seed_616.json",
+      "policy_gate_path": "reports/evaluations/controlled_ablations/202605030220_prometheus_predictor_sla_preservation_seed_616.json",
+      "policy_episode_reward_mean": -667.82681618,
+      "heuristic_total_score": -740.276089708,
+      "delta_vs_heuristic": 72.44927352799994,
+      "beats_heuristic": true
+    },
+    {
+      "variant": "no_predictor_no_sla_preservation",
+      "label": "No predictor runtime, no SLA-risk preservation",
+      "seed": 717,
+      "trace_path": "reports/evaluations/202605022020_aiopslab_mitigation_prometheus_kube_trace.json",
+      "config_path": "orchestrator_stack/config/controlled_ablations/prometheus_no_predictor_no_sla_preservation_seed_717.json",
+      "policy_gate_path": "reports/evaluations/controlled_ablations/202605030220_prometheus_no_predictor_no_sla_preservation_seed_717.json",
+      "policy_episode_reward_mean": -652.3018161800001,
+      "heuristic_total_score": -733.276089708,
+      "delta_vs_heuristic": 80.97427352799991,
+      "beats_heuristic": true
+    },
+    {
+      "variant": "predictor_no_sla_preservation",
+      "label": "Predictor runtime, no SLA-risk preservation",
+      "seed": 717,
+      "trace_path": "reports/evaluations/202605022020_aiopslab_mitigation_prometheus_kube_trace.json",
+      "config_path": "orchestrator_stack/config/controlled_ablations/prometheus_predictor_no_sla_preservation_seed_717.json",
+      "policy_gate_path": "reports/evaluations/controlled_ablations/202605030220_prometheus_predictor_no_sla_preservation_seed_717.json",
+      "policy_episode_reward_mean": -657.7740384022222,
+      "heuristic_total_score": -740.276089708,
+      "delta_vs_heuristic": 82.50205130577774,
+      "beats_heuristic": true
+    },
+    {
+      "variant": "predictor_sla_preservation",
+      "label": "Predictor runtime plus SLA-risk preservation",
+      "seed": 717,
+      "trace_path": "reports/evaluations/202605022020_aiopslab_mitigation_prometheus_kube_trace.json",
+      "config_path": "orchestrator_stack/config/controlled_ablations/prometheus_predictor_sla_preservation_seed_717.json",
+      "policy_gate_path": "reports/evaluations/controlled_ablations/202605030220_prometheus_predictor_sla_preservation_seed_717.json",
+      "policy_episode_reward_mean": -655.5879272911111,
+      "heuristic_total_score": -740.276089708,
+      "delta_vs_heuristic": 84.68816241688887,
+      "beats_heuristic": true
+    }
+  ],
+  "variant_summaries": [
+    {
+      "variant": "no_predictor_no_sla_preservation",
+      "label": "No predictor runtime, no SLA-risk preservation",
+      "seed_count": 3,
+      "pass_count": 3,
+      "pass_rate": 1.0,
+      "mean_delta_vs_heuristic": 71.16131056503696,
+      "std_delta_vs_heuristic": 8.570603799359562,
+      "min_delta_vs_heuristic": 65.14371797244439,
+      "max_delta_vs_heuristic": 80.97427352799991,
+      "mean_policy_episode_reward": -662.114779142963
+    },
+    {
+      "variant": "predictor_no_sla_preservation",
+      "label": "Predictor runtime, no SLA-risk preservation",
+      "seed_count": 3,
+      "pass_count": 3,
+      "pass_rate": 1.0,
+      "mean_delta_vs_heuristic": 65.26038463911107,
+      "std_delta_vs_heuristic": 20.89213867303522,
+      "min_delta_vs_heuristic": 42.02705130577772,
+      "max_delta_vs_heuristic": 82.50205130577774,
+      "mean_policy_episode_reward": -675.0157050688889
+    },
+    {
+      "variant": "predictor_sla_preservation",
+      "label": "Predictor runtime plus SLA-risk preservation",
+      "seed_count": 3,
+      "pass_count": 3,
+      "pass_rate": 1.0,
+      "mean_delta_vs_heuristic": 75.68908834281478,
+      "std_delta_vs_heuristic": 7.894580465114325,
+      "min_delta_vs_heuristic": 69.92982908355555,
+      "max_delta_vs_heuristic": 84.68816241688887,
+      "mean_policy_episode_reward": -664.5870013651852
+    }
+  ],
+  "effects_by_seed": [
+    {
+      "seed": 515,
+      "sla_preservation_delta_gain_with_predictor": 27.90277777777783,
+      "predictor_runtime_delta_change_without_sla_preservation": -25.338888888888846
+    },
+    {
+      "seed": 616,
+      "sla_preservation_delta_gain_with_predictor": 1.1972222222221944,
+      "predictor_runtime_delta_change_without_sla_preservation": 6.1083333333333485
+    },
+    {
+      "seed": 717,
+      "sla_preservation_delta_gain_with_predictor": 2.1861111111111313,
+      "predictor_runtime_delta_change_without_sla_preservation": 1.5277777777778283
+    }
+  ],
+  "effect_summaries": {
+    "sla_preservation_delta_gain_with_predictor": {
+      "mean": 10.428703703703718,
+      "std": 15.141067461322328,
+      "min": 1.1972222222221944,
+      "max": 27.90277777777783
+    },
+    "predictor_runtime_delta_change_without_sla_preservation": {
+      "mean": -5.90092592592589,
+      "std": 16.988854446710715,
+      "min": -25.338888888888846,
+      "max": 6.1083333333333485
+    }
+  }
+}
