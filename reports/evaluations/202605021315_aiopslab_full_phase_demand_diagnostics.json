@@ -1,0 +1,43 @@
+{
+  "model_path": "orchestrator_stack/examples/models/live_full_phase/demand_model.json",
+  "task": "demand",
+  "rows": 11,
+  "feature_names": [
+    "cpu_util",
+    "mem_util",
+    "disk_util",
+    "net_util",
+    "task_pressure",
+    "queue_pressure",
+    "energy_price",
+    "power_state_on"
+  ],
+  "feature_importance": {
+    "weight": {
+      "cpu_util": 31.0,
+      "task_pressure": 7.0
+    },
+    "gain": {
+      "cpu_util": 2.68077883447404e-06,
+      "task_pressure": 2.4445121198368724e-06
+    },
+    "cover": {
+      "cpu_util": 9.838709831237793,
+      "task_pressure": 10.0
+    }
+  },
+  "contribution_summary": {
+    "status": "ok",
+    "mean_abs": {
+      "cpu_util": 0.0003949197707697749,
+      "mem_util": 0.0,
+      "disk_util": 0.0,
+      "net_util": 0.0,
+      "task_pressure": 8.681603503646329e-05,
+      "queue_pressure": 0.0,
+      "energy_price": 0.0,
+      "power_state_on": 0.0,
+      "bias": 0.17763854563236237
+    }
+  }
+}
