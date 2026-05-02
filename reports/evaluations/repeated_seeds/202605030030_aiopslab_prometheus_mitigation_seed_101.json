@@ -1,0 +1,58 @@
+{
+  "status": "trained",
+  "stages": [
+    {
+      "stage": 1,
+      "status": "trained",
+      "checkpoint": "/private/tmp/borg_repeat_prometheus_101/stage_01",
+      "train_iters": 4,
+      "episode_reward_mean": -664.53931618,
+      "train_batch_size": 256,
+      "minibatch_size": 64,
+      "num_epochs": 2,
+      "rollout_fragment_length": 64,
+      "learning_rate": 0.0003,
+      "seed": 101
+    },
+    {
+      "stage": 2,
+      "status": "trained",
+      "checkpoint": "/private/tmp/borg_repeat_prometheus_101/stage_02",
+      "train_iters": 10,
+      "episode_reward_mean": -674.2545939577778,
+      "train_batch_size": 512,
+      "minibatch_size": 128,
+      "num_epochs": 3,
+      "rollout_fragment_length": 128,
+      "learning_rate": 0.0002,
+      "seed": 102
+    },
+    {
+      "stage": 3,
+      "status": "trained",
+      "checkpoint": "/private/tmp/borg_repeat_prometheus_101/stage_03",
+      "train_iters": 16,
+      "episode_reward_mean": -688.5379272911111,
+      "train_batch_size": 512,
+      "minibatch_size": 128,
+      "num_epochs": 3,
+      "rollout_fragment_length": 128,
+      "learning_rate": 0.0001,
+      "seed": 103
+    }
+  ],
+  "stage_count": 3,
+  "heuristic_baseline": {
+    "steps": 14,
+    "total_score": -740.276089708,
+    "avg_score": -52.87686355057143
+  },
+  "policy_vs_heuristic": {
+    "status": "compared",
+    "policy_episode_reward_mean": -688.5379272911111,
+    "heuristic_total_score": -740.276089708,
+    "heuristic_avg_score": -52.87686355057143,
+    "delta_vs_heuristic": 51.73816241688883,
+    "beats_heuristic": true
+  }
+}
