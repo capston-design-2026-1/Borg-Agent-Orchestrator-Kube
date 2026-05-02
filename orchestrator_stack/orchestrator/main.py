@@ -143,6 +143,7 @@ def run_policy_training(config: OrchestratorConfig, output_dir: str | Path) -> d
             beta=config.beta,
             gamma=config.gamma,
             stages=config.ppo_curriculum,
+            seed=config.random_seed,
             output_dir=output_dir,
         )
     else:
@@ -158,6 +159,7 @@ def run_policy_training(config: OrchestratorConfig, output_dir: str | Path) -> d
             minibatch_size=config.ppo_minibatch_size,
             num_epochs=config.ppo_num_epochs,
             rollout_fragment_length=config.ppo_rollout_fragment_length,
+            seed=config.random_seed,
             output_dir=output_dir,
         )
     heuristic_summary = evaluate_heuristic_policy(
@@ -193,6 +195,7 @@ def tune_reward_layer(config: OrchestratorConfig, *, trials: int) -> dict[str, A
             ppo_num_epochs=config.ppo_num_epochs,
             ppo_rollout_fragment_length=config.ppo_rollout_fragment_length,
             ppo_curriculum=config.ppo_curriculum,
+            random_seed=config.random_seed,
             optuna_storage_path=config.optuna_storage_path,
         )
         return run_episode(trial_cfg, verbose=False).total_score
@@ -232,6 +235,7 @@ def tune_policy_and_reward_layer(config: OrchestratorConfig, *, trials: int) -> 
             minibatch_size=minibatch_size,
             num_epochs=num_epochs,
             rollout_fragment_length=rollout_fragment_length,
+            seed=config.random_seed,
             output_dir=trial_output,
         )
         if training_summary.get("status") != "trained":

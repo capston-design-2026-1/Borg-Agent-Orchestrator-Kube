@@ -26,6 +26,7 @@ class OrchestratorConfig:
     ppo_num_epochs: int = 1
     ppo_rollout_fragment_length: int = 8
     ppo_curriculum: list[dict[str, Any]] = field(default_factory=list)
+    random_seed: int | None = None
     optuna_storage_path: Path = Path("orchestrator_stack/runtime/optuna/orchestrator.db")
 
     @staticmethod
@@ -51,5 +52,6 @@ class OrchestratorConfig:
             ppo_num_epochs=int(raw.get("ppo_num_epochs", 1)),
             ppo_rollout_fragment_length=int(raw.get("ppo_rollout_fragment_length", 8)),
             ppo_curriculum=list(raw.get("ppo_curriculum", [])),
+            random_seed=int(raw["random_seed"]) if raw.get("random_seed") is not None else None,
             optuna_storage_path=Path(raw.get("optuna_storage_path", "orchestrator_stack/runtime/optuna/orchestrator.db")),
         )

@@ -46,6 +46,7 @@ def train_multiagent_ppo(
     minibatch_size: int = 16,
     num_epochs: int = 1,
     rollout_fragment_length: int = 8,
+    seed: int | None = None,
     output_dir: str | Path,
 ) -> dict[str, Any]:
     os.environ.setdefault("OMP_NUM_THREADS", "1")
@@ -115,6 +116,8 @@ def train_multiagent_ppo(
         )
         .reporting(min_sample_timesteps_per_iteration=8, min_train_timesteps_per_iteration=8, min_time_s_per_iteration=0)
     )
+    if seed is not None:
+        config = config.debugging(seed=int(seed))
 
     algo = config.build_algo()
     last_result: dict[str, Any] = {}
@@ -152,6 +155,7 @@ def train_multiagent_ppo(
         "num_epochs": int(num_epochs),
         "rollout_fragment_length": int(rollout_fragment_length),
         "learning_rate": float(learning_rate),
+        "seed": int(seed) if seed is not None else None,
     }
 
 
@@ -162,12 +166,16 @@ def train_curriculum_ppo(
     beta: float,
     gamma: float,
     stages: list[dict[str, Any]],
+    seed: int | None = None,
     output_dir: str | Path,
 ) -> dict[str, Any]:
     out = Path(output_dir)
     stage_results = []
     for index, stage in enumerate(stages, start=1):
         stage_output = out / f"stage_{index:02d}"
+        stage_seed = stage.get("seed")
+        if stage_seed is None and seed is not None:
+            stage_seed = seed + index - 1
         result = train_multiagent_ppo(
             backend_factory(),
             alpha=float(stage.get("alpha", alpha)),
@@ -179,6 +187,7 @@ def train_curriculum_ppo(
             minibatch_size=int(stage["minibatch_size"]),
             num_epochs=int(stage["num_epochs"]),
             rollout_fragment_length=int(stage["rollout_fragment_length"]),
+            seed=int(stage_seed) if stage_seed is not None else None,
             output_dir=stage_output,
         )
         stage_results.append({"stage": index, **result})

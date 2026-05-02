@@ -57,6 +57,7 @@ def test_train_curriculum_ppo_runs_each_stage_with_fresh_backend(monkeypatch, tm
                 "rollout_fragment_length": 16,
             },
         ],
+        seed=42,
         output_dir=tmp_path,
     )
 
@@ -64,7 +65,9 @@ def test_train_curriculum_ppo_runs_each_stage_with_fresh_backend(monkeypatch, tm
     assert result["stage_count"] == 2
     assert len(calls) == 2
     assert calls[0]["train_iters"] == 1
+    assert calls[0]["seed"] == 42
     assert calls[1]["train_batch_size"] == 64
+    assert calls[1]["seed"] == 43
 
 
 def test_compare_policy_training_to_heuristic_reports_delta_for_curriculum():
