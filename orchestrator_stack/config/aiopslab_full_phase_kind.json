@@ -1,0 +1,15 @@
+{
+  "trace_path": "reports/evaluations/202605021300_aiopslab_full_phase_kube_trace.json",
+  "risk_model_path": "orchestrator_stack/examples/models/risk_model.json",
+  "demand_model_path": "orchestrator_stack/examples/models/demand_model.json",
+  "use_aiopslab_backend": false,
+  "episode_steps": 11,
+  "alpha": 1.0,
+  "beta": 0.6,
+  "gamma": 0.8,
+  "ppo_curriculum": [
+    {"train_iters": 3, "learning_rate": 0.0003, "train_batch_size": 128, "minibatch_size": 64, "num_epochs": 2, "rollout_fragment_length": 32},
+    {"train_iters": 8, "learning_rate": 0.0002, "train_batch_size": 256, "minibatch_size": 64, "num_epochs": 3, "rollout_fragment_length": 64},
+    {"train_iters": 12, "learning_rate": 0.0001, "train_batch_size": 256, "minibatch_size": 64, "num_epochs": 3, "rollout_fragment_length": 64}
+  ]
+}
