@@ -1,0 +1,16 @@
+{
+  "trace_path": "reports/evaluations/202605022125_k8s_target_port_full_phase_kube_trace.json",
+  "risk_model_path": "orchestrator_stack/examples/models/live_full_phase/risk_model.json",
+  "demand_model_path": "orchestrator_stack/examples/models/live_full_phase/demand_model.json",
+  "use_aiopslab_backend": false,
+  "episode_steps": 17,
+  "alpha": 1.0,
+  "beta": 0.6,
+  "gamma": 0.8,
+  "ppo_curriculum": [
+    {"train_iters": 8, "learning_rate": 0.0003, "train_batch_size": 512, "minibatch_size": 128, "num_epochs": 3, "rollout_fragment_length": 128},
+    {"train_iters": 18, "learning_rate": 0.0002, "train_batch_size": 768, "minibatch_size": 128, "num_epochs": 4, "rollout_fragment_length": 128},
+    {"train_iters": 32, "learning_rate": 0.0001, "train_batch_size": 1024, "minibatch_size": 256, "num_epochs": 4, "rollout_fragment_length": 256},
+    {"train_iters": 24, "learning_rate": 0.00005, "train_batch_size": 1024, "minibatch_size": 256, "num_epochs": 4, "rollout_fragment_length": 256}
+  ]
+}
