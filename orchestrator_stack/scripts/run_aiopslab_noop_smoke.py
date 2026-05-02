@@ -62,8 +62,20 @@ def _patch_aiopslab_config(env_dir: Path, kubeconfig: Path) -> None:
 
 
 class CapturingAIOpsLabPolicyAgent(AIOpsLabPolicyAgent):
-    def __init__(self, *, kubeconfig: Path, namespace_prefixes: tuple[str, ...], detection_answer: str) -> None:
-        super().__init__(detection_answer=detection_answer)
+    def __init__(
+        self,
+        *,
+        kubeconfig: Path,
+        namespace_prefixes: tuple[str, ...],
+        detection_answer: str,
+        submission_code: str | None,
+        pre_submit_commands: list[str],
+    ) -> None:
+        super().__init__(
+            detection_answer=detection_answer,
+            submission_code=submission_code,
+            pre_submit_commands=pre_submit_commands,
+        )
         self.kubeconfig = kubeconfig
         self.namespace_prefixes = namespace_prefixes
         self.trace_rows: list[dict] = []
@@ -103,6 +115,8 @@ def run_smoke(args: argparse.Namespace) -> dict:
             kubeconfig=kubeconfig,
             namespace_prefixes=namespace_prefixes,
             detection_answer=args.detection_answer,
+            submission_code=args.submission_code,
+            pre_submit_commands=args.pre_submit_command,
         )
         initialize_aiopslab_problem(orch, problem_id=args.problem_id, agent=agent)
         result = asyncio.run(orch.start_problem(max_steps=args.max_steps))
@@ -136,6 +150,13 @@ def main() -> None:
     parser.add_argument("--trace-out", help="Write Kubernetes-derived trace rows captured during the live AIOpsLab run.")
     parser.add_argument("--namespace-prefixes", default="test-,default")
     parser.add_argument("--detection-answer", default="No", help="Answer submitted after the observation turn for detection tasks.")
+    parser.add_argument("--submission-code", help='Full parser-compliant final call, for example: submit(["geo"])')
+    parser.add_argument(
+        "--pre-submit-command",
+        action="append",
+        default=[],
+        help="Shell command to execute after observation and before final submission. Repeatable.",
+    )
     parser.add_argument("--out")
     args = parser.parse_args()
 

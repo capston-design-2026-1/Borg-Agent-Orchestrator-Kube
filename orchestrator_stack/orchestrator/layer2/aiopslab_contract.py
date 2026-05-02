@@ -12,12 +12,20 @@ from orchestrator.types import Observation
 class AIOpsLabPolicyAgent:
     """Agent object matching AIOpsLab's init_context/get_action interface."""
 
-    def __init__(self, *, detection_answer: str = "No") -> None:
+    def __init__(
+        self,
+        *,
+        detection_answer: str = "No",
+        submission_code: str | None = None,
+        pre_submit_commands: list[str] | None = None,
+    ) -> None:
         self.problem_desc: Any | None = None
         self.instructions: Any | None = None
         self.apis: Any | None = None
         self.text_turns = 0
         self.detection_answer = detection_answer
+        self.submission_code = submission_code
+        self.pre_submit_commands = pre_submit_commands or []
 
     def init_context(self, problem_desc: Any, instructions: Any, apis: Any) -> None:
         self.problem_desc = problem_desc
@@ -30,6 +38,12 @@ class AIOpsLabPolicyAgent:
         except Exception:
             self.text_turns += 1
             if self.text_turns > 1:
+                command_index = self.text_turns - 2
+                if command_index < len(self.pre_submit_commands):
+                    command = self.pre_submit_commands[command_index].replace('"', '\\"')
+                    return f'Pre-submit remediation command.\n```\nexec_shell("{command}")\n```'
+                if self.submission_code:
+                    return f'Configured task submission.\n```\n{self.submission_code}\n```'
                 answer = str(self.detection_answer).replace('"', '\\"')
                 return f'Detection answer: {answer}\n```\nsubmit("{answer}")\n```'
             obs = Observation(timestamp=0, nodes=[], tasks=[], p_fail_scores={}, demand_projection={}, queue_length=0, energy_price=0.0)

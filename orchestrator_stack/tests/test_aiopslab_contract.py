@@ -80,3 +80,26 @@ def test_aiopslab_policy_agent_can_submit_yes_for_fault_detection():
     response = asyncio.run(agent.get_action("pod list output"))
 
     assert response == 'Detection answer: Yes\n```\nsubmit("Yes")\n```'
+
+
+def test_aiopslab_policy_agent_can_submit_localization_payload():
+    agent = AIOpsLabPolicyAgent(submission_code='submit(["geo"])')
+
+    asyncio.run(agent.get_action("Please take the next action"))
+    response = asyncio.run(agent.get_action("pod list output"))
+
+    assert response == 'Configured task submission.\n```\nsubmit(["geo"])\n```'
+
+
+def test_aiopslab_policy_agent_runs_pre_submit_command_before_submit():
+    agent = AIOpsLabPolicyAgent(
+        submission_code="submit()",
+        pre_submit_commands=["kubectl rollout restart deployment/geo -n test-hotel-reservation"],
+    )
+
+    asyncio.run(agent.get_action("Please take the next action"))
+    command = asyncio.run(agent.get_action("pod list output"))
+    final = asyncio.run(agent.get_action("rollout restarted"))
+
+    assert 'exec_shell("kubectl rollout restart deployment/geo -n test-hotel-reservation")' in command
+    assert final == "Configured task submission.\n```\nsubmit()\n```"
