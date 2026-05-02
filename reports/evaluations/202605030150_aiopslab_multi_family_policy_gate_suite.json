@@ -1,0 +1,45 @@
+{
+  "manifest_path": "orchestrator_stack/config/aiopslab_multi_family_gate_suite.json",
+  "suite_name": "aiopslab_multi_family_live_gate_v1",
+  "status": "passed",
+  "heldout_entries": 3,
+  "heldout_passes": 3,
+  "entries": [
+    {
+      "family": "hotel_reservation_misconfig",
+      "slice": "prometheus_mitigation",
+      "split": "heldout_eval",
+      "trace_path": "reports/evaluations/202605022020_aiopslab_mitigation_prometheus_kube_trace.json",
+      "trace_rows": 15,
+      "policy_gate_path": "reports/evaluations/202605022025_aiopslab_prometheus_mitigation_train_policy.json",
+      "policy_episode_reward_mean": -663.0434828466666,
+      "heuristic_total_score": -740.276089708,
+      "delta_vs_heuristic": 77.23260686133335,
+      "beats_heuristic": true
+    },
+    {
+      "family": "social_network_k8s_target_port",
+      "slice": "full_phase",
+      "split": "heldout_eval",
+      "trace_path": "reports/evaluations/202605022125_k8s_target_port_full_phase_kube_trace.json",
+      "trace_rows": 17,
+      "policy_gate_path": "reports/evaluations/202605030010_k8s_target_port_full_phase_train_policy_stronger.json",
+      "policy_episode_reward_mean": -306.3355152799999,
+      "heuristic_total_score": -324.347559168,
+      "delta_vs_heuristic": 18.01204388800005,
+      "beats_heuristic": true
+    },
+    {
+      "family": "social_network_scale_pod_zero",
+      "slice": "full_phase",
+      "split": "heldout_eval",
+      "trace_path": "reports/evaluations/202605030140_scale_pod_zero_full_phase_kube_trace.json",
+      "trace_rows": 18,
+      "policy_gate_path": "reports/evaluations/202605030145_scale_pod_zero_full_phase_train_policy.json",
+      "policy_episode_reward_mean": -545.6488026933334,
+      "heuristic_total_score": -566.349281616,
+      "delta_vs_heuristic": 20.700478922666548,
+      "beats_heuristic": true
+    }
+  ]
+}
