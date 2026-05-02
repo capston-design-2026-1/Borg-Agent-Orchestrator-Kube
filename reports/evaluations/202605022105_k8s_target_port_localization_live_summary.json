@@ -1,0 +1,19 @@
+{
+  "problem_id": "k8s_target_port-misconfig-localization-1",
+  "final_state": "SubmissionStatus.VALID_SUBMISSION",
+  "history_len": 4,
+  "results": {
+    "Localization Accuracy": 100.0,
+    "TTL": 0.3515908718109131,
+    "steps": 2,
+    "in_tokens": 1533,
+    "out_tokens": 70,
+    "success": true,
+    "is_subset": true
+  },
+  "results_dir": "/private/tmp/aiopslab_results",
+  "trace_rows": 4,
+  "trace_out": "reports/evaluations/202605022105_k8s_target_port_localization_kube_trace.json",
+  "capture_errors": [],
+  "prometheus_base_url": null
+}
