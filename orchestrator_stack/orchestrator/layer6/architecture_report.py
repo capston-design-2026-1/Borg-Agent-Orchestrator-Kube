@@ -81,7 +81,7 @@ ARCHITECTURE_ITEMS = (
 )
 
 NEXT_ENGINEERING_WORK = (
-    "Run controlled ablations with fixed trace, fault family, and PPO budget for risk derivation, SLA risk preservation, and Prometheus enrichment.",
+    "Repeat controlled ablations across multiple seeds for predictor runtime and SLA-risk preservation.",
     "Expand the current two-entry multi-family gate suite to a third full-phase AIOpsLab family.",
     "Add measured or externally calibrated node-power telemetry when a power exporter is available.",
     "Export thesis-ready tables from raw JSON artifacts for reproducible evaluation appendices.",
@@ -112,7 +112,7 @@ def architecture_status_markdown(
             "",
             "## Current Validation Baseline",
             "",
-            "- Full test suite: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` -> `80 passed` on 2026-05-03 KST.",
+            "- Full test suite: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` -> `82 passed` on 2026-05-03 KST.",
             "- `export-brain-datasets` smoke ran against `orchestrator_stack/examples/sample_trace.json` and wrote risk/demand NPZ files.",
             "- `train-policy` smoke reports `heuristic_baseline` and `policy_vs_heuristic` gates.",
             "- Live Kind/AIOpsLab validation uses `~/Documents/aiopslab_validation_env/kubeconfig` and covers no-op, Hotel Reservation misconfiguration, and SocialNetwork Kubernetes target-port misconfiguration.",
@@ -122,10 +122,11 @@ def architecture_status_markdown(
             "- Multi-family gate suite `reports/evaluations/202605030020_aiopslab_multi_family_policy_gate_suite.json` passes `2/2` held-out entries.",
             "- Repeated-seed PPO summary `reports/evaluations/202605030040_repeated_seed_ppo_summary.json` passes `3/3` seeds on both reported families.",
             "- Ablation evidence matrix `reports/evaluations/202605030050_ablation_evidence_matrix.md` records sequential evidence with an explicit non-causal caveat.",
+            "- Controlled single-seed ablation `reports/evaluations/202605030110_controlled_ablation_summary.json` shows SLA-risk preservation improves predictor-runtime delta by `+27.90277777777783` on a fixed trace.",
             "",
             "## Remaining Research Gaps",
             "",
-            "- PPO quality is proven on two held-out gate-suite entries and three repeated seeds per reported family; controlled ablation studies and broader family coverage remain open.",
+            "- PPO quality is proven on two held-out gate-suite entries and three repeated seeds per reported family; repeated-seed controlled ablations and broader family coverage remain open.",
             "- Energy watts remain model-derived from utilization unless a measured node-power exporter is added.",
             "",
             "## Recommended Next Engineering Work",

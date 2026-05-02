@@ -1,8 +1,24 @@
 # Orchestrator Stack Next Steps
 
-1. Run controlled ablations with fixed fault family, trace length, and PPO budget for no risk derivation vs risk derivation vs SLA risk preservation vs Prometheus enrichment.
-2. Expand the multi-family gate suite beyond two held-out entries with another full-phase family from the AIOpsLab catalog.
+1. Expand the multi-family gate suite beyond two held-out entries with another full-phase family from the AIOpsLab catalog.
+2. Add repeated-seed controlled ablations for the Prometheus trace variants; current controlled ablation is single-seed.
 3. Replace model-derived energy watts with a measured or externally calibrated node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
+
+## Latest Session Note (2026-05-03 KST, controlled ablation slice)
+
+- Added runtime ablation flags:
+  - `use_predictor_runtime`
+  - `preserve_live_sla_risk`
+- Ran controlled single-seed ablations on the same Prometheus mitigation trace with fixed PPO curriculum and seed `515`:
+  - no predictor + no SLA preservation: delta `+67.36594019466656`, `beats_heuristic=true`
+  - predictor + no SLA preservation: delta `+42.02705130577772`, `beats_heuristic=true`
+  - predictor + SLA preservation: delta `+69.92982908355555`, `beats_heuristic=true`
+- Generated artifacts:
+  - configs under `orchestrator_stack/config/controlled_ablations/`
+  - per-run outputs under `reports/evaluations/controlled_ablations/`
+  - summary `reports/evaluations/202605030110_controlled_ablation_summary.md`
+- Controlled result: SLA-risk preservation improves predictor-runtime delta by `+27.90277777777783` on this fixed trace. Predictor runtime without SLA preservation reduces delta by `-25.338888888888846` versus no predictor on this single-seed run.
+- Remaining rigor gap: repeat these controlled variants across multiple seeds.
 
 ## Latest Session Note (2026-05-03 KST, ablation evidence matrix slice)
 
@@ -92,7 +108,7 @@
   - telemetry reward audits
   - PPO policy-vs-heuristic gates
 - Validation run status:
-  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`80 passed`)
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`82 passed`)
 
 ## Latest Session Note (2026-05-02 KST, Prometheus/node-exporter mitigation slice)
 
@@ -119,7 +135,7 @@
   - delta `+77.23260686133335`
   - `beats_heuristic=true`
 - Validation run status:
-  - superseded by thesis table export slice (`80 passed`)
+  - superseded by thesis table export slice (`82 passed`)
 
 ## Latest Session Note (2026-05-02 KST, thesis-grade action-diversity slice)
 

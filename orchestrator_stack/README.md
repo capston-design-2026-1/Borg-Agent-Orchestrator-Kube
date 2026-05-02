@@ -251,6 +251,7 @@ Second-family validation: `k8s_target_port-misconfig-*` now runs detection/local
 Multi-family gate suite: `reports/evaluations/202605030020_aiopslab_multi_family_policy_gate_suite.json` records `status=passed` with `2/2` held-out entries passing across Hotel Reservation Prometheus mitigation and SocialNetwork target-port full-phase validation.
 Repeated-seed PPO statistics: `reports/evaluations/202605030040_repeated_seed_ppo_summary.md` records `3/3` passing seeds for both Hotel Reservation Prometheus mitigation and SocialNetwork target-port full-phase validation.
 Ablation evidence matrix: `reports/evaluations/202605030050_ablation_evidence_matrix.md` compares sequential validation stages and explicitly marks the result as preliminary, not a fully controlled causal ablation.
+Controlled ablation summary: `reports/evaluations/202605030110_controlled_ablation_summary.md` compares fixed-trace, fixed-seed Prometheus mitigation variants. On seed `515`, SLA-risk preservation improves predictor-runtime delta by `+27.90277777777783`.
 
 ## Current Validation Status
 
@@ -265,7 +266,7 @@ Latest checked behavior in this worktree is based on the 2026-05-02 KST validati
 - `aiopslab-preflight` now checks real upstream imports, not just package presence.
 - `AIOpsLabBackend` now loads the real upstream `Orchestrator` class by module path and registers the policy agent before `init_problem()`.
 - Live AIOpsLab no-op validation now runs on a real Kind Kubernetes cluster and records a correct detection result.
-- Full orchestrator test suite currently passes with `80 passed`.
+- Full orchestrator test suite currently passes with `82 passed`.
 - `tune` completed successfully after the PPO-tuning rewrite and emitted `reports/tuning/202604161029_optuna_orchestrator_reward_weights.md`.
 - `tune-policy-rewards` now reaches the PPO-backed RLlib trial path and fails closed with a structured `"status": "skipped"` result when macOS sandbox process-enumeration blocks `ray.init()`.
 - The older `reports/tuning/202604142305_optuna_orchestrator_policy_and_rewards.md` artifact predates the 2026-04-16 PPO-backed tuning rewrite and should be treated as historical, not as the current validation artifact for `tune-policy-rewards`.
@@ -281,6 +282,7 @@ The orchestrator now provides verbose step-by-step logging of agent decisions. W
 To see more training logs from Ray RLlib, increase the `"rllib_train_iters"` value in your `.json` config.
 The example config now also exposes PPO knobs used by both `train-policy` and `tune-policy-rewards`: `ppo_learning_rate`, `ppo_train_batch_size`, `ppo_minibatch_size`, `ppo_num_epochs`, and `ppo_rollout_fragment_length`.
 Set `random_seed` for repeatable PPO runs. If `ppo_curriculum` is present, `train-policy` runs each stage in order with its own PPO batch and iteration settings under separate runtime subdirectories; stage seeds derive from `random_seed` unless a stage-specific `seed` is provided.
+For controlled ablations, set `use_predictor_runtime=false` to bypass Layer 3 prediction enrichment and set `preserve_live_sla_risk=false` to disable hard preservation of live SLA-risk evidence in the trace twin.
 
 ## Notes
 

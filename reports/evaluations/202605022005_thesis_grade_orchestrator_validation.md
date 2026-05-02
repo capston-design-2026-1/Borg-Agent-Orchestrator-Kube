@@ -147,6 +147,20 @@ This strengthens the PPO evidence from one-off gate passes to seed-repeated gate
 
 This matrix is sequential evidence across committed validation artifacts, not a fully controlled causal ablation. A controlled thesis ablation should rerun variants while holding fault family, trace length, and PPO budget fixed.
 
+### Controlled Single-Seed Ablation
+
+- Summary JSON: `reports/evaluations/202605030110_controlled_ablation_summary.json`
+- Summary table: `reports/evaluations/202605030110_controlled_ablation_summary.md`
+- Trace: `reports/evaluations/202605022020_aiopslab_mitigation_prometheus_kube_trace.json`
+- Seed: `515`
+- No predictor and no SLA preservation delta: `+67.36594019466656`
+- Predictor and no SLA preservation delta: `+42.02705130577772`
+- Predictor and SLA preservation delta: `+69.92982908355555`
+- SLA preservation gain with predictor: `+27.90277777777783`
+- Predictor runtime delta change without SLA preservation: `-25.338888888888846`
+
+This is a controlled single-seed ablation on one fixed trace. The next rigor step is repeated-seed controlled ablation before making a strong causal claim.
+
 ## Brain Model Evidence
 
 - Live full-phase risk dataset: `reports/evaluations/brain_live_full_phase/risk_dataset.npz`
@@ -173,7 +187,7 @@ Key diagnostics:
 
 ## Next Thesis-Grade Work
 
-1. Run controlled ablations for `no risk derivation`, `risk derivation`, `SLA risk preservation`, and `Prometheus enrichment` with fixed trace and PPO budget.
+1. Repeat controlled ablations for `no predictor`, `predictor`, and `SLA risk preservation` across multiple seeds.
 2. Expand the multi-family gate suite to a third full-phase family from the AIOpsLab catalog.
 3. Add statistical reporting: repeated seeds, confidence intervals, and ablation table for `no risk derivation`, `risk derivation only`, `risk preservation`, and `Prometheus enrichment`.
 4. Add direct power or calibrated energy telemetry if a node-power exporter is available.

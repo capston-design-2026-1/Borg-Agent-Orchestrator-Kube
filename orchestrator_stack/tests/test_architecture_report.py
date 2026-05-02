@@ -16,7 +16,8 @@ def test_architecture_status_markdown_reports_current_gaps():
     assert "passes `2/2` held-out entries" in report
     assert "passes `3/3` seeds" in report
     assert "Ablation evidence matrix" in report
-    assert "80 passed" in report
+    assert "+27.90277777777783" in report
+    assert "82 passed" in report
 
 
 def test_write_architecture_status_report_uses_requested_path(tmp_path):
