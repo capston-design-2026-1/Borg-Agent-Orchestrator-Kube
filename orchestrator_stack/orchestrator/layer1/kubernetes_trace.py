@@ -6,6 +6,8 @@ import time
 from pathlib import Path
 from typing import Any
 
+from orchestrator.layer1.prometheus import query_node_exporter_utilization
+
 CPU_MILLI = 1000.0
 MEMORY_UNITS = {
     "Ki": 1024,
@@ -99,6 +101,57 @@ def _pod_task(pod: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _bounded_ratio(value: float) -> float:
+    return min(1.0, max(0.0, float(value)))
+
+
+def _sample_for_node(samples: dict[str, float], node_id: str, node_count: int) -> float | None:
+    if node_id in samples:
+        return samples[node_id]
+    for key, value in samples.items():
+        if node_id in key or key in node_id:
+            return value
+    if node_count == 1 and samples:
+        return sum(samples.values()) / len(samples)
+    return None
+
+
+def enrich_trace_row_with_prometheus(
+    row: dict[str, Any],
+    samples: dict[str, dict[str, float]],
+) -> dict[str, Any]:
+    nodes = row.get("nodes", [])
+    if not isinstance(nodes, list) or not nodes:
+        return row
+
+    total_energy = 0.0
+    p_fail_scores = dict(row.get("p_fail_scores", {}))
+    demand_projection = dict(row.get("demand_projection", {}))
+    node_count = len(nodes)
+    for node in nodes:
+        if not isinstance(node, dict):
+            continue
+        node_id = str(node.get("node_id", "unknown-node"))
+        cpu_sample = _sample_for_node(samples.get("cpu_util", {}), node_id, node_count)
+        mem_sample = _sample_for_node(samples.get("mem_util", {}), node_id, node_count)
+        if cpu_sample is not None:
+            node["cpu_util"] = _bounded_ratio(cpu_sample)
+        if mem_sample is not None:
+            node["mem_util"] = _bounded_ratio(mem_sample)
+        cpu_util = float(node.get("cpu_util", 0.0))
+        mem_util = float(node.get("mem_util", 0.0))
+        utilization_risk = (0.55 * cpu_util) + (0.35 * mem_util)
+        p_fail_scores[node_id] = round(min(1.0, max(float(p_fail_scores.get(node_id, 0.0)), utilization_risk)), 6)
+        demand_projection[node_id] = round(_bounded_ratio((0.55 * cpu_util) + (0.35 * mem_util)), 6)
+        total_energy += 80.0 + (120.0 * cpu_util) + (60.0 * mem_util)
+
+    row["p_fail_scores"] = p_fail_scores
+    row["demand_projection"] = demand_projection
+    row["energy_watts"] = round(total_energy, 6)
+    row["telemetry_sources"] = sorted(set(row.get("telemetry_sources", ["kubernetes_api"])) | {"prometheus_node_exporter"})
+    return row
+
+
 def kubernetes_snapshot_to_trace_row(
     *,
     nodes_payload: dict[str, Any],
@@ -190,13 +243,19 @@ def capture_kubernetes_trace_row(
     *,
     kubeconfig: str | Path,
     namespace_prefixes: tuple[str, ...] = ("test-", "default"),
+    prometheus_base_url: str | None = None,
 ) -> dict[str, Any]:
-    return kubernetes_snapshot_to_trace_row(
+    row = kubernetes_snapshot_to_trace_row(
         nodes_payload=_kubectl_json(kubeconfig, "nodes"),
         pods_payload=_kubectl_json(kubeconfig, "pods"),
         jobs_payload=_kubectl_json(kubeconfig, "jobs"),
         namespace_prefixes=namespace_prefixes,
     )
+    row["telemetry_sources"] = ["kubernetes_api"]
+    if prometheus_base_url:
+        samples = query_node_exporter_utilization(prometheus_base_url)
+        row = enrich_trace_row_with_prometheus(row, samples)
+    return row
 
 
 def write_kubernetes_trace(rows: list[dict[str, Any]], out_path: str | Path) -> Path:

@@ -9,6 +9,7 @@ import subprocess
 import threading
 import time
 from pathlib import Path
+from urllib.request import urlopen
 
 from aiopslab.orchestrator.orchestrator import Orchestrator
 from orchestrator.layer1.kubernetes_trace import capture_kubernetes_trace_row, write_kubernetes_trace
@@ -70,6 +71,7 @@ class CapturingAIOpsLabPolicyAgent(AIOpsLabPolicyAgent):
         detection_answer: str,
         submission_code: str | None,
         pre_submit_commands: list[str],
+        prometheus_base_url: str | None,
     ) -> None:
         super().__init__(
             detection_answer=detection_answer,
@@ -78,6 +80,7 @@ class CapturingAIOpsLabPolicyAgent(AIOpsLabPolicyAgent):
         )
         self.kubeconfig = kubeconfig
         self.namespace_prefixes = namespace_prefixes
+        self.prometheus_base_url = prometheus_base_url
         self.trace_rows: list[dict] = []
         self.capture_errors: list[str] = []
         self._capture_lock = threading.Lock()
@@ -87,6 +90,7 @@ class CapturingAIOpsLabPolicyAgent(AIOpsLabPolicyAgent):
             row = capture_kubernetes_trace_row(
                 kubeconfig=self.kubeconfig,
                 namespace_prefixes=self.namespace_prefixes,
+                prometheus_base_url=self.prometheus_base_url,
             )
             with self._capture_lock:
                 self.trace_rows.append(row)
@@ -104,6 +108,39 @@ def _periodic_trace_capture(agent: CapturingAIOpsLabPolicyAgent, interval_second
         agent.capture_snapshot()
 
 
+def _start_prometheus_port_forward(kubeconfig: Path, port: int) -> subprocess.Popen | None:
+    if port <= 0:
+        return None
+    process = subprocess.Popen(
+        [
+            "kubectl",
+            "--kubeconfig",
+            str(kubeconfig),
+            "-n",
+            "observe",
+            "port-forward",
+            "svc/prometheus-server",
+            f"{port}:80",
+        ],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        text=True,
+    )
+    url = f"http://127.0.0.1:{port}/api/v1/status/runtimeinfo"
+    deadline = time.time() + 20
+    while time.time() < deadline:
+        if process.poll() is not None:
+            raise RuntimeError("prometheus port-forward exited before becoming ready")
+        try:
+            with urlopen(url, timeout=2) as response:  # noqa: S310 - local port-forward endpoint.
+                if response.status == 200:
+                    return process
+        except Exception:
+            time.sleep(0.5)
+    process.terminate()
+    raise RuntimeError("prometheus port-forward did not become ready")
+
+
 def run_smoke(args: argparse.Namespace) -> dict:
     env_dir = Path(args.env_dir).expanduser().resolve()
     kubeconfig = Path(args.kubeconfig).expanduser().resolve()
@@ -118,15 +155,20 @@ def run_smoke(args: argparse.Namespace) -> dict:
     watcher = threading.Thread(target=_openebs_kind_compat, args=(kubeconfig, stop), daemon=True)
     watcher.start()
     os.environ["KUBECONFIG"] = str(kubeconfig)
+    prometheus_process = None
+    prometheus_base_url = None
     try:
         orch = Orchestrator(results_dir=results_dir)
         namespace_prefixes = tuple(prefix.strip() for prefix in args.namespace_prefixes.split(",") if prefix.strip())
+        prometheus_process = _start_prometheus_port_forward(kubeconfig, args.prometheus_port_forward_port)
+        prometheus_base_url = f"http://127.0.0.1:{args.prometheus_port_forward_port}" if prometheus_process else None
         agent = CapturingAIOpsLabPolicyAgent(
             kubeconfig=kubeconfig,
             namespace_prefixes=namespace_prefixes,
             detection_answer=args.detection_answer,
             submission_code=args.submission_code,
             pre_submit_commands=args.pre_submit_command,
+            prometheus_base_url=prometheus_base_url,
         )
         initialize_aiopslab_problem(orch, problem_id=args.problem_id, agent=agent)
         capture_stop = threading.Event()
@@ -138,10 +180,18 @@ def run_smoke(args: argparse.Namespace) -> dict:
                 daemon=True,
             )
             capture_thread.start()
-        result = asyncio.run(orch.start_problem(max_steps=args.max_steps))
-        if capture_thread is not None:
-            capture_stop.set()
-            capture_thread.join(timeout=5)
+        try:
+            result = asyncio.run(orch.start_problem(max_steps=args.max_steps))
+        finally:
+            if capture_thread is not None:
+                capture_stop.set()
+                capture_thread.join(timeout=5)
+            if prometheus_process is not None:
+                prometheus_process.terminate()
+                try:
+                    prometheus_process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    prometheus_process.kill()
     finally:
         stop.set()
         watcher.join(timeout=5)
@@ -158,6 +208,7 @@ def run_smoke(args: argparse.Namespace) -> dict:
         "trace_rows": len(agent.trace_rows),
         "trace_out": str(Path(args.trace_out)) if args.trace_out else None,
         "capture_errors": agent.capture_errors,
+        "prometheus_base_url": prometheus_base_url,
     }
 
 
@@ -184,6 +235,12 @@ def main() -> None:
         type=float,
         default=0.0,
         help="Also capture Kubernetes trace rows periodically during the agent/env loop; disabled by default.",
+    )
+    parser.add_argument(
+        "--prometheus-port-forward-port",
+        type=int,
+        default=0,
+        help="Start kubectl port-forward to observe/prometheus-server and enrich captures with node-exporter utilization.",
     )
     parser.add_argument("--out")
     args = parser.parse_args()
