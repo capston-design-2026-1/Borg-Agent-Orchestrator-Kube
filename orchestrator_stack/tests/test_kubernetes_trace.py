@@ -99,3 +99,33 @@ def test_enrich_trace_row_with_prometheus_overrides_node_utilization():
     assert enriched["p_fail_scores"]["kind-control-plane"] == 0.47
     assert enriched["energy_watts"] == 176.0
     assert enriched["telemetry_sources"] == ["kubernetes_api", "prometheus_node_exporter"]
+
+
+def test_capture_kubernetes_trace_row_falls_back_when_prometheus_fails(monkeypatch):
+    from orchestrator.layer1 import kubernetes_trace
+
+    monkeypatch.setattr(
+        kubernetes_trace,
+        "_kubectl_json",
+        lambda kubeconfig, resource: {
+            "items": [
+                {
+                    "metadata": {"name": "kind-control-plane"},
+                    "status": {"allocatable": {"cpu": "2000m", "memory": "1Gi"}},
+                }
+            ]
+        }
+        if resource == "nodes"
+        else {"items": []},
+    )
+
+    def fail_query(base_url):
+        raise RuntimeError("prometheus unavailable")
+
+    monkeypatch.setattr(kubernetes_trace, "query_node_exporter_utilization", fail_query)
+
+    row = kubernetes_trace.capture_kubernetes_trace_row(kubeconfig="/tmp/kubeconfig", prometheus_base_url="http://127.0.0.1:19090")
+
+    assert row["telemetry_sources"] == ["kubernetes_api"]
+    assert row["prometheus_error"] == "prometheus unavailable"
+    assert row["nodes"][0]["node_id"] == "kind-control-plane"

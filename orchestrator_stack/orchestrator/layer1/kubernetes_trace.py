@@ -253,8 +253,11 @@ def capture_kubernetes_trace_row(
     )
     row["telemetry_sources"] = ["kubernetes_api"]
     if prometheus_base_url:
-        samples = query_node_exporter_utilization(prometheus_base_url)
-        row = enrich_trace_row_with_prometheus(row, samples)
+        try:
+            samples = query_node_exporter_utilization(prometheus_base_url)
+            row = enrich_trace_row_with_prometheus(row, samples)
+        except Exception as exc:
+            row["prometheus_error"] = str(exc)
     return row
 
 
