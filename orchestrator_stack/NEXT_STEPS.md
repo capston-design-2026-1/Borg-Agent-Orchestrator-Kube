@@ -1,7 +1,7 @@
 # Orchestrator Stack Next Steps
 
-1. Promote the Kind/AIOpsLab validation workflow from no-op smoke to multi-problem coverage so PPO has non-duplicate, fault-diverse live traces.
-2. Tune PPO curriculum again after collecting richer telemetry-backed traces; current no-op trace training does not beat heuristic.
+1. Extend live AIOpsLab capture beyond two-turn detection runs: collect longer localization/analysis/mitigation traces so PPO sees enough state/action transitions to learn above heuristic.
+2. Tune PPO curriculum again after collecting longer telemetry-backed traces; current no-op+misconfig detection traces do not beat heuristic.
 3. Export representative trace-derived matrices with `export-brain-datasets`, retrain boosters, inspect `calibration_summary`, and only then promote thresholds.
 4. Replace the current Kubernetes resource-request energy proxy with direct Prometheus/node-exporter utilization queries once stable query names are locked for the local chart.
 
@@ -21,6 +21,43 @@
   - heuristic average `8.701477552`
   - `beats_heuristic=false`
 - Conclusion: PPO gate remains closed because the no-op live trace has only two duplicate healthy-state rows. Next useful job is richer AIOpsLab multi-problem trace capture, not more tuning on this trace.
+
+## Latest Session Note (2026-05-02 KST, live fault trace slice)
+
+- Parameterized `AIOpsLabPolicyAgent` with `detection_answer`, preserving no-op `No` by default and allowing fault detection runs to submit `Yes`.
+- Ran real Kind-backed AIOpsLab fault detection:
+  - problem `misconfig_app_hotel_res-detection-1`
+  - fault service `geo`
+  - final state `SubmissionStatus.VALID_SUBMISSION`
+  - result `Detection Accuracy=Correct`
+  - captured `2` Kubernetes-derived trace rows
+  - captured `20` target pods
+  - max SLA violations `1`
+- Ran telemetry reward audit on the fault trace:
+  - telemetry coverage `1.0`
+  - max SLA violations `1`
+  - weighted telemetry reward delta `-47.698522448`
+- Combined no-op and misconfig traces into `reports/evaluations/202605021235_aiopslab_combined_kube_trace.json`.
+- Combined trace audit:
+  - telemetry coverage `1.0`
+  - max SLA violations `1`
+  - score average `-8.965189114666666`
+- Combined trace PPO gate:
+  - config `orchestrator_stack/config/aiopslab_combined_kind.json`
+  - output `reports/evaluations/202605021235_aiopslab_combined_train_policy.json`
+  - policy reward `-31.29943042181818`
+  - heuristic average `-7.965189114666667`
+  - `beats_heuristic=false`
+- Recorded artifacts:
+  - `reports/evaluations/202605021230_aiopslab_misconfig_detection_live_summary.json`
+  - `reports/evaluations/202605021230_aiopslab_misconfig_detection_kube_trace.json`
+  - `reports/evaluations/202605021230_aiopslab_misconfig_detection_reward_audit.json`
+  - `reports/evaluations/202605021235_aiopslab_combined_kube_trace.json`
+  - `reports/evaluations/202605021235_aiopslab_combined_reward_audit.json`
+  - `reports/evaluations/202605021235_aiopslab_combined_train_policy.json`
+- Validation run status:
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests/test_aiopslab_contract.py -q`: success (`5 passed`)
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`69 passed`)
 
 ## Latest Session Note (2026-05-02 KST, live Kubernetes telemetry audit slice)
 

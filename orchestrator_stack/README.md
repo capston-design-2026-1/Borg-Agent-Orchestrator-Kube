@@ -222,6 +222,7 @@ Latest live Kind result: `reports/evaluations/202605021205_aiopslab_noop_live_su
 Latest live Kubernetes-derived trace: `reports/evaluations/202605021205_aiopslab_noop_kube_trace.json`.
 Latest live telemetry audit: `reports/evaluations/202605021205_aiopslab_noop_kube_reward_audit.json` with telemetry coverage `1.0`.
 Live trace PPO config: `orchestrator_stack/config/aiopslab_live_kind.json`. Current PPO gate remains closed on this two-row no-op trace; `reports/evaluations/202605021222_aiopslab_live_train_policy_stronger.json` records `beats_heuristic=false`.
+Fault detection validation: `reports/evaluations/202605021230_aiopslab_misconfig_detection_live_summary.json` records `Detection Accuracy=Correct` for `misconfig_app_hotel_res-detection-1` on Kind. Combined no-op+fault trace config is `orchestrator_stack/config/aiopslab_combined_kind.json`; current PPO gate remains closed there too, with `reports/evaluations/202605021235_aiopslab_combined_train_policy.json` recording `beats_heuristic=false`.
 
 ## Current Validation Status
 
