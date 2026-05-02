@@ -12,6 +12,7 @@ def test_architecture_status_markdown_reports_current_gaps():
     assert "Live Kind/AIOpsLab validation" in report
     assert "Prometheus/node-exporter enrichment covers all 15 rows" in report
     assert "k8s_target_port-misconfig-*" in report
+    assert "+18.01204388800005" in report
     assert "78 passed" in report
 
 

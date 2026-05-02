@@ -1,9 +1,21 @@
 # Orchestrator Stack Next Steps
 
-1. Improve policy learning on the second full-phase family: `k8s_target_port-misconfig-*` PPO is close but still below heuristic by `-5.581706111999949`.
-2. Build a held-out multi-family trace corpus and require PPO to beat heuristic total score across held-out traces, not only the enriched mitigation slices.
-3. Add repeated-seed statistical tables: confidence intervals and ablations for no risk derivation vs risk derivation vs SLA risk preservation vs Prometheus enrichment.
-4. Replace model-derived energy watts with a measured or externally calibrated node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
+1. Build a held-out multi-family trace corpus and require PPO to beat heuristic total score across held-out traces, not only per-family enriched slices.
+2. Add repeated-seed statistical tables: confidence intervals and ablations for no risk derivation vs risk derivation vs SLA risk preservation vs Prometheus enrichment.
+3. Replace model-derived energy watts with a measured or externally calibrated node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
+
+## Latest Session Note (2026-05-03 KST, second-family PPO pass slice)
+
+- Added stronger PPO curriculum for the second full-phase family:
+  - config `orchestrator_stack/config/aiopslab_k8s_target_port_full_phase_stronger_kind.json`
+  - output `reports/evaluations/202605030010_k8s_target_port_full_phase_train_policy_stronger.json`
+- Stronger PPO gate on `k8s_target_port-misconfig-*` full-phase trace:
+  - policy episode reward `-306.3355152799999`
+  - heuristic total score `-324.347559168`
+  - delta `+18.01204388800005`
+  - `beats_heuristic=true`
+- Best intermediate stage was stage 3 with reward `-303.6011402799999`; final stage still beats the gate.
+- Conclusion: per-family PPO gates now pass on Prometheus-enriched mitigation and second-family full-phase traces. Next blocker is held-out multi-family generalization and repeated-seed statistics.
 
 ## Latest Session Note (2026-05-02 KST, second-family AIOpsLab validation slice)
 
@@ -24,7 +36,7 @@
   - heuristic total score `-324.347559168`
   - delta `-5.581706111999949`
   - `beats_heuristic=false`
-- Conclusion: external validity improved from one full-phase fault family to two; next blocker is PPO robustness on multi-family traces, not live Kubernetes integration.
+- Conclusion: external validity improved from one full-phase fault family to two; original PPO gate was close but below heuristic, superseded by the 2026-05-03 stronger PPO pass.
 
 ## Latest Session Note (2026-05-02 KST, thesis table export slice)
 

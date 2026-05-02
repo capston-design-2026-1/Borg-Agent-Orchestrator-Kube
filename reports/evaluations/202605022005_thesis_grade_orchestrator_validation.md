@@ -95,15 +95,19 @@ This replaces the earlier CPU/memory resource-request proxy for the latest mitig
 - Trace: `reports/evaluations/202605022125_k8s_target_port_full_phase_kube_trace.json`
 - Reward audit: `reports/evaluations/202605022125_k8s_target_port_full_phase_reward_audit.json`
 - PPO gate: `reports/evaluations/202605022130_k8s_target_port_full_phase_train_policy.json`
+- Stronger PPO gate: `reports/evaluations/202605030010_k8s_target_port_full_phase_train_policy_stronger.json`
 - Rows: 17
 - Telemetry coverage: `1.0`
 - Actions selected by heuristic audit: `dvfs=13`, `replicate=3`
-- Policy episode reward: `-329.9292652799999`
+- Initial policy episode reward: `-329.9292652799999`
 - Heuristic total score: `-324.347559168`
-- Delta: `-5.581706111999949`
-- Gate: `beats_heuristic=false`
+- Initial delta: `-5.581706111999949`
+- Initial gate: `beats_heuristic=false`
+- Stronger policy episode reward: `-306.3355152799999`
+- Stronger delta: `+18.01204388800005`
+- Stronger gate: `beats_heuristic=true`
 
-This expands live external validity to a second full-phase fault family. The remaining policy gap is now robustness across families, because the learned policy does not yet beat the heuristic on this second-family trace.
+This expands live external validity to a second full-phase fault family and closes the per-family PPO gate after a stronger curriculum. The remaining policy gap is held-out multi-family robustness rather than single-family validation.
 
 ## Brain Model Evidence
 
@@ -126,13 +130,13 @@ Key diagnostics:
 - Current latest mitigation CPU and memory signals come from Prometheus/node-exporter, but energy watts are still model-derived rather than measured by hardware power telemetry.
 - Current validated full-phase fault families are Hotel Reservation application misconfiguration and SocialNetwork Kubernetes target-port misconfiguration; external validity still requires held-out multi-family testing.
 - Kind is a local control plane; production cluster behavior may differ in scheduling, resource pressure, and exporter availability.
-- PPO pass is validated on enriched mitigation traces, including one Prometheus/node-exporter slice, but not yet on the second full-phase family or a broad multi-family trace corpus.
+- PPO pass is validated on enriched mitigation traces, including one Prometheus/node-exporter slice, and on the second full-phase family after stronger curriculum, but not yet on a broad held-out multi-family trace corpus.
 - Prometheus enrichment currently uses node-exporter CPU and memory utilization; additional PromQL mappings are still needed for service-level latency, queue pressure, and direct power signals if those exporters are available.
 
 ## Next Thesis-Grade Work
 
-1. Improve PPO robustness on the second full-phase family and then on held-out multi-family traces.
-2. Build a multi-family trace corpus and require PPO to beat heuristic total score across held-out traces.
+1. Build a multi-family trace corpus and require PPO to beat heuristic total score across held-out traces.
+2. Add repeated-seed PPO runs for the Prometheus mitigation and `k8s_target_port` full-phase slices.
 3. Add statistical reporting: repeated seeds, confidence intervals, and ablation table for `no risk derivation`, `risk derivation only`, `risk preservation`, and `Prometheus enrichment`.
 4. Add direct power or calibrated energy telemetry if a node-power exporter is available.
 5. Keep thesis-ready tables synchronized with raw JSON artifacts for reproducible evaluation appendices.
