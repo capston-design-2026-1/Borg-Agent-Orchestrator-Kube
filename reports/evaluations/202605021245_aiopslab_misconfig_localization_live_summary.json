@@ -1,0 +1,18 @@
+{
+  "problem_id": "misconfig_app_hotel_res-localization-1",
+  "final_state": "SubmissionStatus.VALID_SUBMISSION",
+  "history_len": 4,
+  "results": {
+    "Localization Accuracy": 100.0,
+    "TTL": 0.3223140239715576,
+    "steps": 2,
+    "in_tokens": 1258,
+    "out_tokens": 69,
+    "success": true,
+    "is_subset": true
+  },
+  "results_dir": "/private/tmp/aiopslab_results",
+  "trace_rows": 2,
+  "trace_out": "reports/evaluations/202605021245_aiopslab_misconfig_localization_kube_trace.json",
+  "capture_errors": []
+}
