@@ -81,10 +81,9 @@ ARCHITECTURE_ITEMS = (
 )
 
 NEXT_ENGINEERING_WORK = (
-    "Repeat controlled ablations across multiple seeds for predictor runtime and SLA-risk preservation.",
     "Expand the current three-entry multi-family gate suite with another full-phase AIOpsLab family when available.",
     "Add measured or externally calibrated node-power telemetry when a power exporter is available.",
-    "Export thesis-ready tables from raw JSON artifacts for reproducible evaluation appendices.",
+    "Keep thesis-ready tables synchronized with new raw JSON artifacts for reproducible evaluation appendices.",
 )
 
 
@@ -123,11 +122,11 @@ def architecture_status_markdown(
             "- Latest multi-family gate suite `reports/evaluations/202605030150_aiopslab_multi_family_policy_gate_suite.json` passes `3/3` held-out entries.",
             "- Repeated-seed PPO summary `reports/evaluations/202605030205_repeated_seed_ppo_summary.json` passes `3/3` seeds on all three reported families.",
             "- Ablation evidence matrix `reports/evaluations/202605030050_ablation_evidence_matrix.md` records sequential evidence with an explicit non-causal caveat.",
-            "- Controlled single-seed ablation `reports/evaluations/202605030110_controlled_ablation_summary.json` shows SLA-risk preservation improves predictor-runtime delta by `+27.90277777777783` on a fixed trace.",
+            "- Controlled repeated-seed ablation `reports/evaluations/202605030225_controlled_ablation_repeated_seed_summary.json` shows mean SLA-risk preservation gain of `+10.428703703703718` across seeds `515`, `616`, and `717`.",
             "",
             "## Remaining Research Gaps",
             "",
-            "- PPO quality is proven on three held-out gate-suite entries and three repeated seeds for all three reported families; repeated-seed controlled ablations remain open.",
+            "- PPO quality is proven on three held-out gate-suite entries and three repeated seeds for all three reported families; controlled repeated-seed ablations are recorded for the Prometheus mitigation trace.",
             "- Energy watts remain model-derived from utilization unless a measured node-power exporter is added.",
             "",
             "## Recommended Next Engineering Work",

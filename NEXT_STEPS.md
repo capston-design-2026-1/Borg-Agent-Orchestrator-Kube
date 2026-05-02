@@ -61,6 +61,7 @@ Read Agents.md, NEXT_STEPS.md, MAS_ARCHITECTURE.md, and README.md, inspect the l
 - Follow-up validation on 2026-05-03 KST: controlled single-seed ablations now run on one fixed Prometheus trace; SLA-risk preservation improves predictor-runtime delta by `+27.90277777777783`.
 - Follow-up validation on 2026-05-03 KST: `scale_pod_zero_social_net-*` now validates a third live full-phase AIOpsLab family; PPO beats heuristic by `+20.700478922666548`, and the multi-family suite passes `3/3` entries.
 - Follow-up validation on 2026-05-03 KST: repeated-seed PPO statistics now include `scale_pod_zero_social_net-*`; `reports/evaluations/202605030205_repeated_seed_ppo_summary.md` records `3/3` seeds passing on all three reported families.
+- Follow-up validation on 2026-05-03 KST: controlled ablations now repeat across seeds `515`, `616`, and `717`; `reports/evaluations/202605030225_controlled_ablation_repeated_seed_summary.md` records all `9/9` runs beating heuristic and mean SLA preservation gain `+10.428703703703718`.
 - Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `82 passed`.
 
 ## Pipeline Status

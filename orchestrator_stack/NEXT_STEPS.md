@@ -1,8 +1,19 @@
 # Orchestrator Stack Next Steps
 
-1. Add repeated-seed controlled ablations for the Prometheus trace variants; current controlled ablation is single-seed.
-2. Expand the current three-family policy gate suite with another full-phase AIOpsLab family when available.
-3. Replace model-derived energy watts with a measured or externally calibrated node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
+1. Expand the current three-family policy gate suite with another full-phase AIOpsLab family when available.
+2. Replace model-derived energy watts with a measured or externally calibrated node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
+
+## Latest Session Note (2026-05-03 KST, repeated-seed controlled ablation slice)
+
+- Added controlled-ablation configs for seeds `616` and `717`, covering:
+  - no predictor runtime and no SLA-risk preservation
+  - predictor runtime without SLA-risk preservation
+  - predictor runtime with SLA-risk preservation
+- Recorded the six new PPO outputs under `reports/evaluations/controlled_ablations/202605030220_*`.
+- Wrote repeated-seed controlled summary:
+  - `reports/evaluations/202605030225_controlled_ablation_repeated_seed_summary.json`
+  - `reports/evaluations/202605030225_controlled_ablation_repeated_seed_summary.md`
+- Result: all `9/9` controlled runs beat heuristic. SLA-risk preservation has mean predictor-runtime delta gain `+10.428703703703718`; predictor runtime without SLA preservation has mean delta change `-5.90092592592589`.
 
 ## Latest Session Note (2026-05-03 KST, third-family repeated-seed PPO slice)
 
@@ -50,7 +61,7 @@
   - per-run outputs under `reports/evaluations/controlled_ablations/`
   - summary `reports/evaluations/202605030110_controlled_ablation_summary.md`
 - Controlled result: SLA-risk preservation improves predictor-runtime delta by `+27.90277777777783` on this fixed trace. Predictor runtime without SLA preservation reduces delta by `-25.338888888888846` versus no predictor on this single-seed run.
-- Remaining rigor gap: repeat these controlled variants across multiple seeds.
+- Follow-up note: repeated-seed controlled ablations are now recorded in `reports/evaluations/202605030225_controlled_ablation_repeated_seed_summary.md`.
 
 ## Latest Session Note (2026-05-03 KST, ablation evidence matrix slice)
 

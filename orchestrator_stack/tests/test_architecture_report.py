@@ -19,7 +19,8 @@ def test_architecture_status_markdown_reports_current_gaps():
     assert "202605030205_repeated_seed_ppo_summary.json" in report
     assert "passes `3/3` seeds on all three reported families" in report
     assert "Ablation evidence matrix" in report
-    assert "+27.90277777777783" in report
+    assert "202605030225_controlled_ablation_repeated_seed_summary.json" in report
+    assert "+10.428703703703718" in report
     assert "82 passed" in report
 
 
