@@ -1,0 +1,16 @@
+{
+  "problem_id": "misconfig_app_hotel_res-detection-1",
+  "final_state": "SubmissionStatus.VALID_SUBMISSION",
+  "history_len": 4,
+  "results": {
+    "Detection Accuracy": "Correct",
+    "TTD": 0.29135608673095703,
+    "steps": 2,
+    "in_tokens": 1257,
+    "out_tokens": 69
+  },
+  "results_dir": "/private/tmp/aiopslab_results",
+  "trace_rows": 2,
+  "trace_out": "reports/evaluations/202605021230_aiopslab_misconfig_detection_kube_trace.json",
+  "capture_errors": []
+}
