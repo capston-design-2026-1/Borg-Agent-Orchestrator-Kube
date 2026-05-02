@@ -1,4 +1,6 @@
-from orchestrator.layer1.kubernetes_trace import kubernetes_snapshot_to_trace_row, parse_cpu_milli, parse_memory_bytes
+import json
+
+from orchestrator.layer1.kubernetes_trace import kubernetes_snapshot_to_trace_row, parse_cpu_milli, parse_memory_bytes, write_kubernetes_trace
 
 
 def test_parse_kubernetes_quantities():
@@ -56,3 +58,11 @@ def test_kubernetes_snapshot_to_trace_row_uses_real_kube_payload_shape():
         "test-hotel-reservation/frontend",
         "test-hotel-reservation/pending",
     }
+
+
+def test_write_kubernetes_trace_orders_rows_by_timestamp(tmp_path):
+    out = tmp_path / "trace.json"
+
+    write_kubernetes_trace([{"timestamp": 3}, {"timestamp": 1}, {"timestamp": 2}], out)
+
+    assert [row["timestamp"] for row in json.loads(out.read_text(encoding="utf-8"))] == [1, 2, 3]

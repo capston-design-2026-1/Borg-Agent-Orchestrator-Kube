@@ -187,5 +187,6 @@ def capture_kubernetes_trace_row(
 def write_kubernetes_trace(rows: list[dict[str, Any]], out_path: str | Path) -> Path:
     out = Path(out_path)
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(rows, indent=2), encoding="utf-8")
+    ordered = sorted(rows, key=lambda row: int(row.get("timestamp", 0)))
+    out.write_text(json.dumps(ordered, indent=2), encoding="utf-8")
     return out
