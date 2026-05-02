@@ -117,13 +117,14 @@ This expands live external validity to a second full-phase fault family and clos
 
 - Manifest: `orchestrator_stack/config/aiopslab_multi_family_gate_suite.json`
 - Report: `reports/evaluations/202605030020_aiopslab_multi_family_policy_gate_suite.json`
-- Latest report: `reports/evaluations/202605030150_aiopslab_multi_family_policy_gate_suite.json`
+- Latest report: `reports/evaluations/202605030320_aiopslab_multi_family_policy_gate_suite.json`
 - Suite status: `passed`
-- Held-out entries: 3
-- Held-out passes: 3
+- Held-out entries: 4
+- Held-out passes: 4
 - Hotel Reservation Prometheus mitigation delta: `+77.23260686133335`
 - SocialNetwork target-port full-phase delta: `+18.01204388800005`
 - SocialNetwork scale-to-zero full-phase delta: `+20.700478922666548`
+- SocialNetwork assign-to-nonexistent-node full-phase delta: `+25.097637718564556`
 
 This is the first machine-checkable multi-family policy gate. It does not replace repeated-seed statistics, but it prevents thesis reporting from relying on unstructured manual inspection of policy JSON artifacts.
 
@@ -196,9 +197,9 @@ Key diagnostics:
 ## Current Scientific Limitations
 
 - Current latest mitigation CPU and memory signals come from Prometheus/node-exporter. Energy watts now carry explicit calibration metadata, but are still utilization-derived rather than measured by hardware power telemetry.
-- Current validated full-phase fault families are Hotel Reservation application misconfiguration, SocialNetwork Kubernetes target-port misconfiguration, and SocialNetwork scale-to-zero operation error; external validity still requires broader held-out multi-family testing.
+- Current validated full-phase fault families are Hotel Reservation application misconfiguration, SocialNetwork Kubernetes target-port misconfiguration, SocialNetwork scale-to-zero operation error, and SocialNetwork assign-to-nonexistent-node dependency fault; external validity still requires broader held-out multi-family testing.
 - Kind is a local control plane; production cluster behavior may differ in scheduling, resource pressure, and exporter availability.
-- PPO pass is validated on enriched mitigation traces, including one Prometheus/node-exporter slice, on two SocialNetwork full-phase families, on the current three-entry multi-family gate suite, and across three seeds for all three reported families. Broader external coverage remains open.
+- PPO pass is validated on enriched mitigation traces, including one Prometheus/node-exporter slice, on three SocialNetwork full-phase families, on the current four-entry multi-family gate suite, and across three seeds for the first three reported families. Broader external coverage remains open.
 - Prometheus enrichment currently uses node-exporter CPU and memory utilization; additional PromQL mappings are still needed for service-level latency, queue pressure, and direct power signals if those exporters are available.
 
 ## Next Thesis-Grade Work

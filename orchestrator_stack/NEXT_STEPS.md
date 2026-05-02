@@ -1,7 +1,18 @@
 # Orchestrator Stack Next Steps
 
-1. Expand the current three-family policy gate suite with another full-phase AIOpsLab family when available.
+1. Expand the current four-family policy gate suite with another full-phase AIOpsLab family when available.
 2. Replace calibrated utilization-derived energy watts with a direct measured node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
+
+## Latest Session Note (2026-05-03 KST, fourth-family AIOpsLab validation slice)
+
+- Ran live Kind-backed `assign_to_non_existent_node_social_net-*` on the SocialNetwork app:
+  - detection `reports/evaluations/202605030250_assign_nonexistent_detection_live_summary.json`: `Detection Accuracy=Correct`
+  - localization `reports/evaluations/202605030255_assign_nonexistent_localization_live_summary.json`: `Localization Accuracy=100.0`, `success=true`
+  - analysis `reports/evaluations/202605030300_assign_nonexistent_analysis_live_summary.json`: `system_level_correct=true`, `fault_type_correct=true`, `success=true`
+  - mitigation `reports/evaluations/202605030305_assign_nonexistent_mitigation_live_summary.json`: `success=true`
+- Built fourth-family full-phase trace `reports/evaluations/202605030310_assign_nonexistent_full_phase_kube_trace.json` with `21` rows and telemetry coverage `1.0`.
+- PPO output `reports/evaluations/202605030315_assign_nonexistent_full_phase_train_policy.json` records `beats_heuristic=true` with delta `+25.097637718564556`.
+- Multi-family gate suite `reports/evaluations/202605030320_aiopslab_multi_family_policy_gate_suite.json` now passes `4/4` held-out entries.
 
 ## Latest Session Note (2026-05-03 KST, power calibration metadata slice)
 
