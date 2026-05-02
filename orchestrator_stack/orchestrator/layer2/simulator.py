@@ -246,7 +246,13 @@ def _clone_observation(obs: Observation) -> Observation:
     )
 
 
-def _apply_action_deltas(current_obs: Observation, simulated_obs: Observation, baseline_obs: Observation) -> Observation:
+def _apply_action_deltas(
+    current_obs: Observation,
+    simulated_obs: Observation,
+    baseline_obs: Observation,
+    *,
+    preserve_live_sla_risk: bool = True,
+) -> Observation:
     merged = _clone_observation(baseline_obs)
     current_nodes = {node.node_id: node for node in current_obs.nodes}
     merged_nodes = {node.node_id: node for node in merged.nodes}
@@ -309,7 +315,7 @@ def _apply_action_deltas(current_obs: Observation, simulated_obs: Observation, b
         baseline_risk = baseline_obs.p_fail_scores.get(node.node_id, simulated_risk)
         blended_risk = (0.6 * simulated_risk) + (0.4 * baseline_risk)
         # Live SLA violations are hard evidence; do not let synthetic action deltas erase them.
-        if baseline_obs.sla_violations > 0:
+        if preserve_live_sla_risk and baseline_obs.sla_violations > 0:
             blended_risk = max(blended_risk, baseline_risk)
         merged.p_fail_scores[node.node_id] = max(0.0, min(1.0, blended_risk))
     merged.demand_projection = {
@@ -624,6 +630,7 @@ def state_to_observation(state: Any, *, fallback_timestamp: int = 0, default_ene
 @dataclass(slots=True)
 class TraceDrivenTwinBackend:
     rows: list[dict]
+    preserve_live_sla_risk: bool = True
     index: int = 0
 
     def reset(self) -> Observation:
@@ -642,7 +649,12 @@ class TraceDrivenTwinBackend:
             next_obs = simulated_next
         else:
             baseline_next = self._to_observation(self.rows[next_index])
-            next_obs = _apply_action_deltas(current_obs, simulated_next, baseline_next)
+            next_obs = _apply_action_deltas(
+                current_obs,
+                simulated_next,
+                baseline_next,
+                preserve_live_sla_risk=self.preserve_live_sla_risk,
+            )
 
         self.index = next_index
         done = self.index >= len(self.rows) - 1

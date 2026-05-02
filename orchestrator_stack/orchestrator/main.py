@@ -42,10 +42,12 @@ class RunSummary:
 def _build_backend(rows: list[dict], config: OrchestratorConfig):
     if config.use_aiopslab_backend:
         return AIOpsLabBackend(config.aiopslab_problem_id, max_steps=config.aiopslab_max_steps)
-    return TraceDrivenTwinBackend(rows)
+    return TraceDrivenTwinBackend(rows, preserve_live_sla_risk=config.preserve_live_sla_risk)
 
 
 def _build_predictor_runtime(rows: list[dict], config: OrchestratorConfig):
+    if not config.use_predictor_runtime:
+        return _build_backend(rows, config)
     return PredictorBackedBackend(
         _build_backend(rows, config),
         risk_model=SafetyRiskForecast.load(config.risk_model_path),
