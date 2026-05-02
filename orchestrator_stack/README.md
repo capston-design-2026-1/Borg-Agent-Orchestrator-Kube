@@ -249,6 +249,7 @@ Thesis-grade validation: `reports/evaluations/202605022005_thesis_grade_orchestr
 Prometheus/node-exporter validation: `reports/evaluations/202605022020_aiopslab_mitigation_prometheus_kube_trace.json` records `15` live mitigation rows with `prometheus_node_exporter` in every row. `reports/evaluations/202605022025_aiopslab_prometheus_mitigation_train_policy.json` records `beats_heuristic=true` with delta `+77.23260686133335` on that Prometheus-enriched trace.
 Second-family validation: `k8s_target_port-misconfig-*` now runs detection/localization/analysis/mitigation on the SocialNetwork app. Full-phase trace `reports/evaluations/202605022125_k8s_target_port_full_phase_kube_trace.json` has `17` Kubernetes rows. Initial PPO output `reports/evaluations/202605022130_k8s_target_port_full_phase_train_policy.json` was close but below heuristic; stronger PPO output `reports/evaluations/202605030010_k8s_target_port_full_phase_train_policy_stronger.json` now records `beats_heuristic=true` with delta `+18.01204388800005`.
 Multi-family gate suite: `reports/evaluations/202605030020_aiopslab_multi_family_policy_gate_suite.json` records `status=passed` with `2/2` held-out entries passing across Hotel Reservation Prometheus mitigation and SocialNetwork target-port full-phase validation.
+Repeated-seed PPO statistics: `reports/evaluations/202605030040_repeated_seed_ppo_summary.md` records `3/3` passing seeds for both Hotel Reservation Prometheus mitigation and SocialNetwork target-port full-phase validation.
 
 ## Current Validation Status
 

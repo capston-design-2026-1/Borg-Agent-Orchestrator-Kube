@@ -1,8 +1,22 @@
 # Orchestrator Stack Next Steps
 
-1. Add repeated-seed statistical tables: confidence intervals and ablations for no risk derivation vs risk derivation vs SLA risk preservation vs Prometheus enrichment.
+1. Add ablation tables for no risk derivation vs risk derivation vs SLA risk preservation vs Prometheus enrichment.
 2. Expand the multi-family gate suite beyond two held-out entries with another full-phase family from the AIOpsLab catalog.
 3. Replace model-derived energy watts with a measured or externally calibrated node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
+
+## Latest Session Note (2026-05-03 KST, repeated-seed PPO statistics slice)
+
+- Added deterministic `random_seed` support to PPO training and curriculum stages.
+- Ran repeated-seed PPO (`101`, `202`, `303`) for two thesis slices:
+  - Hotel Reservation Prometheus mitigation
+  - SocialNetwork target-port full phase
+- Generated summary artifacts:
+  - `reports/evaluations/202605030040_repeated_seed_ppo_summary.json`
+  - `reports/evaluations/202605030040_repeated_seed_ppo_summary.md`
+- Results:
+  - Hotel Reservation Prometheus mitigation: pass rate `3/3`, mean delta `+69.34464389837028`, std delta `15.733374610873856`
+  - SocialNetwork target-port full phase: pass rate `3/3`, mean delta `+7.616210554666718`, std delta `4.111612192037126`
+- Conclusion: current PPO gates are stable across three seeds for both reported families. Next thesis statistics blocker is ablation, not repeated-seed pass rate.
 
 ## Latest Session Note (2026-05-03 KST, multi-family gate suite slice)
 
@@ -13,7 +27,7 @@
   - Hotel Reservation Prometheus mitigation: `beats_heuristic=true`, delta `+77.23260686133335`
   - SocialNetwork target-port full phase: `beats_heuristic=true`, delta `+18.01204388800005`
 - Suite result: `status=passed`, `heldout_passes=2/2`.
-- Conclusion: current two-family held-out gate passes; next blocker is repeated-seed statistics and expanding the suite to a third family.
+- Conclusion: current two-family held-out gate passes; repeated-seed statistics are now recorded in the 2026-05-03 repeated-seed slice.
 
 ## Latest Session Note (2026-05-03 KST, second-family PPO pass slice)
 

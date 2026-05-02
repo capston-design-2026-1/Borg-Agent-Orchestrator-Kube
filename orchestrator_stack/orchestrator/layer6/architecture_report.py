@@ -81,7 +81,7 @@ ARCHITECTURE_ITEMS = (
 )
 
 NEXT_ENGINEERING_WORK = (
-    "Add repeated-seed statistics, confidence intervals, and ablations for risk derivation, SLA risk preservation, and Prometheus enrichment.",
+    "Add ablation tables for risk derivation, SLA risk preservation, and Prometheus enrichment.",
     "Expand the current two-entry multi-family gate suite to a third full-phase AIOpsLab family.",
     "Add measured or externally calibrated node-power telemetry when a power exporter is available.",
     "Export thesis-ready tables from raw JSON artifacts for reproducible evaluation appendices.",
@@ -120,10 +120,11 @@ def architecture_status_markdown(
             "- PPO beats heuristic on the Prometheus-enriched mitigation trace by `+77.23260686133335` total reward.",
             "- `k8s_target_port-misconfig-*` validates a second full-phase family; stronger PPO beats heuristic by `+18.01204388800005` on that family trace.",
             "- Multi-family gate suite `reports/evaluations/202605030020_aiopslab_multi_family_policy_gate_suite.json` passes `2/2` held-out entries.",
+            "- Repeated-seed PPO summary `reports/evaluations/202605030040_repeated_seed_ppo_summary.json` passes `3/3` seeds on both reported families.",
             "",
             "## Remaining Research Gaps",
             "",
-            "- PPO quality is proven on two held-out gate-suite entries, but repeated-seed confidence intervals and broader family coverage remain open.",
+            "- PPO quality is proven on two held-out gate-suite entries and three repeated seeds per reported family; ablation studies and broader family coverage remain open.",
             "- Energy watts remain model-derived from utilization unless a measured node-power exporter is added.",
             "",
             "## Recommended Next Engineering Work",
