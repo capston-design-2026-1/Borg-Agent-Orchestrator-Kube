@@ -204,6 +204,17 @@ def cmd_architecture_status(args: argparse.Namespace) -> None:
     print(json.dumps({"architecture_status_path": str(out)}, indent=2))
 
 
+def cmd_thesis_tables(args: argparse.Namespace) -> None:
+    from orchestrator.layer6.thesis_tables import write_thesis_evaluation_tables
+
+    result = write_thesis_evaluation_tables(
+        evaluation_dir=args.evaluation_dir,
+        out_md=args.out_md,
+        out_csv_dir=args.out_csv_dir,
+    )
+    print(json.dumps(result, indent=2))
+
+
 def cmd_telemetry_reward_audit(args: argparse.Namespace) -> None:
     from orchestrator.layer1.trace_ingestor import load_trace_rows
     from orchestrator.layer6.telemetry_audit import audit_trace_telemetry_rewards, write_telemetry_audit_report
@@ -311,6 +322,12 @@ def build_parser() -> argparse.ArgumentParser:
     p_arch.add_argument("--out")
     p_arch.add_argument("--source-architecture", default="docs/project_architecture.pdf")
     p_arch.set_defaults(func=cmd_architecture_status)
+
+    p_thesis_tables = sub.add_parser("thesis-tables")
+    p_thesis_tables.add_argument("--evaluation-dir", default="reports/evaluations")
+    p_thesis_tables.add_argument("--out-md", required=True)
+    p_thesis_tables.add_argument("--out-csv-dir")
+    p_thesis_tables.set_defaults(func=cmd_thesis_tables)
 
     p_telemetry = sub.add_parser("telemetry-reward-audit")
     p_telemetry.add_argument("--trace", required=True)
