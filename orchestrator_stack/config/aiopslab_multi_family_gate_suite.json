@@ -21,6 +21,12 @@
       "split": "heldout_eval",
       "trace_path": "reports/evaluations/202605030140_scale_pod_zero_full_phase_kube_trace.json",
       "policy_gate_path": "reports/evaluations/202605030145_scale_pod_zero_full_phase_train_policy.json"
+    },
+    {
+      "family": "social_network_assign_nonexistent_node",
+      "slice": "assign_nonexistent_full_phase",
+      "trace_path": "reports/evaluations/202605030310_assign_nonexistent_full_phase_kube_trace.json",
+      "policy_gate_path": "reports/evaluations/202605030315_assign_nonexistent_full_phase_train_policy.json"
     }
   ]
 }
