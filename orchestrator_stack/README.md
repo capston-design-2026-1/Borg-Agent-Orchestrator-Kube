@@ -204,7 +204,7 @@ PYTHONPATH=orchestrator_stack ~/Documents/aiopslab_validation_env/bin/python \
   --kube-config ~/.kube/config
 ```
 
-Current status: Python 3.12 and the upstream `aiopslab` package install successfully. Live orchestrator import is still blocked until Kubernetes config is available. Preflight checks `KUBECONFIG` first, then `~/.kube/config`; this machine currently has neither.
+Current status: Python 3.12, the upstream `aiopslab` package, Kind, and the local kubeconfig are installed for live validation. The active local kubeconfig used by validation is `~/Documents/aiopslab_validation_env/kubeconfig`.
 
 For local live validation, create a Kind cluster and run the no-op AIOpsLab smoke:
 ```bash
@@ -226,6 +226,7 @@ Fault detection validation: `reports/evaluations/202605021230_aiopslab_misconfig
 Full-phase validation now covers misconfig localization, analysis, and mitigation on Kind. `reports/evaluations/202605021300_aiopslab_full_phase_kube_trace.json` has 11 Kubernetes-derived rows across no-op plus misconfig detection/localization/analysis/mitigation. `reports/evaluations/202605021310_aiopslab_full_phase_train_policy_fixed_gate.json` uses corrected total-score comparison and still records `beats_heuristic=false`. Live trace-derived predictors are under `orchestrator_stack/examples/models/live_full_phase/`; diagnostics are `reports/evaluations/202605021315_aiopslab_full_phase_risk_diagnostics.json` and `reports/evaluations/202605021315_aiopslab_full_phase_demand_diagnostics.json`.
 Periodic mitigation capture: run `orchestrator_stack/scripts/run_aiopslab_noop_smoke.py` with `--capture-interval-seconds 2` to collect intra-run Kubernetes transitions. Latest periodic trace is `reports/evaluations/202605021325_aiopslab_misconfig_mitigation_periodic_kube_trace.json`; PPO gate output is `reports/evaluations/202605021330_aiopslab_periodic_mitigation_train_policy.json` and remains `beats_heuristic=false` by `-16.72244079999996` total score.
 Thesis-grade validation: `reports/evaluations/202605022005_thesis_grade_orchestrator_validation.md` summarizes the live Kubernetes/AIOpsLab evidence, limitations, and next research gates. Latest enriched mitigation PPO result is `reports/evaluations/202605021400_aiopslab_enriched_mitigation_train_policy.json`, with `beats_heuristic=true` and delta `+126.69152246399995` after deriving Kubernetes risk/demand signals and preserving live SLA risk.
+Prometheus/node-exporter validation: `reports/evaluations/202605022020_aiopslab_mitigation_prometheus_kube_trace.json` records `15` live mitigation rows with `prometheus_node_exporter` in every row. `reports/evaluations/202605022025_aiopslab_prometheus_mitigation_train_policy.json` records `beats_heuristic=true` with delta `+77.23260686133335` on that Prometheus-enriched trace.
 
 ## Current Validation Status
 
@@ -240,7 +241,7 @@ Latest checked behavior in this worktree is based on the 2026-05-02 KST validati
 - `aiopslab-preflight` now checks real upstream imports, not just package presence.
 - `AIOpsLabBackend` now loads the real upstream `Orchestrator` class by module path and registers the policy agent before `init_problem()`.
 - Live AIOpsLab no-op validation now runs on a real Kind Kubernetes cluster and records a correct detection result.
-- Full orchestrator test suite currently passes with `73 passed`.
+- Full orchestrator test suite currently passes with `76 passed`.
 - `tune` completed successfully after the PPO-tuning rewrite and emitted `reports/tuning/202604161029_optuna_orchestrator_reward_weights.md`.
 - `tune-policy-rewards` now reaches the PPO-backed RLlib trial path and fails closed with a structured `"status": "skipped"` result when macOS sandbox process-enumeration blocks `ray.init()`.
 - The older `reports/tuning/202604142305_optuna_orchestrator_policy_and_rewards.md` artifact predates the 2026-04-16 PPO-backed tuning rewrite and should be treated as historical, not as the current validation artifact for `tune-policy-rewards`.
@@ -264,5 +265,5 @@ If `ppo_curriculum` is present, `train-policy` runs each stage in order with its
 - PPO checkpoints are written under `orchestrator_stack/runtime/rllib`.
 - `tune-policy-rewards` now scores each Optuna trial with a real PPO training run plus a small heuristic stability term; it is no longer a learning-rate-only placeholder objective.
 - In restricted macOS sandboxes, Ray may fail during `ray.init()` with a `PermissionError` from process enumeration. The command now returns a structured `"status": "skipped"` result in that case instead of crashing.
-- Direct validation against the live upstream AIOpsLab package/session API is now proven on the Kind no-op detection path; broader multi-problem validation remains open.
+- Direct validation against the live upstream AIOpsLab package/session API is now proven on Kind no-op, misconfig detection/localization/analysis/mitigation, periodic mitigation capture, and Prometheus/node-exporter enriched mitigation paths; broader multi-family validation remains open.
 - AIOpsLab agent onboarding now has an explicit contract adapter for the documented flow: `init_problem(problem_id)`, agent `init_context(...)`, `register_agent(agent)`, and async agent `get_action(state)`.

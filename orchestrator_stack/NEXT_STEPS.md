@@ -1,9 +1,36 @@
 # Orchestrator Stack Next Steps
 
-1. Add direct Prometheus/node-exporter utilization queries and replace the current Kubernetes resource-request energy proxy once stable query names are locked for the local chart.
-2. Expand beyond Hotel Reservation misconfig to one more stable AIOpsLab fault family with detection/localization/analysis/mitigation coverage.
-3. Build a held-out multi-family trace corpus and require PPO to beat heuristic total score across held-out traces, not only the enriched mitigation slice.
-4. Add thesis-ready statistical tables: repeated seeds, confidence intervals, and ablations for no risk derivation vs risk derivation vs SLA risk preservation.
+1. Expand beyond Hotel Reservation misconfig to one more stable AIOpsLab fault family with detection/localization/analysis/mitigation coverage.
+2. Build a held-out multi-family trace corpus and require PPO to beat heuristic total score across held-out traces, not only the enriched mitigation slices.
+3. Add thesis-ready statistical tables: repeated seeds, confidence intervals, and ablations for no risk derivation vs risk derivation vs SLA risk preservation vs Prometheus enrichment.
+4. Replace model-derived energy watts with a measured or externally calibrated node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
+
+## Latest Session Note (2026-05-02 KST, Prometheus/node-exporter mitigation slice)
+
+- Added direct Prometheus/node-exporter enrichment to live Kubernetes trace capture:
+  - Prometheus service is port-forwarded after AIOpsLab deploys the observer stack.
+  - node-exporter instant queries provide live CPU and memory utilization.
+  - trace rows retain Kubernetes API state and add `prometheus_node_exporter` to `telemetry_sources`.
+- Re-ran live Kind-backed `misconfig_app_hotel_res-mitigation-1` with Prometheus enrichment:
+  - summary `reports/evaluations/202605022020_aiopslab_mitigation_prometheus_live_summary.json`
+  - trace `reports/evaluations/202605022020_aiopslab_mitigation_prometheus_kube_trace.json`
+  - captured `15` live rows
+  - all `15` rows include `prometheus_node_exporter`
+  - final state `SubmissionStatus.VALID_SUBMISSION`
+- Prometheus trace audit:
+  - output `reports/evaluations/202605022020_aiopslab_mitigation_prometheus_reward_audit.json`
+  - telemetry coverage `1.0`
+  - actions: `replicate=13`, `dvfs=1`
+  - max energy watts `128.083859`
+- PPO gate on Prometheus-enriched trace:
+  - config `orchestrator_stack/config/aiopslab_prometheus_mitigation_kind.json`
+  - output `reports/evaluations/202605022025_aiopslab_prometheus_mitigation_train_policy.json`
+  - policy episode reward `-663.0434828466666`
+  - heuristic total score `-740.276089708`
+  - delta `+77.23260686133335`
+  - `beats_heuristic=true`
+- Validation run status:
+  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`76 passed`)
 
 ## Latest Session Note (2026-05-02 KST, thesis-grade action-diversity slice)
 
@@ -28,7 +55,7 @@
 - Added thesis-grade validation report:
   - `reports/evaluations/202605022005_thesis_grade_orchestrator_validation.md`
 - Validation run status:
-  - `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`73 passed`)
+  - superseded by Prometheus slice (`76 passed`)
 
 ## Latest Session Note (2026-05-02 KST, periodic mitigation capture slice)
 

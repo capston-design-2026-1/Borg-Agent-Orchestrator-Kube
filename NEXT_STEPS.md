@@ -50,7 +50,8 @@ Read Agents.md, NEXT_STEPS.md, MAS_ARCHITECTURE.md, and README.md, inspect the l
 - Follow-up validation on 2026-05-02 KST: misconfig localization, analysis, and mitigation now run live on Kind with correct task-specific submissions; full-phase trace has 11 Kubernetes-derived rows and live retrained brain models/diagnostics, but PPO still remains below the corrected heuristic total-score gate.
 - Follow-up validation on 2026-05-02 KST: periodic Kubernetes capture now records 26-row live mitigation traces and PPO nearly closes the gate but still remains below heuristic total score by `-16.72244079999996`; next blocker is action diversity/reward design, not basic kube ingestion.
 - Follow-up validation on 2026-05-02 KST: live Kubernetes risk/demand derivation plus SLA risk preservation produces action-diverse audits (`replicate=21`, `dvfs=2`) and PPO now beats heuristic on the enriched mitigation trace by `+126.69152246399995`; thesis-grade report recorded at `reports/evaluations/202605022005_thesis_grade_orchestrator_validation.md`.
-- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `73 passed`.
+- Follow-up validation on 2026-05-02 KST: live Prometheus/node-exporter enrichment now supplies CPU and memory utilization to all `15` rows of the latest mitigation trace, and PPO beats heuristic on that Prometheus-enriched trace by `+77.23260686133335`.
+- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `76 passed`.
 
 ## Pipeline Status
 

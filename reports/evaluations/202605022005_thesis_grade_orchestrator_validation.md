@@ -24,6 +24,7 @@ The Borg-Agent-Orchestrator architecture is no longer validated only with synthe
 - AIOpsLab mitigation can run real remediation commands before `submit()`.
 - Periodic capture records intra-run state transitions instead of only one agent-turn snapshot.
 - Trace twin preserves live SLA risk when applying synthetic action deltas, preventing learned/simulated actions from erasing hard evidence from the next real trace row.
+- Prometheus/node-exporter enrichment now adds direct node CPU and memory utilization to live trace rows after AIOpsLab deploys the observer stack.
 - PPO gate now compares policy episode return against heuristic total episode score, not per-step average.
 
 ## Live Task Coverage
@@ -67,6 +68,22 @@ The Borg-Agent-Orchestrator architecture is no longer validated only with synthe
 
 This is the first validated slice where the learned policy beats the deterministic heuristic gate on a Kubernetes-derived live trace.
 
+### Prometheus/Node-Exporter Enriched Mitigation Trace
+
+- Trace: `reports/evaluations/202605022020_aiopslab_mitigation_prometheus_kube_trace.json`
+- Summary: `reports/evaluations/202605022020_aiopslab_mitigation_prometheus_live_summary.json`
+- Reward audit: `reports/evaluations/202605022020_aiopslab_mitigation_prometheus_reward_audit.json`
+- PPO gate: `reports/evaluations/202605022025_aiopslab_prometheus_mitigation_train_policy.json`
+- Rows: 15
+- Prometheus coverage: 15 of 15 rows include `prometheus_node_exporter`
+- Actions selected by heuristic audit: `replicate=13`, `dvfs=1`
+- Policy episode reward: `-663.0434828466666`
+- Heuristic total score: `-740.276089708`
+- Delta: `+77.23260686133335`
+- Gate: `beats_heuristic=true`
+
+This replaces the earlier CPU/memory resource-request proxy for the latest mitigation validation slice with live node-exporter utilization. Energy remains model-derived from observed utilization rather than measured from hardware power telemetry.
+
 ## Brain Model Evidence
 
 - Live full-phase risk dataset: `reports/evaluations/brain_live_full_phase/risk_dataset.npz`
@@ -85,18 +102,18 @@ Key diagnostics:
 
 ## Current Scientific Limitations
 
-- Current energy signal is a Kubernetes resource-request proxy, not direct node power telemetry.
+- Current latest mitigation CPU and memory signals come from Prometheus/node-exporter, but energy watts are still model-derived rather than measured by hardware power telemetry.
 - Current validated fault family is Hotel Reservation application misconfiguration; external validity requires at least one more fault family.
 - Kind is a local control plane; production cluster behavior may differ in scheduling, resource pressure, and exporter availability.
-- PPO pass is validated on an enriched mitigation trace, not yet on a broad multi-family trace corpus.
-- The full AIOpsLab Prometheus query path still needs stable query mappings before it can replace Kubernetes snapshot-derived proxies.
+- PPO pass is validated on enriched mitigation traces, including one Prometheus/node-exporter slice, not yet on a broad multi-family trace corpus.
+- Prometheus enrichment currently uses node-exporter CPU and memory utilization; additional PromQL mappings are still needed for service-level latency, queue pressure, and direct power signals if those exporters are available.
 
 ## Next Thesis-Grade Work
 
-1. Add Prometheus/node-exporter query capture for CPU, memory, and node-level energy proxies.
-2. Validate one additional AIOpsLab fault family with detection/localization/analysis/mitigation coverage.
-3. Build a multi-family trace corpus and require PPO to beat heuristic total score across held-out traces.
-4. Add statistical reporting: repeated seeds, confidence intervals, and ablation table for `no risk derivation`, `risk derivation only`, and `risk preservation`.
+1. Validate one additional AIOpsLab fault family with detection/localization/analysis/mitigation coverage.
+2. Build a multi-family trace corpus and require PPO to beat heuristic total score across held-out traces.
+3. Add statistical reporting: repeated seeds, confidence intervals, and ablation table for `no risk derivation`, `risk derivation only`, `risk preservation`, and `Prometheus enrichment`.
+4. Add direct power or calibrated energy telemetry if a node-power exporter is available.
 5. Separate thesis-ready tables from raw JSON artifacts for reproducible evaluation appendices.
 
 ## Validation Commands
@@ -105,4 +122,4 @@ Key diagnostics:
 PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q
 ```
 
-Latest result: `73 passed`.
+Latest result: `76 passed`.
