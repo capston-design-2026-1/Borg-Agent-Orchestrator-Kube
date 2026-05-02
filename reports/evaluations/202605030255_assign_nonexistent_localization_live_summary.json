@@ -1,0 +1,19 @@
+{
+  "problem_id": "assign_to_non_existent_node_social_net-localization-1",
+  "final_state": "SubmissionStatus.VALID_SUBMISSION",
+  "history_len": 4,
+  "results": {
+    "Localization Accuracy": 100.0,
+    "TTL": 0.2868790626525879,
+    "steps": 2,
+    "in_tokens": 22,
+    "out_tokens": 70,
+    "success": true,
+    "is_subset": true
+  },
+  "results_dir": "/private/tmp/aiopslab_results",
+  "trace_rows": 5,
+  "trace_out": "reports/evaluations/202605030255_assign_nonexistent_localization_kube_trace.json",
+  "capture_errors": [],
+  "prometheus_base_url": "http://127.0.0.1:19090"
+}
