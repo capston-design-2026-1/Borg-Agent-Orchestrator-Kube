@@ -1,0 +1,99 @@
+{
+  "status": "passed",
+  "confidence_level": 0.95,
+  "method": "Student t confidence intervals for seed-repeated deltas; n=3 intervals are descriptive and intentionally wide.",
+  "inputs": {
+    "repeated_seed_summary": "reports/evaluations/202605030205_repeated_seed_ppo_summary.json",
+    "controlled_ablation_summary": "reports/evaluations/202605030225_controlled_ablation_repeated_seed_summary.json"
+  },
+  "repeated_seed_policy_deltas": [
+    {
+      "evaluation_set": "hotel_reservation_prometheus_mitigation",
+      "metric": "delta_vs_heuristic",
+      "n": 3,
+      "mean": 69.34464389837028,
+      "std": 15.733374610873856,
+      "ci95_low": 30.260774694403338,
+      "ci95_high": 108.42851310233722,
+      "ci95_half_width": 39.08386920396694,
+      "pass_rate": 1.0
+    },
+    {
+      "evaluation_set": "social_network_k8s_target_port_full_phase",
+      "metric": "delta_vs_heuristic",
+      "n": 3,
+      "mean": 7.616210554666718,
+      "std": 4.111612192037126,
+      "ci95_low": -2.597600347665151,
+      "ci95_high": 17.830021456998587,
+      "ci95_half_width": 10.213810902331868,
+      "pass_rate": 1.0
+    },
+    {
+      "evaluation_set": "social_network_scale_pod_zero_full_phase",
+      "metric": "delta_vs_heuristic",
+      "n": 3,
+      "mean": 3.7671455893331918,
+      "std": 2.4305920632179037,
+      "ci95_low": -2.270779816787448,
+      "ci95_high": 9.805070995453832,
+      "ci95_half_width": 6.03792540612064,
+      "pass_rate": 1.0
+    }
+  ],
+  "controlled_ablation_variant_deltas": [
+    {
+      "variant": "no_predictor_no_sla_preservation",
+      "metric": "delta_vs_heuristic",
+      "n": 3,
+      "mean": 71.16131056503696,
+      "std": 8.570603799359562,
+      "ci95_low": 49.8707504545772,
+      "ci95_high": 92.4518706754967,
+      "ci95_half_width": 21.290560110459758,
+      "pass_rate": 1.0
+    },
+    {
+      "variant": "predictor_no_sla_preservation",
+      "metric": "delta_vs_heuristic",
+      "n": 3,
+      "mean": 65.26038463911107,
+      "std": 20.89213867303522,
+      "ci95_low": 13.361435082306755,
+      "ci95_high": 117.15933419591538,
+      "ci95_half_width": 51.89894955680431,
+      "pass_rate": 1.0
+    },
+    {
+      "variant": "predictor_sla_preservation",
+      "metric": "delta_vs_heuristic",
+      "n": 3,
+      "mean": 75.68908834281478,
+      "std": 7.894580465114325,
+      "ci95_low": 56.07786329097682,
+      "ci95_high": 95.30031339465275,
+      "ci95_half_width": 19.611225051837962,
+      "pass_rate": 1.0
+    }
+  ],
+  "controlled_ablation_effects": [
+    {
+      "effect": "sla_preservation_delta_gain_with_predictor",
+      "n": 3,
+      "mean": 10.428703703703718,
+      "std": 15.141067461322328,
+      "ci95_low": -27.183792973122927,
+      "ci95_high": 48.04120038053036,
+      "ci95_half_width": 37.612496676826645
+    },
+    {
+      "effect": "predictor_runtime_delta_change_without_sla_preservation",
+      "n": 3,
+      "mean": -5.90092592592589,
+      "std": 16.988854446710715,
+      "ci95_low": -48.103579936437285,
+      "ci95_high": 36.301728084585505,
+      "ci95_half_width": 42.202654010511395
+    }
+  ]
+}
