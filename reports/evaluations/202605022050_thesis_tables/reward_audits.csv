@@ -11,3 +11,8 @@ aiopslab_misconfig_mitigation_periodic_reward_audit,25,1,2,2,117.620408,"{""dvfs
 aiopslab_mitigation_enriched_reward_audit,23,1,2,2,117.620408,"{""dvfs"": 22, ""replicate"": 1}",-1142.5252163,reports/evaluations/202605021350_aiopslab_mitigation_enriched_reward_audit.json
 aiopslab_mitigation_enriched_reward_audit_risk_preserved,23,1,2,2,117.620408,"{""dvfs"": 2, ""replicate"": 21}",-1142.5252163,reports/evaluations/202605021355_aiopslab_mitigation_enriched_reward_audit_risk_preserved.json
 aiopslab_mitigation_prometheus_reward_audit,14,1,1,2,128.083859,"{""dvfs"": 1, ""replicate"": 13}",-665.876089708,reports/evaluations/202605022020_aiopslab_mitigation_prometheus_reward_audit.json
+k8s_target_port_detection_reward_audit,3,1,0,0,93.620408,"{""dvfs"": 3}",7.314832656,reports/evaluations/202605022100_k8s_target_port_detection_reward_audit.json
+k8s_target_port_localization_reward_audit,3,1,0,0,93.620408,"{""dvfs"": 3}",7.314832656,reports/evaluations/202605022105_k8s_target_port_localization_reward_audit.json
+k8s_target_port_analysis_reward_audit,3,1,0,0,93.620408,"{""dvfs"": 3}",7.314832656,reports/evaluations/202605022110_k8s_target_port_analysis_reward_audit.json
+k8s_target_port_mitigation_reward_audit,4,1,0,0,93.620408,"{""dvfs"": 4}",9.753110208,reports/evaluations/202605022120_k8s_target_port_mitigation_reward_audit.json
+k8s_target_port_full_phase_reward_audit,16,1,1,1,93.620408,"{""dvfs"": 13, ""replicate"": 3}",-260.507559168,reports/evaluations/202605022125_k8s_target_port_full_phase_reward_audit.json

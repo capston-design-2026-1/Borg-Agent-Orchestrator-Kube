@@ -15,6 +15,10 @@
 | aiopslab_misconfig_mitigation_periodic_live_summary | misconfig_app_hotel_res-mitigation-1 | SubmissionStatus.VALID_SUBMISSION | true | 26 | 0 | success=true | reports/evaluations/202605021325_aiopslab_misconfig_mitigation_periodic_live_summary.json |
 | aiopslab_mitigation_enriched_live_summary | misconfig_app_hotel_res-mitigation-1 | SubmissionStatus.VALID_SUBMISSION | true | 24 | 0 | success=true | reports/evaluations/202605021350_aiopslab_mitigation_enriched_live_summary.json |
 | aiopslab_mitigation_prometheus_live_summary | misconfig_app_hotel_res-mitigation-1 | SubmissionStatus.VALID_SUBMISSION | true | 15 | 2 | success=true | reports/evaluations/202605022020_aiopslab_mitigation_prometheus_live_summary.json |
+| k8s_target_port_detection_live_summary | k8s_target_port-misconfig-detection-1 | SubmissionStatus.VALID_SUBMISSION |  | 4 | 0 | Detection Accuracy=Correct | reports/evaluations/202605022100_k8s_target_port_detection_live_summary.json |
+| k8s_target_port_localization_live_summary | k8s_target_port-misconfig-localization-1 | SubmissionStatus.VALID_SUBMISSION | true | 4 | 0 | Localization Accuracy=100 | reports/evaluations/202605022105_k8s_target_port_localization_live_summary.json |
+| k8s_target_port_analysis_live_summary | k8s_target_port-misconfig-analysis-1 | SubmissionStatus.VALID_SUBMISSION | true | 4 | 0 | system_level_correct=true | reports/evaluations/202605022110_k8s_target_port_analysis_live_summary.json |
+| k8s_target_port_mitigation_live_summary | k8s_target_port-misconfig-mitigation-1 | SubmissionStatus.VALID_SUBMISSION | true | 5 | 0 | success=true | reports/evaluations/202605022120_k8s_target_port_mitigation_live_summary.json |
 
 ## Telemetry Reward Audits
 
@@ -32,6 +36,11 @@
 | aiopslab_mitigation_enriched_reward_audit | 23 | 1 | 2 | 2 | 117.620408 | {"dvfs": 22, "replicate": 1} | -1142.5252163 | reports/evaluations/202605021350_aiopslab_mitigation_enriched_reward_audit.json |
 | aiopslab_mitigation_enriched_reward_audit_risk_preserved | 23 | 1 | 2 | 2 | 117.620408 | {"dvfs": 2, "replicate": 21} | -1142.5252163 | reports/evaluations/202605021355_aiopslab_mitigation_enriched_reward_audit_risk_preserved.json |
 | aiopslab_mitigation_prometheus_reward_audit | 14 | 1 | 1 | 2 | 128.083859 | {"dvfs": 1, "replicate": 13} | -665.876089708 | reports/evaluations/202605022020_aiopslab_mitigation_prometheus_reward_audit.json |
+| k8s_target_port_detection_reward_audit | 3 | 1 | 0 | 0 | 93.620408 | {"dvfs": 3} | 7.314832656 | reports/evaluations/202605022100_k8s_target_port_detection_reward_audit.json |
+| k8s_target_port_localization_reward_audit | 3 | 1 | 0 | 0 | 93.620408 | {"dvfs": 3} | 7.314832656 | reports/evaluations/202605022105_k8s_target_port_localization_reward_audit.json |
+| k8s_target_port_analysis_reward_audit | 3 | 1 | 0 | 0 | 93.620408 | {"dvfs": 3} | 7.314832656 | reports/evaluations/202605022110_k8s_target_port_analysis_reward_audit.json |
+| k8s_target_port_mitigation_reward_audit | 4 | 1 | 0 | 0 | 93.620408 | {"dvfs": 4} | 9.753110208 | reports/evaluations/202605022120_k8s_target_port_mitigation_reward_audit.json |
+| k8s_target_port_full_phase_reward_audit | 16 | 1 | 1 | 1 | 93.620408 | {"dvfs": 13, "replicate": 3} | -260.507559168 | reports/evaluations/202605022125_k8s_target_port_full_phase_reward_audit.json |
 
 ## PPO Policy Gates
 
@@ -44,3 +53,4 @@
 | aiopslab_periodic_mitigation_train_policy | trained | 3 | -1219.131102 | -1202.4086612 | -16.7224408 | false | reports/evaluations/202605021330_aiopslab_periodic_mitigation_train_policy.json |
 | aiopslab_enriched_mitigation_train_policy | trained | 3 | -991.63369384 | -1118.3252163 | 126.691522464 | true | reports/evaluations/202605021400_aiopslab_enriched_mitigation_train_policy.json |
 | aiopslab_prometheus_mitigation_train_policy | trained | 3 | -663.043482847 | -740.276089708 | 77.2326068613 | true | reports/evaluations/202605022025_aiopslab_prometheus_mitigation_train_policy.json |
+| k8s_target_port_full_phase_train_policy | trained | 3 | -329.92926528 | -324.347559168 | -5.581706112 | false | reports/evaluations/202605022130_k8s_target_port_full_phase_train_policy.json |

@@ -6,3 +6,4 @@ aiopslab_full_phase_train_policy_fixed_gate,trained,3,-340.600374133,-312.985224
 aiopslab_periodic_mitigation_train_policy,trained,3,-1219.131102,-1202.4086612,-16.7224408,false,reports/evaluations/202605021330_aiopslab_periodic_mitigation_train_policy.json
 aiopslab_enriched_mitigation_train_policy,trained,3,-991.63369384,-1118.3252163,126.691522464,true,reports/evaluations/202605021400_aiopslab_enriched_mitigation_train_policy.json
 aiopslab_prometheus_mitigation_train_policy,trained,3,-663.043482847,-740.276089708,77.2326068613,true,reports/evaluations/202605022025_aiopslab_prometheus_mitigation_train_policy.json
+k8s_target_port_full_phase_train_policy,trained,3,-329.92926528,-324.347559168,-5.581706112,false,reports/evaluations/202605022130_k8s_target_port_full_phase_train_policy.json
