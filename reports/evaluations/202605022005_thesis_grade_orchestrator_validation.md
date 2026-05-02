@@ -129,8 +129,8 @@ This is the first machine-checkable multi-family policy gate. It does not replac
 
 ### Repeated-Seed PPO Statistics
 
-- Summary JSON: `reports/evaluations/202605030040_repeated_seed_ppo_summary.json`
-- Summary table: `reports/evaluations/202605030040_repeated_seed_ppo_summary.md`
+- Summary JSON: `reports/evaluations/202605030205_repeated_seed_ppo_summary.json`
+- Summary table: `reports/evaluations/202605030205_repeated_seed_ppo_summary.md`
 - Seeds: `101`, `202`, `303`
 - Hotel Reservation Prometheus mitigation pass rate: `3/3`
 - Hotel Reservation Prometheus mitigation mean delta: `+69.34464389837028`
@@ -138,8 +138,11 @@ This is the first machine-checkable multi-family policy gate. It does not replac
 - SocialNetwork target-port full-phase pass rate: `3/3`
 - SocialNetwork target-port full-phase mean delta: `+7.616210554666718`
 - SocialNetwork target-port full-phase delta standard deviation: `4.111612192037126`
+- SocialNetwork scale-to-zero full-phase pass rate: `3/3`
+- SocialNetwork scale-to-zero full-phase mean delta: `+3.767145589333192`
+- SocialNetwork scale-to-zero full-phase delta standard deviation: `2.430592063223214`
 
-This strengthens the PPO evidence from one-off gate passes to seed-repeated gate passes on both reported live fault families.
+This strengthens the PPO evidence from one-off gate passes to seed-repeated gate passes on all three reported live fault families.
 
 ### Ablation Evidence Matrix
 
@@ -188,7 +191,7 @@ Key diagnostics:
 - Current latest mitigation CPU and memory signals come from Prometheus/node-exporter, but energy watts are still model-derived rather than measured by hardware power telemetry.
 - Current validated full-phase fault families are Hotel Reservation application misconfiguration and SocialNetwork Kubernetes target-port misconfiguration; external validity still requires held-out multi-family testing.
 - Kind is a local control plane; production cluster behavior may differ in scheduling, resource pressure, and exporter availability.
-- PPO pass is validated on enriched mitigation traces, including one Prometheus/node-exporter slice, on two SocialNetwork full-phase families, on the current three-entry multi-family gate suite, and across three seeds for the first two reported families. Third-family repeated seeds and broader coverage remain open.
+- PPO pass is validated on enriched mitigation traces, including one Prometheus/node-exporter slice, on two SocialNetwork full-phase families, on the current three-entry multi-family gate suite, and across three seeds for all three reported families. Broader external coverage and repeated-seed controlled ablations remain open.
 - Prometheus enrichment currently uses node-exporter CPU and memory utilization; additional PromQL mappings are still needed for service-level latency, queue pressure, and direct power signals if those exporters are available.
 
 ## Next Thesis-Grade Work

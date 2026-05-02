@@ -82,7 +82,6 @@ ARCHITECTURE_ITEMS = (
 
 NEXT_ENGINEERING_WORK = (
     "Repeat controlled ablations across multiple seeds for predictor runtime and SLA-risk preservation.",
-    "Add repeated-seed PPO statistics for the third live full-phase family.",
     "Expand the current three-entry multi-family gate suite with another full-phase AIOpsLab family when available.",
     "Add measured or externally calibrated node-power telemetry when a power exporter is available.",
     "Export thesis-ready tables from raw JSON artifacts for reproducible evaluation appendices.",
@@ -122,13 +121,13 @@ def architecture_status_markdown(
             "- `k8s_target_port-misconfig-*` validates a second full-phase family; stronger PPO beats heuristic by `+18.01204388800005` on that family trace.",
             "- Third-family `scale_pod_zero_social_net-*` full-phase PPO beats heuristic by `+20.700478922666548`.",
             "- Latest multi-family gate suite `reports/evaluations/202605030150_aiopslab_multi_family_policy_gate_suite.json` passes `3/3` held-out entries.",
-            "- Repeated-seed PPO summary `reports/evaluations/202605030040_repeated_seed_ppo_summary.json` passes `3/3` seeds on both reported families.",
+            "- Repeated-seed PPO summary `reports/evaluations/202605030205_repeated_seed_ppo_summary.json` passes `3/3` seeds on all three reported families.",
             "- Ablation evidence matrix `reports/evaluations/202605030050_ablation_evidence_matrix.md` records sequential evidence with an explicit non-causal caveat.",
             "- Controlled single-seed ablation `reports/evaluations/202605030110_controlled_ablation_summary.json` shows SLA-risk preservation improves predictor-runtime delta by `+27.90277777777783` on a fixed trace.",
             "",
             "## Remaining Research Gaps",
             "",
-            "- PPO quality is proven on three held-out gate-suite entries and three repeated seeds for the first two reported families; third-family repeated seeds and repeated-seed controlled ablations remain open.",
+            "- PPO quality is proven on three held-out gate-suite entries and three repeated seeds for all three reported families; repeated-seed controlled ablations remain open.",
             "- Energy watts remain model-derived from utilization unless a measured node-power exporter is added.",
             "",
             "## Recommended Next Engineering Work",

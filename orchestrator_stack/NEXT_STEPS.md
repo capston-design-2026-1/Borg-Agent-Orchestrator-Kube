@@ -1,8 +1,17 @@
 # Orchestrator Stack Next Steps
 
 1. Add repeated-seed controlled ablations for the Prometheus trace variants; current controlled ablation is single-seed.
-2. Add repeated-seed PPO statistics for the third family (`scale_pod_zero_social_net-*`) to match the first two families.
+2. Expand the current three-family policy gate suite with another full-phase AIOpsLab family when available.
 3. Replace model-derived energy watts with a measured or externally calibrated node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
+
+## Latest Session Note (2026-05-03 KST, third-family repeated-seed PPO slice)
+
+- Added repeated-seed PPO configs for `scale_pod_zero_social_net-*` seeds `101`, `202`, and `303`.
+- Recorded repeated-seed PPO artifacts under `reports/evaluations/repeated_seeds/202605030200_scale_pod_zero_full_phase_seed_*.json`.
+- Updated combined repeated-seed summary:
+  - `reports/evaluations/202605030205_repeated_seed_ppo_summary.json`
+  - `reports/evaluations/202605030205_repeated_seed_ppo_summary.md`
+- Result: `social_network_scale_pod_zero_full_phase` passes `3/3` seeds with mean delta `+3.767145589333192` and sample standard deviation `2.430592063223214`.
 
 ## Latest Session Note (2026-05-03 KST, third-family AIOpsLab validation slice)
 

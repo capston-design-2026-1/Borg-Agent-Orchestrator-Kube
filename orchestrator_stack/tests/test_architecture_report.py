@@ -16,7 +16,8 @@ def test_architecture_status_markdown_reports_current_gaps():
     assert "scale_pod_zero_social_net-*" in report
     assert "+20.700478922666548" in report
     assert "passes `3/3` held-out entries" in report
-    assert "passes `3/3` seeds" in report
+    assert "202605030205_repeated_seed_ppo_summary.json" in report
+    assert "passes `3/3` seeds on all three reported families" in report
     assert "Ablation evidence matrix" in report
     assert "+27.90277777777783" in report
     assert "82 passed" in report
