@@ -1,0 +1,16 @@
+{
+  "problem_id": "misconfig_app_hotel_res-mitigation-1",
+  "final_state": "SubmissionStatus.VALID_SUBMISSION",
+  "history_len": 6,
+  "results": {
+    "TTM": 2.639164924621582,
+    "steps": 3,
+    "in_tokens": 1332,
+    "out_tokens": 127,
+    "success": true
+  },
+  "results_dir": "/private/tmp/aiopslab_results",
+  "trace_rows": 26,
+  "trace_out": "reports/evaluations/202605021325_aiopslab_misconfig_mitigation_periodic_kube_trace.json",
+  "capture_errors": []
+}
