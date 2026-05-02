@@ -215,6 +215,17 @@ def cmd_thesis_tables(args: argparse.Namespace) -> None:
     print(json.dumps(result, indent=2))
 
 
+def cmd_evaluation_statistics(args: argparse.Namespace) -> None:
+    from orchestrator.layer6.evaluation_statistics import build_evaluation_statistics_report, write_evaluation_statistics_report
+
+    report = build_evaluation_statistics_report(
+        repeated_seed_summary_path=args.repeated_seed_summary,
+        controlled_ablation_summary_path=args.controlled_ablation_summary,
+    )
+    outputs = write_evaluation_statistics_report(report, args.out_json, args.out_md)
+    print(json.dumps(outputs, indent=2))
+
+
 def cmd_policy_gate_suite(args: argparse.Namespace) -> None:
     from orchestrator.layer6.policy_gate_suite import evaluate_policy_gate_suite, write_policy_gate_suite_report
 
@@ -336,6 +347,13 @@ def build_parser() -> argparse.ArgumentParser:
     p_thesis_tables.add_argument("--out-md", required=True)
     p_thesis_tables.add_argument("--out-csv-dir")
     p_thesis_tables.set_defaults(func=cmd_thesis_tables)
+
+    p_eval_stats = sub.add_parser("evaluation-statistics")
+    p_eval_stats.add_argument("--repeated-seed-summary", required=True)
+    p_eval_stats.add_argument("--controlled-ablation-summary", required=True)
+    p_eval_stats.add_argument("--out-json", required=True)
+    p_eval_stats.add_argument("--out-md")
+    p_eval_stats.set_defaults(func=cmd_evaluation_statistics)
 
     p_gate_suite = sub.add_parser("policy-gate-suite")
     p_gate_suite.add_argument("--manifest", required=True)
