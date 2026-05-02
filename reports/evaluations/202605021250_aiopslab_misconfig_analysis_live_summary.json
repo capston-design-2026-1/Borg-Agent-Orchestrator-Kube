@@ -1,0 +1,18 @@
+{
+  "problem_id": "misconfig_app_hotel_res-analysis-1",
+  "final_state": "SubmissionStatus.VALID_SUBMISSION",
+  "history_len": 4,
+  "results": {
+    "system_level_correct": true,
+    "fault_type_correct": true,
+    "success": true,
+    "TTA": 0.31943297386169434,
+    "steps": 2,
+    "in_tokens": 1262,
+    "out_tokens": 81
+  },
+  "results_dir": "/private/tmp/aiopslab_results",
+  "trace_rows": 2,
+  "trace_out": "reports/evaluations/202605021250_aiopslab_misconfig_analysis_kube_trace.json",
+  "capture_errors": []
+}
