@@ -1,8 +1,31 @@
 # Orchestrator Stack Next Steps
 
-1. Expand the multi-family gate suite beyond two held-out entries with another full-phase family from the AIOpsLab catalog.
-2. Add repeated-seed controlled ablations for the Prometheus trace variants; current controlled ablation is single-seed.
+1. Add repeated-seed controlled ablations for the Prometheus trace variants; current controlled ablation is single-seed.
+2. Add repeated-seed PPO statistics for the third family (`scale_pod_zero_social_net-*`) to match the first two families.
 3. Replace model-derived energy watts with a measured or externally calibrated node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
+
+## Latest Session Note (2026-05-03 KST, third-family AIOpsLab validation slice)
+
+- Ran live Kind-backed `scale_pod_zero_social_net-*` on the SocialNetwork app:
+  - detection `reports/evaluations/202605030120_scale_pod_zero_detection_live_summary.json`: `Detection Accuracy=Correct`
+  - localization `reports/evaluations/202605030125_scale_pod_zero_localization_live_summary.json`: `Localization Accuracy=100.0`, `success=true`
+  - analysis `reports/evaluations/202605030130_scale_pod_zero_analysis_live_summary.json`: `system_level_correct=true`, `fault_type_correct=true`, `success=true`
+  - mitigation `reports/evaluations/202605030135_scale_pod_zero_mitigation_live_summary.json`: `success=true`
+- Built third-family full-phase trace:
+  - trace `reports/evaluations/202605030140_scale_pod_zero_full_phase_kube_trace.json`
+  - rows `18`
+  - telemetry coverage `1.0`
+  - actions `dvfs=13`, `replicate=4`
+- PPO gate:
+  - config `orchestrator_stack/config/aiopslab_scale_pod_zero_full_phase_kind.json`
+  - output `reports/evaluations/202605030145_scale_pod_zero_full_phase_train_policy.json`
+  - policy episode reward `-545.6488026933334`
+  - heuristic total score `-566.349281616`
+  - delta `+20.700478922666548`
+  - `beats_heuristic=true`
+- Updated multi-family gate suite:
+  - report `reports/evaluations/202605030150_aiopslab_multi_family_policy_gate_suite.json`
+  - `heldout_passes=3/3`
 
 ## Latest Session Note (2026-05-03 KST, controlled ablation slice)
 

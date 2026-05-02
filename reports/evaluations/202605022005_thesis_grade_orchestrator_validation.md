@@ -40,6 +40,10 @@ The Borg-Agent-Orchestrator architecture is no longer validated only with synthe
 | Target-port misconfig localization | `reports/evaluations/202605022105_k8s_target_port_localization_live_summary.json` | `Localization Accuracy=100.0`, `success=true` |
 | Target-port misconfig analysis | `reports/evaluations/202605022110_k8s_target_port_analysis_live_summary.json` | `system_level_correct=true`, `fault_type_correct=true`, `success=true` |
 | Target-port misconfig mitigation | `reports/evaluations/202605022120_k8s_target_port_mitigation_live_summary.json` | `success=true` |
+| Scale-to-zero detection | `reports/evaluations/202605030120_scale_pod_zero_detection_live_summary.json` | `Detection Accuracy=Correct` |
+| Scale-to-zero localization | `reports/evaluations/202605030125_scale_pod_zero_localization_live_summary.json` | `Localization Accuracy=100.0`, `success=true` |
+| Scale-to-zero analysis | `reports/evaluations/202605030130_scale_pod_zero_analysis_live_summary.json` | `system_level_correct=true`, `fault_type_correct=true`, `success=true` |
+| Scale-to-zero mitigation | `reports/evaluations/202605030135_scale_pod_zero_mitigation_live_summary.json` | `success=true` |
 
 ## Reward And Policy Evidence
 
@@ -113,11 +117,13 @@ This expands live external validity to a second full-phase fault family and clos
 
 - Manifest: `orchestrator_stack/config/aiopslab_multi_family_gate_suite.json`
 - Report: `reports/evaluations/202605030020_aiopslab_multi_family_policy_gate_suite.json`
+- Latest report: `reports/evaluations/202605030150_aiopslab_multi_family_policy_gate_suite.json`
 - Suite status: `passed`
-- Held-out entries: 2
-- Held-out passes: 2
+- Held-out entries: 3
+- Held-out passes: 3
 - Hotel Reservation Prometheus mitigation delta: `+77.23260686133335`
 - SocialNetwork target-port full-phase delta: `+18.01204388800005`
+- SocialNetwork scale-to-zero full-phase delta: `+20.700478922666548`
 
 This is the first machine-checkable multi-family policy gate. It does not replace repeated-seed statistics, but it prevents thesis reporting from relying on unstructured manual inspection of policy JSON artifacts.
 
@@ -182,7 +188,7 @@ Key diagnostics:
 - Current latest mitigation CPU and memory signals come from Prometheus/node-exporter, but energy watts are still model-derived rather than measured by hardware power telemetry.
 - Current validated full-phase fault families are Hotel Reservation application misconfiguration and SocialNetwork Kubernetes target-port misconfiguration; external validity still requires held-out multi-family testing.
 - Kind is a local control plane; production cluster behavior may differ in scheduling, resource pressure, and exporter availability.
-- PPO pass is validated on enriched mitigation traces, including one Prometheus/node-exporter slice, on the second full-phase family after stronger curriculum, on the current two-entry multi-family gate suite, and across three seeds for both reported families. Broader multi-family coverage and ablation studies remain open.
+- PPO pass is validated on enriched mitigation traces, including one Prometheus/node-exporter slice, on two SocialNetwork full-phase families, on the current three-entry multi-family gate suite, and across three seeds for the first two reported families. Third-family repeated seeds and broader coverage remain open.
 - Prometheus enrichment currently uses node-exporter CPU and memory utilization; additional PromQL mappings are still needed for service-level latency, queue pressure, and direct power signals if those exporters are available.
 
 ## Next Thesis-Grade Work

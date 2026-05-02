@@ -13,7 +13,9 @@ def test_architecture_status_markdown_reports_current_gaps():
     assert "Prometheus/node-exporter enrichment covers all 15 rows" in report
     assert "k8s_target_port-misconfig-*" in report
     assert "+18.01204388800005" in report
-    assert "passes `2/2` held-out entries" in report
+    assert "scale_pod_zero_social_net-*" in report
+    assert "+20.700478922666548" in report
+    assert "passes `3/3` held-out entries" in report
     assert "passes `3/3` seeds" in report
     assert "Ablation evidence matrix" in report
     assert "+27.90277777777783" in report
