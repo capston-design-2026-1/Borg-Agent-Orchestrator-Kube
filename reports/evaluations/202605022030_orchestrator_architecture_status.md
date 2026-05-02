@@ -1,6 +1,6 @@
 # Orchestrator Architecture Status
 
-- Generated (KST): 2026-05-02 20:48
+- Generated (KST): 2026-05-02 21:10
 - Source architecture: `docs/project_architecture.pdf`
 - Implementation root: `orchestrator_stack/`
 
@@ -26,22 +26,22 @@
 
 ## Current Validation Baseline
 
-- Full test suite: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` -> `76 passed` on 2026-05-02 KST.
+- Full test suite: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` -> `78 passed` on 2026-05-02 KST.
 - `export-brain-datasets` smoke ran against `orchestrator_stack/examples/sample_trace.json` and wrote risk/demand NPZ files.
 - `train-policy` smoke reports `heuristic_baseline` and `policy_vs_heuristic` gates.
-- Live Kind/AIOpsLab validation uses `~/Documents/aiopslab_validation_env/kubeconfig` and covers no-op plus misconfig detection/localization/analysis/mitigation.
+- Live Kind/AIOpsLab validation uses `~/Documents/aiopslab_validation_env/kubeconfig` and covers no-op, Hotel Reservation misconfiguration, and SocialNetwork Kubernetes target-port misconfiguration.
 - Prometheus/node-exporter enrichment covers all 15 rows in `reports/evaluations/202605022020_aiopslab_mitigation_prometheus_kube_trace.json`.
 - PPO beats heuristic on the Prometheus-enriched mitigation trace by `+77.23260686133335` total reward.
+- `k8s_target_port-misconfig-*` validates a second full-phase family; PPO remains below heuristic by `-5.581706111999949` on that family trace.
 
 ## Remaining Research Gaps
 
-- Current validated live fault family is still Hotel Reservation misconfiguration.
-- PPO quality is proven on enriched mitigation slices, not yet on a held-out multi-family corpus.
+- PPO quality is proven on enriched mitigation slices, but not yet on the second full-phase family or a held-out multi-family corpus.
 - Energy watts remain model-derived from utilization unless a measured node-power exporter is added.
 
 ## Recommended Next Engineering Work
 
-1. Validate one additional AIOpsLab fault family beyond Hotel Reservation misconfiguration.
+1. Improve PPO robustness on the second full-phase family where `k8s_target_port-misconfig-*` is still below heuristic.
 2. Build a held-out multi-family live trace corpus and require PPO to beat heuristic total score across held-out traces.
 3. Add repeated-seed statistics, confidence intervals, and ablations for risk derivation, SLA risk preservation, and Prometheus enrichment.
 4. Add measured or externally calibrated node-power telemetry when a power exporter is available.
