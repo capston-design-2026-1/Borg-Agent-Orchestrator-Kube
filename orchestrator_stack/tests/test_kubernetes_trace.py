@@ -31,7 +31,10 @@ def test_kubernetes_snapshot_to_trace_row_uses_real_kube_payload_shape():
             },
             {
                 "metadata": {"namespace": "test-hotel-reservation", "name": "pending"},
-                "spec": {"containers": [{"resources": {"requests": {"cpu": "250m", "memory": "64Mi"}}}]},
+                "spec": {
+                    "nodeName": "kind-control-plane",
+                    "containers": [{"resources": {"requests": {"cpu": "250m", "memory": "64Mi"}}}],
+                },
                 "status": {"phase": "Pending", "containerStatuses": []},
             },
         ]
@@ -48,12 +51,14 @@ def test_kubernetes_snapshot_to_trace_row_uses_real_kube_payload_shape():
 
     assert row["timestamp"] == 123
     assert row["nodes"][0]["node_id"] == "kind-control-plane"
-    assert row["nodes"][0]["cpu_util"] == 0.25
-    assert row["nodes"][0]["mem_util"] == 0.125
+    assert row["nodes"][0]["cpu_util"] == 0.375
+    assert row["nodes"][0]["mem_util"] == 0.1875
     assert row["sla_violations"] == 1
     assert row["completed_tasks"] == 3
     assert row["queue_length"] == 1
     assert row["energy_watts"] > 0
+    assert row["p_fail_scores"]["kind-control-plane"] == 0.95
+    assert row["demand_projection"]["kind-control-plane"] > 0.0
     assert {task["task_id"] for task in row["tasks"]} == {
         "test-hotel-reservation/frontend",
         "test-hotel-reservation/pending",

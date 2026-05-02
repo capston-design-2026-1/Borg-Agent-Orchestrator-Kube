@@ -115,6 +115,8 @@ def kubernetes_snapshot_to_trace_row(
         pods_by_node.setdefault(node_name, []).append(pod)
 
     nodes = []
+    p_fail_scores: dict[str, float] = {}
+    demand_projection: dict[str, float] = {}
     total_energy = 0.0
     for node in nodes_payload.get("items", []):
         name = node.get("metadata", {}).get("name", "unknown-node")
@@ -129,6 +131,17 @@ def kubernetes_snapshot_to_trace_row(
             req_mem += mem
         cpu_util = min(1.0, max(0.0, req_cpu / alloc_cpu))
         mem_util = min(1.0, max(0.0, req_mem / alloc_mem))
+        node_pods = pods_by_node.get(name, [])
+        unhealthy_pods = [
+            pod
+            for pod in node_pods
+            if pod.get("status", {}).get("phase") in {"Failed", "Pending", "Unknown"} or not _pod_ready(pod)
+        ]
+        restart_count = sum(_pod_restart_count(pod) for pod in node_pods)
+        health_risk = 0.95 if unhealthy_pods else (0.7 if restart_count else 0.0)
+        utilization_risk = (0.55 * cpu_util) + (0.35 * mem_util)
+        p_fail_scores[name] = round(min(1.0, max(health_risk, utilization_risk)), 6)
+        demand_projection[name] = round(min(1.0, max(0.0, (0.55 * cpu_util) + (0.35 * mem_util))), 6)
         node_energy = 80.0 + (120.0 * cpu_util) + (60.0 * mem_util)
         total_energy += node_energy
         nodes.append(
@@ -168,6 +181,8 @@ def kubernetes_snapshot_to_trace_row(
         "sla_violations": int(sla_violations),
         "completed_tasks": int(completed_tasks),
         "energy_watts": round(total_energy, 6),
+        "p_fail_scores": p_fail_scores,
+        "demand_projection": demand_projection,
     }
 
 
