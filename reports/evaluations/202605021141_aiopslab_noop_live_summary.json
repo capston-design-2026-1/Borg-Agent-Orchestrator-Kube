@@ -1,0 +1,22 @@
+{
+  "problem_id": "noop_detection_hotel_reservation-1",
+  "cluster": "kind-borg-aiopslab",
+  "kubeconfig": "/Users/theokim/Documents/aiopslab_validation_env/kubeconfig",
+  "aiopslab_env": "/Users/theokim/Documents/aiopslab_validation_env",
+  "status": "validated",
+  "final_state": "SubmissionStatus.VALID_SUBMISSION",
+  "history_len": 4,
+  "results": {
+    "Detection Accuracy": "Correct",
+    "TTD": 0.07076191902160645,
+    "steps": 2,
+    "in_tokens": 1265,
+    "out_tokens": 68
+  },
+  "session_trace": "reports/evaluations/202605021140_aiopslab_noop_live_session.json",
+  "notes": [
+    "Kind cluster created from Docker Desktop using setup_kind_cluster.sh equivalent commands.",
+    "OpenEBS NDM daemonset is removed during smoke runs because Docker Desktop Kind lacks /run/udev hostPath.",
+    "AIOpsLab Hotel Reservation app, Prometheus, workload job, agent response parsing, environment action, submission, evaluation, and cleanup all executed on the live cluster."
+  ]
+}

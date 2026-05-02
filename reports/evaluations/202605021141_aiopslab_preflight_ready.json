@@ -1,0 +1,13 @@
+{
+  "status": "ready",
+  "python_executable": "/Users/theokim/Documents/aiopslab_validation_env/bin/python",
+  "python_version": "3.12.13",
+  "compatible_python": true,
+  "aiopslab_package_available": true,
+  "kube_config_available": true,
+  "kube_config_paths": [
+    "/Users/theokim/Documents/aiopslab_validation_env/kubeconfig"
+  ],
+  "import_errors": {},
+  "blockers": []
+}
