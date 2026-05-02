@@ -1,0 +1,20 @@
+{
+  "problem_id": "misconfig_app_hotel_res-mitigation-1",
+  "final_state": "SubmissionStatus.VALID_SUBMISSION",
+  "history_len": 6,
+  "results": {
+    "TTM": 2.9001221656799316,
+    "steps": 3,
+    "in_tokens": 1328,
+    "out_tokens": 127,
+    "success": true
+  },
+  "results_dir": "/private/tmp/aiopslab_results",
+  "trace_rows": 15,
+  "trace_out": "reports/evaluations/202605022020_aiopslab_mitigation_prometheus_kube_trace.json",
+  "capture_errors": [
+    "Remote end closed connection without response",
+    "<urlopen error [Errno 61] Connection refused>"
+  ],
+  "prometheus_base_url": "http://127.0.0.1:19090"
+}

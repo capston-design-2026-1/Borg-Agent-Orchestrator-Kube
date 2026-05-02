@@ -1,0 +1,55 @@
+{
+  "status": "trained",
+  "stages": [
+    {
+      "stage": 1,
+      "status": "trained",
+      "checkpoint": "/private/tmp/borg_aiopslab_prometheus_mitigation_rllib/stage_01",
+      "train_iters": 4,
+      "episode_reward_mean": -673.8393161800001,
+      "train_batch_size": 256,
+      "minibatch_size": 64,
+      "num_epochs": 2,
+      "rollout_fragment_length": 64,
+      "learning_rate": 0.0003
+    },
+    {
+      "stage": 2,
+      "status": "trained",
+      "checkpoint": "/private/tmp/borg_aiopslab_prometheus_mitigation_rllib/stage_02",
+      "train_iters": 10,
+      "episode_reward_mean": -678.0045939577778,
+      "train_batch_size": 512,
+      "minibatch_size": 128,
+      "num_epochs": 3,
+      "rollout_fragment_length": 128,
+      "learning_rate": 0.0002
+    },
+    {
+      "stage": 3,
+      "status": "trained",
+      "checkpoint": "/private/tmp/borg_aiopslab_prometheus_mitigation_rllib/stage_03",
+      "train_iters": 16,
+      "episode_reward_mean": -663.0434828466666,
+      "train_batch_size": 512,
+      "minibatch_size": 128,
+      "num_epochs": 3,
+      "rollout_fragment_length": 128,
+      "learning_rate": 0.0001
+    }
+  ],
+  "stage_count": 3,
+  "heuristic_baseline": {
+    "steps": 14,
+    "total_score": -740.276089708,
+    "avg_score": -52.87686355057143
+  },
+  "policy_vs_heuristic": {
+    "status": "compared",
+    "policy_episode_reward_mean": -663.0434828466666,
+    "heuristic_total_score": -740.276089708,
+    "heuristic_avg_score": -52.87686355057143,
+    "delta_vs_heuristic": 77.23260686133335,
+    "beats_heuristic": true
+  }
+}
