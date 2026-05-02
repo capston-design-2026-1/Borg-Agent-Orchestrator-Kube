@@ -221,6 +221,7 @@ PYTHONPATH=orchestrator_stack ~/Documents/aiopslab_validation_env/bin/python \
 Latest live Kind result: `reports/evaluations/202605021205_aiopslab_noop_live_summary.json` with `Detection Accuracy=Correct`.
 Latest live Kubernetes-derived trace: `reports/evaluations/202605021205_aiopslab_noop_kube_trace.json`.
 Latest live telemetry audit: `reports/evaluations/202605021205_aiopslab_noop_kube_reward_audit.json` with telemetry coverage `1.0`.
+Live trace PPO config: `orchestrator_stack/config/aiopslab_live_kind.json`. Current PPO gate remains closed on this two-row no-op trace; `reports/evaluations/202605021222_aiopslab_live_train_policy_stronger.json` records `beats_heuristic=false`.
 
 ## Current Validation Status
 

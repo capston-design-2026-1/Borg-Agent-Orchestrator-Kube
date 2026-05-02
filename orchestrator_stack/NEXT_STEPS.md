@@ -1,9 +1,26 @@
 # Orchestrator Stack Next Steps
 
-1. Tune PPO curriculum beyond smoke settings until `policy_vs_heuristic.beats_heuristic` is true on representative telemetry-backed traces.
-2. Export representative trace-derived matrices with `export-brain-datasets`, retrain boosters, inspect `calibration_summary`, and only then promote thresholds.
-3. Promote the Kind/AIOpsLab validation workflow from no-op smoke to multi-problem coverage.
+1. Promote the Kind/AIOpsLab validation workflow from no-op smoke to multi-problem coverage so PPO has non-duplicate, fault-diverse live traces.
+2. Tune PPO curriculum again after collecting richer telemetry-backed traces; current no-op trace training does not beat heuristic.
+3. Export representative trace-derived matrices with `export-brain-datasets`, retrain boosters, inspect `calibration_summary`, and only then promote thresholds.
 4. Replace the current Kubernetes resource-request energy proxy with direct Prometheus/node-exporter utilization queries once stable query names are locked for the local chart.
+
+## Latest Session Note (2026-05-02 KST, live trace PPO gate slice)
+
+- Added `orchestrator_stack/config/aiopslab_live_kind.json` for policy training against the live Kubernetes-derived AIOpsLab trace.
+- Ran smoke curriculum PPO against `reports/evaluations/202605021205_aiopslab_noop_kube_trace.json`:
+  - output `reports/evaluations/202605021218_aiopslab_live_train_policy.json`
+  - status `trained`
+  - policy reward `3.945170919999999`
+  - heuristic average `8.701477552`
+  - `beats_heuristic=false`
+- Ran stronger 3-stage PPO curriculum against the same live trace:
+  - output `reports/evaluations/202605021222_aiopslab_live_train_policy_stronger.json`
+  - status `trained`
+  - best final policy reward `6.757670919999999`
+  - heuristic average `8.701477552`
+  - `beats_heuristic=false`
+- Conclusion: PPO gate remains closed because the no-op live trace has only two duplicate healthy-state rows. Next useful job is richer AIOpsLab multi-problem trace capture, not more tuning on this trace.
 
 ## Latest Session Note (2026-05-02 KST, live Kubernetes telemetry audit slice)
 
