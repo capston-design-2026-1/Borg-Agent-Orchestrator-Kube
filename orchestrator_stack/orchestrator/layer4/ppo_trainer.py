@@ -208,19 +208,22 @@ def compare_policy_training_to_heuristic(
     heuristic_summary: dict[str, float | int],
 ) -> dict[str, Any]:
     policy_reward = policy_training_reward_mean(training_summary)
-    heuristic_average = float(heuristic_summary.get("avg_score", 0.0))
+    heuristic_total = float(heuristic_summary.get("total_score", heuristic_summary.get("avg_score", 0.0)))
+    heuristic_average = float(heuristic_summary.get("avg_score", heuristic_total))
     if policy_reward is None:
         return {
             "status": "skipped",
             "reason": "policy training did not produce an episode_reward_mean",
+            "heuristic_total_score": heuristic_total,
             "heuristic_avg_score": heuristic_average,
         }
     return {
         "status": "compared",
         "policy_episode_reward_mean": policy_reward,
+        "heuristic_total_score": heuristic_total,
         "heuristic_avg_score": heuristic_average,
-        "delta_vs_heuristic": policy_reward - heuristic_average,
-        "beats_heuristic": policy_reward > heuristic_average,
+        "delta_vs_heuristic": policy_reward - heuristic_total,
+        "beats_heuristic": policy_reward > heuristic_total,
     }
 
 

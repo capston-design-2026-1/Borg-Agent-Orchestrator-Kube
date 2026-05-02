@@ -76,14 +76,15 @@ def test_compare_policy_training_to_heuristic_reports_delta_for_curriculum():
                 {"status": "trained", "episode_reward_mean": 3.5},
             ],
         },
-        {"avg_score": 2.0},
+        {"total_score": 3.0, "avg_score": 2.0},
     )
 
     assert result == {
         "status": "compared",
         "policy_episode_reward_mean": 3.5,
+        "heuristic_total_score": 3.0,
         "heuristic_avg_score": 2.0,
-        "delta_vs_heuristic": 1.5,
+        "delta_vs_heuristic": 0.5,
         "beats_heuristic": True,
     }
 
@@ -92,4 +93,5 @@ def test_compare_policy_training_to_heuristic_skips_untrained_policy():
     result = ppo_trainer.compare_policy_training_to_heuristic({"status": "skipped"}, {"avg_score": 2.0})
 
     assert result["status"] == "skipped"
+    assert result["heuristic_total_score"] == 2.0
     assert result["heuristic_avg_score"] == 2.0
