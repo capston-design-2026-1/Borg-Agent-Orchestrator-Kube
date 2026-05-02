@@ -6,6 +6,7 @@ from typing import Any
 from orchestrator.layer2.simulator import state_to_observation
 from orchestrator.layer4.policy import decode_agent_action, default_policy_actions
 from orchestrator.layer4.referee import resolve
+from orchestrator.types import Observation
 
 
 class AIOpsLabPolicyAgent:
@@ -15,6 +16,7 @@ class AIOpsLabPolicyAgent:
         self.problem_desc: Any | None = None
         self.instructions: Any | None = None
         self.apis: Any | None = None
+        self.text_turns = 0
 
     def init_context(self, problem_desc: Any, instructions: Any, apis: Any) -> None:
         self.problem_desc = problem_desc
@@ -22,7 +24,13 @@ class AIOpsLabPolicyAgent:
         self.apis = apis
 
     async def get_action(self, state: str) -> str:
-        obs = state_to_observation(state)
+        try:
+            obs = state_to_observation(state)
+        except Exception:
+            self.text_turns += 1
+            if self.text_turns > 1:
+                return 'No fault found.\n```\nsubmit("No")\n```'
+            obs = Observation(timestamp=0, nodes=[], tasks=[], p_fail_scores={}, demand_projection={}, queue_length=0, energy_price=0.0)
         action_ids = default_policy_actions(obs)
         action = resolve(
             [

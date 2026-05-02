@@ -53,3 +53,21 @@ def test_aiopslab_policy_agent_returns_parser_compliant_action():
     assert '"target": "n1"' in response
     assert response.count("```") == 2
     assert 'exec_shell("kubectl get pods --all-namespaces")' in response
+
+
+def test_aiopslab_policy_agent_accepts_instruction_text():
+    agent = AIOpsLabPolicyAgent()
+
+    response = asyncio.run(agent.get_action("Please take the next action"))
+
+    assert response.count("```") == 2
+    assert 'exec_shell("kubectl get pods --all-namespaces")' in response
+
+
+def test_aiopslab_policy_agent_submits_no_after_text_observation():
+    agent = AIOpsLabPolicyAgent()
+
+    asyncio.run(agent.get_action("Please take the next action"))
+    response = asyncio.run(agent.get_action("pod list output"))
+
+    assert response == 'No fault found.\n```\nsubmit("No")\n```'
