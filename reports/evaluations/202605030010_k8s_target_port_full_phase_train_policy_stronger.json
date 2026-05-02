@@ -1,0 +1,67 @@
+{
+  "status": "trained",
+  "stages": [
+    {
+      "stage": 1,
+      "status": "trained",
+      "checkpoint": "/private/tmp/borg_aiopslab_k8s_target_port_full_phase_stronger_rllib/stage_01",
+      "train_iters": 8,
+      "episode_reward_mean": -346.6792652799999,
+      "train_batch_size": 512,
+      "minibatch_size": 128,
+      "num_epochs": 3,
+      "rollout_fragment_length": 128,
+      "learning_rate": 0.0003
+    },
+    {
+      "stage": 2,
+      "status": "trained",
+      "checkpoint": "/private/tmp/borg_aiopslab_k8s_target_port_full_phase_stronger_rllib/stage_02",
+      "train_iters": 18,
+      "episode_reward_mean": -317.3459319466666,
+      "train_batch_size": 768,
+      "minibatch_size": 128,
+      "num_epochs": 4,
+      "rollout_fragment_length": 128,
+      "learning_rate": 0.0002
+    },
+    {
+      "stage": 3,
+      "status": "trained",
+      "checkpoint": "/private/tmp/borg_aiopslab_k8s_target_port_full_phase_stronger_rllib/stage_03",
+      "train_iters": 32,
+      "episode_reward_mean": -303.6011402799999,
+      "train_batch_size": 1024,
+      "minibatch_size": 256,
+      "num_epochs": 4,
+      "rollout_fragment_length": 256,
+      "learning_rate": 0.0001
+    },
+    {
+      "stage": 4,
+      "status": "trained",
+      "checkpoint": "/private/tmp/borg_aiopslab_k8s_target_port_full_phase_stronger_rllib/stage_04",
+      "train_iters": 24,
+      "episode_reward_mean": -306.3355152799999,
+      "train_batch_size": 1024,
+      "minibatch_size": 256,
+      "num_epochs": 4,
+      "rollout_fragment_length": 256,
+      "learning_rate": 5e-05
+    }
+  ],
+  "stage_count": 4,
+  "heuristic_baseline": {
+    "steps": 16,
+    "total_score": -324.347559168,
+    "avg_score": -20.271722448
+  },
+  "policy_vs_heuristic": {
+    "status": "compared",
+    "policy_episode_reward_mean": -306.3355152799999,
+    "heuristic_total_score": -324.347559168,
+    "heuristic_avg_score": -20.271722448,
+    "delta_vs_heuristic": 18.01204388800005,
+    "beats_heuristic": true
+  }
+}
