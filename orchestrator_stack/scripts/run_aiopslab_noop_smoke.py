@@ -62,8 +62,8 @@ def _patch_aiopslab_config(env_dir: Path, kubeconfig: Path) -> None:
 
 
 class CapturingAIOpsLabPolicyAgent(AIOpsLabPolicyAgent):
-    def __init__(self, *, kubeconfig: Path, namespace_prefixes: tuple[str, ...]) -> None:
-        super().__init__()
+    def __init__(self, *, kubeconfig: Path, namespace_prefixes: tuple[str, ...], detection_answer: str) -> None:
+        super().__init__(detection_answer=detection_answer)
         self.kubeconfig = kubeconfig
         self.namespace_prefixes = namespace_prefixes
         self.trace_rows: list[dict] = []
@@ -99,7 +99,11 @@ def run_smoke(args: argparse.Namespace) -> dict:
     try:
         orch = Orchestrator(results_dir=results_dir)
         namespace_prefixes = tuple(prefix.strip() for prefix in args.namespace_prefixes.split(",") if prefix.strip())
-        agent = CapturingAIOpsLabPolicyAgent(kubeconfig=kubeconfig, namespace_prefixes=namespace_prefixes)
+        agent = CapturingAIOpsLabPolicyAgent(
+            kubeconfig=kubeconfig,
+            namespace_prefixes=namespace_prefixes,
+            detection_answer=args.detection_answer,
+        )
         initialize_aiopslab_problem(orch, problem_id=args.problem_id, agent=agent)
         result = asyncio.run(orch.start_problem(max_steps=args.max_steps))
     finally:
@@ -131,6 +135,7 @@ def main() -> None:
     parser.add_argument("--results-dir", default="/private/tmp/aiopslab_results")
     parser.add_argument("--trace-out", help="Write Kubernetes-derived trace rows captured during the live AIOpsLab run.")
     parser.add_argument("--namespace-prefixes", default="test-,default")
+    parser.add_argument("--detection-answer", default="No", help="Answer submitted after the observation turn for detection tasks.")
     parser.add_argument("--out")
     args = parser.parse_args()
 

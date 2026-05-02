@@ -70,4 +70,13 @@ def test_aiopslab_policy_agent_submits_no_after_text_observation():
     asyncio.run(agent.get_action("Please take the next action"))
     response = asyncio.run(agent.get_action("pod list output"))
 
-    assert response == 'No fault found.\n```\nsubmit("No")\n```'
+    assert response == 'Detection answer: No\n```\nsubmit("No")\n```'
+
+
+def test_aiopslab_policy_agent_can_submit_yes_for_fault_detection():
+    agent = AIOpsLabPolicyAgent(detection_answer="Yes")
+
+    asyncio.run(agent.get_action("Please take the next action"))
+    response = asyncio.run(agent.get_action("pod list output"))
+
+    assert response == 'Detection answer: Yes\n```\nsubmit("Yes")\n```'

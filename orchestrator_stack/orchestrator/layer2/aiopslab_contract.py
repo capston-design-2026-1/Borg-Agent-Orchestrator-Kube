@@ -12,11 +12,12 @@ from orchestrator.types import Observation
 class AIOpsLabPolicyAgent:
     """Agent object matching AIOpsLab's init_context/get_action interface."""
 
-    def __init__(self) -> None:
+    def __init__(self, *, detection_answer: str = "No") -> None:
         self.problem_desc: Any | None = None
         self.instructions: Any | None = None
         self.apis: Any | None = None
         self.text_turns = 0
+        self.detection_answer = detection_answer
 
     def init_context(self, problem_desc: Any, instructions: Any, apis: Any) -> None:
         self.problem_desc = problem_desc
@@ -29,7 +30,8 @@ class AIOpsLabPolicyAgent:
         except Exception:
             self.text_turns += 1
             if self.text_turns > 1:
-                return 'No fault found.\n```\nsubmit("No")\n```'
+                answer = str(self.detection_answer).replace('"', '\\"')
+                return f'Detection answer: {answer}\n```\nsubmit("{answer}")\n```'
             obs = Observation(timestamp=0, nodes=[], tasks=[], p_fail_scores={}, demand_projection={}, queue_length=0, energy_price=0.0)
         action_ids = default_policy_actions(obs)
         action = resolve(
