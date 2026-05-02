@@ -1,0 +1,19 @@
+{
+  "problem_id": "assign_to_non_existent_node_social_net-analysis-1",
+  "final_state": "SubmissionStatus.VALID_SUBMISSION",
+  "history_len": 4,
+  "results": {
+    "system_level_correct": true,
+    "fault_type_correct": true,
+    "success": true,
+    "TTA": 0.36038875579833984,
+    "steps": 2,
+    "in_tokens": 22,
+    "out_tokens": 79
+  },
+  "results_dir": "/private/tmp/aiopslab_results",
+  "trace_rows": 5,
+  "trace_out": "reports/evaluations/202605030300_assign_nonexistent_analysis_kube_trace.json",
+  "capture_errors": [],
+  "prometheus_base_url": "http://127.0.0.1:19090"
+}
