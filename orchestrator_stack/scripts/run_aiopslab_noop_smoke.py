@@ -12,7 +12,7 @@ from pathlib import Path
 from urllib.request import urlopen
 
 from aiopslab.orchestrator.orchestrator import Orchestrator
-from orchestrator.layer1.kubernetes_trace import capture_kubernetes_trace_row, write_kubernetes_trace
+from orchestrator.layer1.kubernetes_trace import capture_kubernetes_trace_row, load_power_calibration, write_kubernetes_trace
 from orchestrator.layer2.aiopslab_contract import AIOpsLabPolicyAgent, initialize_aiopslab_problem
 
 
@@ -72,6 +72,7 @@ class CapturingAIOpsLabPolicyAgent(AIOpsLabPolicyAgent):
         submission_code: str | None,
         pre_submit_commands: list[str],
         prometheus_base_url: str | None,
+        power_calibration_path: Path | None,
     ) -> None:
         super().__init__(
             detection_answer=detection_answer,
@@ -81,6 +82,7 @@ class CapturingAIOpsLabPolicyAgent(AIOpsLabPolicyAgent):
         self.kubeconfig = kubeconfig
         self.namespace_prefixes = namespace_prefixes
         self.prometheus_base_url = prometheus_base_url
+        self.power_calibration = load_power_calibration(power_calibration_path)
         self.trace_rows: list[dict] = []
         self.capture_errors: list[str] = []
         self._capture_lock = threading.Lock()
@@ -91,6 +93,7 @@ class CapturingAIOpsLabPolicyAgent(AIOpsLabPolicyAgent):
                 kubeconfig=self.kubeconfig,
                 namespace_prefixes=self.namespace_prefixes,
                 prometheus_base_url=self.prometheus_base_url,
+                power_calibration=self.power_calibration,
             )
             with self._capture_lock:
                 self.trace_rows.append(row)
@@ -167,6 +170,7 @@ def run_smoke(args: argparse.Namespace) -> dict:
             submission_code=args.submission_code,
             pre_submit_commands=args.pre_submit_command,
             prometheus_base_url=prometheus_base_url,
+            power_calibration_path=Path(args.power_calibration).expanduser().resolve() if args.power_calibration else None,
         )
         initialize_aiopslab_problem(orch, problem_id=args.problem_id, agent=agent)
         prometheus_process = _start_prometheus_port_forward(kubeconfig, args.prometheus_port_forward_port)
@@ -242,6 +246,10 @@ def main() -> None:
         type=int,
         default=0,
         help="Start kubectl port-forward to observe/prometheus-server and enrich captures with node-exporter utilization.",
+    )
+    parser.add_argument(
+        "--power-calibration",
+        help="Optional JSON file with idle_watts, cpu_full_scale_watts, mem_full_scale_watts, and source fields.",
     )
     parser.add_argument("--out")
     args = parser.parse_args()
