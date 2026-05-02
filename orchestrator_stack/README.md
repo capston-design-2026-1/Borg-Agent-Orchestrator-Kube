@@ -253,6 +253,7 @@ Multi-family gate suite: `reports/evaluations/202605030150_aiopslab_multi_family
 Repeated-seed PPO statistics: `reports/evaluations/202605030205_repeated_seed_ppo_summary.md` records `3/3` passing seeds for Hotel Reservation Prometheus mitigation, SocialNetwork target-port full-phase validation, and SocialNetwork scale-to-zero full-phase validation.
 Ablation evidence matrix: `reports/evaluations/202605030050_ablation_evidence_matrix.md` compares sequential validation stages and explicitly marks the result as preliminary, not a fully controlled causal ablation.
 Controlled ablation summary: `reports/evaluations/202605030225_controlled_ablation_repeated_seed_summary.md` compares fixed-trace Prometheus mitigation variants across seeds `515`, `616`, and `717`. SLA-risk preservation has mean predictor-runtime delta gain `+10.428703703703718`; the effect is positive but seed-sensitive.
+Evaluation statistics: `reports/evaluations/202605030240_evaluation_statistics.md` records descriptive 95% Student-t confidence intervals for repeated-seed PPO deltas and controlled-ablation effects. With `n=3`, these intervals are intentionally wide and should be treated as descriptive, not definitive significance proof.
 
 ## Current Validation Status
 

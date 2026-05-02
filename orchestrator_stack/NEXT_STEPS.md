@@ -10,6 +10,14 @@
 - Added `--power-calibration` to `scripts/run_aiopslab_noop_smoke.py` so thesis runs can record the calibration coefficients used for utilization-derived watts.
 - Added `orchestrator_stack/config/kind_power_calibration.example.json` as the editable calibration template.
 
+## Latest Session Note (2026-05-03 KST, evaluation statistics slice)
+
+- Added `evaluation-statistics` CLI for descriptive 95% Student-t intervals over repeated-seed PPO and controlled-ablation deltas.
+- Generated:
+  - `reports/evaluations/202605030240_evaluation_statistics.json`
+  - `reports/evaluations/202605030240_evaluation_statistics.md`
+- Caveat recorded in the artifact: current `n=3` intervals are wide and descriptive, not definitive significance proof.
+
 ## Latest Session Note (2026-05-03 KST, repeated-seed controlled ablation slice)
 
 - Added controlled-ablation configs for seeds `616` and `717`, covering:

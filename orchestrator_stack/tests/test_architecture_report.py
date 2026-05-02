@@ -21,7 +21,8 @@ def test_architecture_status_markdown_reports_current_gaps():
     assert "Ablation evidence matrix" in report
     assert "202605030225_controlled_ablation_repeated_seed_summary.json" in report
     assert "+10.428703703703718" in report
-    assert "83 passed" in report
+    assert "202605030240_evaluation_statistics.json" in report
+    assert "86 passed" in report
 
 
 def test_write_architecture_status_report_uses_requested_path(tmp_path):

@@ -170,6 +170,13 @@ This matrix is sequential evidence across committed validation artifacts, not a 
 
 This shows SLA-risk preservation keeps a positive mean gain across repeated seeds, while the predictor-only effect is seed-sensitive and should be reported as mixed rather than uniformly beneficial.
 
+### Statistical Reporting
+
+- Statistics JSON: `reports/evaluations/202605030240_evaluation_statistics.json`
+- Statistics table: `reports/evaluations/202605030240_evaluation_statistics.md`
+- Method: descriptive 95% Student-t confidence intervals for seed-repeated deltas.
+- Caveat: `n=3` intervals are intentionally wide; use them to report uncertainty, not as definitive significance proof.
+
 ## Brain Model Evidence
 
 - Live full-phase risk dataset: `reports/evaluations/brain_live_full_phase/risk_dataset.npz`
@@ -197,8 +204,8 @@ Key diagnostics:
 ## Next Thesis-Grade Work
 
 1. Expand the multi-family gate suite with another full-phase family from the AIOpsLab catalog when available.
-2. Add confidence intervals and significance tests over the repeated-seed PPO and controlled-ablation tables.
-3. Add ablation table coverage for `Prometheus enrichment` and any future direct power telemetry source.
+2. Increase seed count beyond `n=3` if significance testing is required rather than descriptive confidence intervals.
+3. Add ablation table coverage for `Prometheus enrichment` and any future direct measured power telemetry source.
 4. Add direct power or calibrated energy telemetry if a node-power exporter is available.
 5. Keep thesis-ready tables synchronized with raw JSON artifacts for reproducible evaluation appendices.
 

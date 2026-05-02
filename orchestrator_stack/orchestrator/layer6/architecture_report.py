@@ -83,7 +83,7 @@ ARCHITECTURE_ITEMS = (
 NEXT_ENGINEERING_WORK = (
     "Expand the current three-entry multi-family gate suite with another full-phase AIOpsLab family when available.",
     "Replace calibrated utilization-based power estimates with direct measured node-power telemetry when a power exporter is available.",
-    "Keep thesis-ready tables synchronized with new raw JSON artifacts for reproducible evaluation appendices.",
+    "Keep thesis-ready tables and confidence-interval reports synchronized with new raw JSON artifacts.",
 )
 
 
@@ -111,7 +111,7 @@ def architecture_status_markdown(
             "",
             "## Current Validation Baseline",
             "",
-            "- Full test suite: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` -> `83 passed` on 2026-05-03 KST.",
+            "- Full test suite: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` -> `86 passed` on 2026-05-03 KST.",
             "- `export-brain-datasets` smoke ran against `orchestrator_stack/examples/sample_trace.json` and wrote risk/demand NPZ files.",
             "- `train-policy` smoke reports `heuristic_baseline` and `policy_vs_heuristic` gates.",
             "- Live Kind/AIOpsLab validation uses `~/Documents/aiopslab_validation_env/kubeconfig` and covers no-op, Hotel Reservation misconfiguration, and SocialNetwork Kubernetes target-port misconfiguration.",
@@ -123,6 +123,7 @@ def architecture_status_markdown(
             "- Repeated-seed PPO summary `reports/evaluations/202605030205_repeated_seed_ppo_summary.json` passes `3/3` seeds on all three reported families.",
             "- Ablation evidence matrix `reports/evaluations/202605030050_ablation_evidence_matrix.md` records sequential evidence with an explicit non-causal caveat.",
             "- Controlled repeated-seed ablation `reports/evaluations/202605030225_controlled_ablation_repeated_seed_summary.json` shows mean SLA-risk preservation gain of `+10.428703703703718` across seeds `515`, `616`, and `717`.",
+            "- Evaluation statistics report `reports/evaluations/202605030240_evaluation_statistics.json` adds descriptive 95% t-intervals for repeated-seed PPO and controlled-ablation deltas.",
             "",
             "## Remaining Research Gaps",
             "",
