@@ -1,0 +1,28 @@
+label,steps,telemetry_coverage,max_sla_violations,max_completed_tasks,max_energy_watts,actions,weighted_telemetry_delta,artifact
+sample_telemetry_reward_audit,2,1,1,25,310,"{""migrate"": 1, ""throttle"": 1}",-94.46,reports/evaluations/202605020534_sample_telemetry_reward_audit.json
+aiopslab_noop_kube_reward_audit,1,1,0,0,116.420408,"{""dvfs"": 1}",2.301477552,reports/evaluations/202605021205_aiopslab_noop_kube_reward_audit.json
+aiopslab_misconfig_detection_reward_audit,1,1,1,0,116.420408,"{""dvfs"": 1}",-47.698522448,reports/evaluations/202605021230_aiopslab_misconfig_detection_reward_audit.json
+aiopslab_combined_reward_audit,3,1,1,0,116.420408,"{""dvfs"": 3}",-43.095567344,reports/evaluations/202605021235_aiopslab_combined_reward_audit.json
+aiopslab_misconfig_localization_reward_audit,1,1,1,0,116.420408,"{""dvfs"": 1}",-47.698522448,reports/evaluations/202605021245_aiopslab_misconfig_localization_reward_audit.json
+aiopslab_misconfig_analysis_reward_audit,1,1,1,0,116.420408,"{""dvfs"": 1}",-47.698522448,reports/evaluations/202605021250_aiopslab_misconfig_analysis_reward_audit.json
+aiopslab_misconfig_mitigation_reward_audit,2,1,1,0,116.420408,"{""dvfs"": 2}",-95.397044896,reports/evaluations/202605021255_aiopslab_misconfig_mitigation_reward_audit.json
+aiopslab_full_phase_reward_audit,10,1,1,0,116.420408,"{""dvfs"": 10}",-376.98522448,reports/evaluations/202605021300_aiopslab_full_phase_reward_audit.json
+aiopslab_misconfig_mitigation_periodic_reward_audit,25,1,2,2,117.620408,"{""dvfs"": 25}",-1237.4086612,reports/evaluations/202605021325_aiopslab_misconfig_mitigation_periodic_reward_audit.json
+aiopslab_mitigation_enriched_reward_audit,23,1,2,2,117.620408,"{""dvfs"": 22, ""replicate"": 1}",-1142.5252163,reports/evaluations/202605021350_aiopslab_mitigation_enriched_reward_audit.json
+aiopslab_mitigation_enriched_reward_audit_risk_preserved,23,1,2,2,117.620408,"{""dvfs"": 2, ""replicate"": 21}",-1142.5252163,reports/evaluations/202605021355_aiopslab_mitigation_enriched_reward_audit_risk_preserved.json
+aiopslab_mitigation_prometheus_reward_audit,14,1,1,2,128.083859,"{""dvfs"": 1, ""replicate"": 13}",-665.876089708,reports/evaluations/202605022020_aiopslab_mitigation_prometheus_reward_audit.json
+k8s_target_port_detection_reward_audit,3,1,0,0,93.620408,"{""dvfs"": 3}",7.314832656,reports/evaluations/202605022100_k8s_target_port_detection_reward_audit.json
+k8s_target_port_localization_reward_audit,3,1,0,0,93.620408,"{""dvfs"": 3}",7.314832656,reports/evaluations/202605022105_k8s_target_port_localization_reward_audit.json
+k8s_target_port_analysis_reward_audit,3,1,0,0,93.620408,"{""dvfs"": 3}",7.314832656,reports/evaluations/202605022110_k8s_target_port_analysis_reward_audit.json
+k8s_target_port_mitigation_reward_audit,4,1,0,0,93.620408,"{""dvfs"": 4}",9.753110208,reports/evaluations/202605022120_k8s_target_port_mitigation_reward_audit.json
+k8s_target_port_full_phase_reward_audit,16,1,1,1,93.620408,"{""dvfs"": 13, ""replicate"": 3}",-260.507559168,reports/evaluations/202605022125_k8s_target_port_full_phase_reward_audit.json
+scale_pod_zero_detection_reward_audit,3,1,0,0,93.620408,"{""dvfs"": 3}",7.314832656,reports/evaluations/202605030120_scale_pod_zero_detection_reward_audit.json
+scale_pod_zero_localization_reward_audit,3,1,0,0,93.620408,"{""dvfs"": 3}",7.314832656,reports/evaluations/202605030125_scale_pod_zero_localization_reward_audit.json
+scale_pod_zero_analysis_reward_audit,3,1,0,0,93.620408,"{""dvfs"": 3}",7.314832656,reports/evaluations/202605030130_scale_pod_zero_analysis_reward_audit.json
+scale_pod_zero_mitigation_reward_audit,5,1,1,0,93.620408,"{""dvfs"": 4, ""replicate"": 1}",-37.80861224,reports/evaluations/202605030135_scale_pod_zero_mitigation_reward_audit.json
+scale_pod_zero_full_phase_reward_audit,17,1,2,2,93.620408,"{""dvfs"": 13, ""replicate"": 4}",-507.749281616,reports/evaluations/202605030140_scale_pod_zero_full_phase_reward_audit.json
+assign_nonexistent_detection_reward_audit,4,1,3,3,109.708904,"{""dvfs"": 2, ""replicate"": 2}",-290.393013696,reports/evaluations/202605030250_assign_nonexistent_detection_reward_audit.json
+assign_nonexistent_localization_reward_audit,4,1,2,2,109.139406,"{""dvfs"": 2, ""replicate"": 2}",-240.459345744,reports/evaluations/202605030255_assign_nonexistent_localization_reward_audit.json
+assign_nonexistent_analysis_reward_audit,4,1,1,1,108.520878,"{""dvfs"": 2, ""replicate"": 2}",-190.524501072,reports/evaluations/202605030300_assign_nonexistent_analysis_reward_audit.json
+assign_nonexistent_mitigation_reward_audit,5,1,2,2,109.803724,"{""dvfs"": 3, ""replicate"": 2}",-288.13411172,reports/evaluations/202605030305_assign_nonexistent_mitigation_reward_audit.json
+assign_nonexistent_full_phase_reward_audit,20,1,3,3,109.803724,"{""dvfs"": 9, ""replicate"": 11}",-1351.39613958,reports/evaluations/202605030310_assign_nonexistent_full_phase_reward_audit.json

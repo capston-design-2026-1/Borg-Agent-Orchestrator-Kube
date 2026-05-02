@@ -1,0 +1,12 @@
+label,status,stage_count,policy_episode_reward_mean,heuristic_total_score,delta_vs_heuristic,beats_heuristic,artifact
+aiopslab_live_train_policy,trained,2,3.94517092,8.701477552,-4.756306632,false,reports/evaluations/202605021218_aiopslab_live_train_policy.json
+aiopslab_live_train_policy_stronger,trained,3,6.75767092,8.701477552,-1.943806632,false,reports/evaluations/202605021222_aiopslab_live_train_policy_stronger.json
+aiopslab_combined_train_policy,trained,3,-31.2994304218,-23.895567344,-23.3342413072,false,reports/evaluations/202605021235_aiopslab_combined_train_policy.json
+aiopslab_full_phase_train_policy_fixed_gate,trained,3,-340.600374133,-312.98522448,-27.6151496533,false,reports/evaluations/202605021310_aiopslab_full_phase_train_policy_fixed_gate.json
+aiopslab_periodic_mitigation_train_policy,trained,3,-1219.131102,-1202.4086612,-16.7224408,false,reports/evaluations/202605021330_aiopslab_periodic_mitigation_train_policy.json
+aiopslab_enriched_mitigation_train_policy,trained,3,-991.63369384,-1118.3252163,126.691522464,true,reports/evaluations/202605021400_aiopslab_enriched_mitigation_train_policy.json
+aiopslab_prometheus_mitigation_train_policy,trained,3,-663.043482847,-740.276089708,77.2326068613,true,reports/evaluations/202605022025_aiopslab_prometheus_mitigation_train_policy.json
+k8s_target_port_full_phase_train_policy,trained,3,-329.92926528,-324.347559168,-5.581706112,false,reports/evaluations/202605022130_k8s_target_port_full_phase_train_policy.json
+k8s_target_port_full_phase_train_policy_stronger,trained,4,-306.33551528,-324.347559168,18.012043888,true,reports/evaluations/202605030010_k8s_target_port_full_phase_train_policy_stronger.json
+scale_pod_zero_full_phase_train_policy,trained,4,-545.648802693,-566.349281616,20.7004789227,true,reports/evaluations/202605030145_scale_pod_zero_full_phase_train_policy.json
+assign_nonexistent_full_phase_train_policy,trained,4,-1768.77850186,-1793.87613958,25.0976377186,true,reports/evaluations/202605030315_assign_nonexistent_full_phase_train_policy.json
