@@ -22,6 +22,7 @@ An independent end-to-end orchestrator workspace now exists at `orchestrator_sta
 - Has dedicated handoff files: `orchestrator_stack/README.md`, `orchestrator_stack/AGENTS.md`, `orchestrator_stack/NEXT_STEPS.md`
 - Mermaid architecture source is tracked at `orchestrator_stack/ARCHITECTURE.md`
 - Repository-wide Mermaid architecture source is tracked at `docs/repository_architecture.mmd`
+- One-command orchestration launch and live visualization instructions are tracked at `docs/ORCHESTRATION_LAUNCH.md`
 - Repo `.venv` has verified orchestrator smoke support for reward-weight Optuna runs, Layer 4 referee/RLlib environment smoke checks, and sample predictor training
 - Layer 5 policy tuning now forwards real PPO hyperparameters into RLlib-backed trials instead of scoring a placeholder learning-rate proxy; in restricted sandboxes it returns a structured skip when Ray process permissions are blocked
 - Layer 1 ingestion/trace contracts are strict by default (row-indexed schema checks, `.json/.jsonl` contract validation, bool-like and non-negative queue guardrails)
