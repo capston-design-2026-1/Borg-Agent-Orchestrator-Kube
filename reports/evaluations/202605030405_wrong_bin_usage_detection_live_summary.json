@@ -1,0 +1,17 @@
+{
+  "problem_id": "wrong_bin_usage-detection-1",
+  "final_state": "SubmissionStatus.VALID_SUBMISSION",
+  "history_len": 4,
+  "results": {
+    "Detection Accuracy": "Correct",
+    "TTD": 0.3388340473175049,
+    "steps": 2,
+    "in_tokens": 22,
+    "out_tokens": 69
+  },
+  "results_dir": "/private/tmp/aiopslab_results",
+  "trace_rows": 20,
+  "trace_out": "reports/evaluations/202605030405_wrong_bin_usage_detection_kube_trace.json",
+  "capture_errors": [],
+  "prometheus_base_url": "http://127.0.0.1:19090"
+}
