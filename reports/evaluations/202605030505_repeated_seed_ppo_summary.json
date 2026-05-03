@@ -1,0 +1,250 @@
+{
+  "status": "passed",
+  "sets": [
+    {
+      "evaluation_set": "hotel_reservation_prometheus_mitigation",
+      "seeds": [
+        101,
+        202,
+        303
+      ],
+      "runs": [
+        {
+          "seed": 101,
+          "artifact": "reports/evaluations/repeated_seeds/202605030030_aiopslab_prometheus_mitigation_seed_101.json",
+          "status": "compared",
+          "policy_episode_reward_mean": -688.5379272911111,
+          "heuristic_total_score": -740.276089708,
+          "heuristic_avg_score": -52.87686355057143,
+          "delta_vs_heuristic": 51.73816241688883,
+          "beats_heuristic": true
+        },
+        {
+          "seed": 202,
+          "artifact": "reports/evaluations/repeated_seeds/202605030030_aiopslab_prometheus_mitigation_seed_202.json",
+          "status": "compared",
+          "policy_episode_reward_mean": -658.2490384022223,
+          "heuristic_total_score": -740.276089708,
+          "heuristic_avg_score": -52.87686355057143,
+          "delta_vs_heuristic": 82.02705130577772,
+          "beats_heuristic": true
+        },
+        {
+          "seed": 303,
+          "artifact": "reports/evaluations/repeated_seeds/202605030030_aiopslab_prometheus_mitigation_seed_303.json",
+          "status": "compared",
+          "policy_episode_reward_mean": -666.0073717355557,
+          "heuristic_total_score": -740.276089708,
+          "heuristic_avg_score": -52.87686355057143,
+          "delta_vs_heuristic": 74.26871797244428,
+          "beats_heuristic": true
+        }
+      ],
+      "pass_count": 3,
+      "run_count": 3,
+      "pass_rate": 1.0,
+      "mean_delta_vs_heuristic": 69.34464389837028,
+      "std_delta_vs_heuristic": 15.733374610873856,
+      "min_delta_vs_heuristic": 51.73816241688883,
+      "max_delta_vs_heuristic": 82.02705130577772,
+      "mean_policy_episode_reward": -670.9314458096297,
+      "mean_heuristic_total_score": -740.2760897080001
+    },
+    {
+      "evaluation_set": "social_network_k8s_target_port_full_phase",
+      "seeds": [
+        101,
+        202,
+        303
+      ],
+      "runs": [
+        {
+          "seed": 101,
+          "artifact": "reports/evaluations/repeated_seeds/202605030030_k8s_target_port_full_phase_seed_101.json",
+          "status": "compared",
+          "policy_episode_reward_mean": -313.8823902799999,
+          "heuristic_total_score": -324.347559168,
+          "heuristic_avg_score": -20.271722448,
+          "delta_vs_heuristic": 10.46516888800005,
+          "beats_heuristic": true
+        },
+        {
+          "seed": 202,
+          "artifact": "reports/evaluations/repeated_seeds/202605030030_k8s_target_port_full_phase_seed_202.json",
+          "status": "compared",
+          "policy_episode_reward_mean": -321.4448902799999,
+          "heuristic_total_score": -324.347559168,
+          "heuristic_avg_score": -20.271722448,
+          "delta_vs_heuristic": 2.9026688880000506,
+          "beats_heuristic": true
+        },
+        {
+          "seed": 303,
+          "artifact": "reports/evaluations/repeated_seeds/202605030030_k8s_target_port_full_phase_seed_303.json",
+          "status": "compared",
+          "policy_episode_reward_mean": -314.8667652799999,
+          "heuristic_total_score": -324.347559168,
+          "heuristic_avg_score": -20.271722448,
+          "delta_vs_heuristic": 9.48079388800005,
+          "beats_heuristic": true
+        }
+      ],
+      "pass_count": 3,
+      "run_count": 3,
+      "pass_rate": 1.0,
+      "mean_delta_vs_heuristic": 7.616210554666718,
+      "std_delta_vs_heuristic": 4.111612192037126,
+      "min_delta_vs_heuristic": 2.9026688880000506,
+      "max_delta_vs_heuristic": 10.46516888800005,
+      "mean_policy_episode_reward": -316.73134861333324,
+      "mean_heuristic_total_score": -324.347559168
+    },
+    {
+      "evaluation_set": "social_network_scale_pod_zero_full_phase",
+      "seeds": [
+        101,
+        202,
+        303
+      ],
+      "runs": [
+        {
+          "seed": 101,
+          "artifact": "reports/evaluations/repeated_seeds/202605030200_scale_pod_zero_full_phase_seed_101.json",
+          "status": "compared",
+          "policy_episode_reward_mean": -564.8488026933335,
+          "heuristic_total_score": -566.349281616,
+          "heuristic_avg_score": -33.31466362447059,
+          "delta_vs_heuristic": 1.5004789226665025,
+          "beats_heuristic": true
+        },
+        {
+          "seed": 202,
+          "artifact": "reports/evaluations/repeated_seeds/202605030200_scale_pod_zero_full_phase_seed_202.json",
+          "status": "compared",
+          "policy_episode_reward_mean": -562.8821360266668,
+          "heuristic_total_score": -566.349281616,
+          "heuristic_avg_score": -33.31466362447059,
+          "delta_vs_heuristic": 3.4671455893331995,
+          "beats_heuristic": true
+        },
+        {
+          "seed": 303,
+          "artifact": "reports/evaluations/repeated_seeds/202605030200_scale_pod_zero_full_phase_seed_303.json",
+          "status": "compared",
+          "policy_episode_reward_mean": -560.0154693600001,
+          "heuristic_total_score": -566.349281616,
+          "heuristic_avg_score": -33.31466362447059,
+          "delta_vs_heuristic": 6.333812255999874,
+          "beats_heuristic": true
+        }
+      ],
+      "pass_count": 3,
+      "run_count": 3,
+      "pass_rate": 1.0,
+      "mean_delta_vs_heuristic": 3.7671455893331918,
+      "std_delta_vs_heuristic": 2.4305920632179037,
+      "min_delta_vs_heuristic": 1.5004789226665025,
+      "max_delta_vs_heuristic": 6.333812255999874,
+      "mean_policy_episode_reward": -562.5821360266668,
+      "mean_heuristic_total_score": -566.349281616
+    },
+    {
+      "evaluation_set": "social_network_assign_nonexistent_node_full_phase",
+      "seeds": [
+        101,
+        202,
+        303
+      ],
+      "runs": [
+        {
+          "seed": 101,
+          "artifact": "reports/evaluations/repeated_seeds/202605030345_assign_nonexistent_full_phase_stronger_seed_101.json",
+          "status": "compared",
+          "policy_episode_reward_mean": -1738.2726257890592,
+          "heuristic_total_score": -1793.876139576,
+          "heuristic_avg_score": -89.6938069788,
+          "delta_vs_heuristic": 55.603513786940766,
+          "beats_heuristic": true
+        },
+        {
+          "seed": 202,
+          "artifact": "reports/evaluations/repeated_seeds/202605030345_assign_nonexistent_full_phase_stronger_seed_202.json",
+          "status": "compared",
+          "policy_episode_reward_mean": -1757.415788182222,
+          "heuristic_total_score": -1793.876139576,
+          "heuristic_avg_score": -89.6938069788,
+          "delta_vs_heuristic": 36.460351393777955,
+          "beats_heuristic": true
+        },
+        {
+          "seed": 303,
+          "artifact": "reports/evaluations/repeated_seeds/202605030345_assign_nonexistent_full_phase_stronger_seed_303.json",
+          "status": "compared",
+          "policy_episode_reward_mean": -1737.197839464273,
+          "heuristic_total_score": -1793.876139576,
+          "heuristic_avg_score": -89.6938069788,
+          "delta_vs_heuristic": 56.67830011172691,
+          "beats_heuristic": true
+        }
+      ],
+      "pass_count": 3,
+      "run_count": 3,
+      "pass_rate": 1.0,
+      "mean_delta_vs_heuristic": 49.58072176414854,
+      "std_delta_vs_heuristic": 11.375274959435515,
+      "min_delta_vs_heuristic": 36.460351393777955,
+      "max_delta_vs_heuristic": 56.67830011172691,
+      "mean_policy_episode_reward": -1744.2954178118514,
+      "mean_heuristic_total_score": -1793.876139576
+    },
+    {
+      "evaluation_set": "hotel_reservation_wrong_bin_usage_full_phase",
+      "seeds": [
+        101,
+        202,
+        303
+      ],
+      "runs": [
+        {
+          "seed": 101,
+          "artifact": "reports/evaluations/repeated_seeds/202605030500_wrong_bin_usage_full_phase_seed_101.json",
+          "status": "compared",
+          "policy_episode_reward_mean": -5362.3645586600005,
+          "heuristic_total_score": -5671.353735196,
+          "heuristic_avg_score": -70.89192168995001,
+          "delta_vs_heuristic": 308.98917653599983,
+          "beats_heuristic": true
+        },
+        {
+          "seed": 202,
+          "artifact": "reports/evaluations/repeated_seeds/202605030500_wrong_bin_usage_full_phase_seed_202.json",
+          "status": "compared",
+          "policy_episode_reward_mean": -5421.9895586600005,
+          "heuristic_total_score": -5671.353735196,
+          "heuristic_avg_score": -70.89192168995001,
+          "delta_vs_heuristic": 249.36417653599983,
+          "beats_heuristic": true
+        },
+        {
+          "seed": 303,
+          "artifact": "reports/evaluations/repeated_seeds/202605030500_wrong_bin_usage_full_phase_seed_303.json",
+          "status": "compared",
+          "policy_episode_reward_mean": -5465.170114215555,
+          "heuristic_total_score": -5671.353735196,
+          "heuristic_avg_score": -70.89192168995001,
+          "delta_vs_heuristic": 206.18362098044508,
+          "beats_heuristic": true
+        }
+      ],
+      "pass_count": 3,
+      "run_count": 3,
+      "pass_rate": 1.0,
+      "mean_delta_vs_heuristic": 254.84565801748158,
+      "std_delta_vs_heuristic": 51.6215124022479,
+      "min_delta_vs_heuristic": 206.18362098044508,
+      "max_delta_vs_heuristic": 308.98917653599983,
+      "mean_policy_episode_reward": -5416.508077178519,
+      "mean_heuristic_total_score": -5671.353735196
+    }
+  ]
+}
