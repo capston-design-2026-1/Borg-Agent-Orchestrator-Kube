@@ -197,6 +197,22 @@ def cmd_full_process(args: argparse.Namespace) -> None:
     print(json.dumps(result, indent=2))
 
 
+def cmd_visualized_run(args: argparse.Namespace) -> None:
+    try:
+        from orchestrator.visualization import run_visualized_orchestration
+    except ModuleNotFoundError as exc:
+        raise _missing_dependency(exc, "loading visualization runtime") from exc
+
+    result = run_visualized_orchestration(
+        args.config,
+        trials=args.trials,
+        event_dir=args.event_dir,
+        train_policy=not args.no_policy,
+        tune_rewards=not args.no_tune,
+    )
+    print(json.dumps(result, indent=2))
+
+
 def cmd_architecture_status(args: argparse.Namespace) -> None:
     from orchestrator.layer6.architecture_report import write_architecture_status_report
 
@@ -336,6 +352,14 @@ def build_parser() -> argparse.ArgumentParser:
     p_full.add_argument("--config", required=True)
     p_full.add_argument("--trials", type=int, default=5)
     p_full.set_defaults(func=cmd_full_process)
+
+    p_visualized = sub.add_parser("visualized-run")
+    p_visualized.add_argument("--config", default="orchestrator_stack/config/orchestrator.example.json")
+    p_visualized.add_argument("--trials", type=int, default=3)
+    p_visualized.add_argument("--event-dir", default="orchestrator_stack/runtime/visualization")
+    p_visualized.add_argument("--no-policy", action="store_true", help="Skip Ray/RLlib PPO training")
+    p_visualized.add_argument("--no-tune", action="store_true", help="Skip Optuna reward tuning")
+    p_visualized.set_defaults(func=cmd_visualized_run)
 
     p_arch = sub.add_parser("architecture-status")
     p_arch.add_argument("--out")
