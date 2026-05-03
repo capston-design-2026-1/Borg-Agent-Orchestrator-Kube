@@ -18,12 +18,12 @@ def test_architecture_status_markdown_reports_current_gaps():
     assert "assign_to_non_existent_node_social_net-*" in report
     assert "+25.097637718564556" in report
     assert "passes `4/4` held-out entries" in report
-    assert "202605030205_repeated_seed_ppo_summary.json" in report
-    assert "passes `3/3` seeds on all three reported families" in report
+    assert "202605030350_repeated_seed_ppo_summary.json" in report
+    assert "passes `3/3` seeds on all four reported families" in report
     assert "Ablation evidence matrix" in report
     assert "202605030225_controlled_ablation_repeated_seed_summary.json" in report
     assert "+10.428703703703718" in report
-    assert "202605030240_evaluation_statistics.json" in report
+    assert "202605030355_evaluation_statistics.json" in report
     assert "86 passed" in report
 
 

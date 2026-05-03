@@ -14,6 +14,15 @@
 - PPO output `reports/evaluations/202605030315_assign_nonexistent_full_phase_train_policy.json` records `beats_heuristic=true` with delta `+25.097637718564556`.
 - Multi-family gate suite `reports/evaluations/202605030320_aiopslab_multi_family_policy_gate_suite.json` now passes `4/4` held-out entries.
 
+## Latest Session Note (2026-05-03 KST, fourth-family repeated-seed PPO slice)
+
+- Added stronger repeated-seed PPO configs for `assign_to_non_existent_node_social_net-*` seeds `101`, `202`, and `303`.
+- Recorded promoted PPO artifacts under `reports/evaluations/repeated_seeds/202605030345_assign_nonexistent_full_phase_stronger_seed_*.json`.
+- Updated combined repeated-seed summary:
+  - `reports/evaluations/202605030350_repeated_seed_ppo_summary.json`
+  - `reports/evaluations/202605030350_repeated_seed_ppo_summary.md`
+- Result: `social_network_assign_nonexistent_node_full_phase` passes `3/3` seeds with mean delta `+49.58072176414854` and sample standard deviation `11.375274959397744`.
+
 ## Latest Session Note (2026-05-03 KST, power calibration metadata slice)
 
 - Added explicit `PowerCalibration` support to Kubernetes trace capture.
@@ -24,9 +33,9 @@
 ## Latest Session Note (2026-05-03 KST, evaluation statistics slice)
 
 - Added `evaluation-statistics` CLI for descriptive 95% Student-t intervals over repeated-seed PPO and controlled-ablation deltas.
-- Generated:
-  - `reports/evaluations/202605030240_evaluation_statistics.json`
-  - `reports/evaluations/202605030240_evaluation_statistics.md`
+- Generated latest:
+  - `reports/evaluations/202605030355_evaluation_statistics.json`
+  - `reports/evaluations/202605030355_evaluation_statistics.md`
 - Caveat recorded in the artifact: current `n=3` intervals are wide and descriptive, not definitive significance proof.
 
 ## Latest Session Note (2026-05-03 KST, repeated-seed controlled ablation slice)
