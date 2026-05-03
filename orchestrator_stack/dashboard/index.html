@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Borg Orchestrator Live</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Borg-Agent-Orchestrator</p>
+        <h1>Live Orchestration Control Plane</h1>
+        <p class="subtitle">Layer state, reward pressure, Optuna trials, and Ray/RLlib training signals from the current runtime JSON stream.</p>
+      </div>
+      <div class="status-card">
+        <span id="statusDot" class="dot"></span>
+        <div>
+          <div id="statusText" class="status-text">waiting</div>
+          <div id="updatedAt" class="muted">no state yet</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid metrics">
+      <article><span>Active Stage</span><strong id="activeStage">boot</strong></article>
+      <article><span>Last Reward</span><strong id="lastReward">0.000</strong></article>
+      <article><span>Optuna Best</span><strong id="optunaBest">n/a</strong></article>
+      <article><span>Ray Status</span><strong id="rayStatus">idle</strong></article>
+    </section>
+
+    <section class="panel stage-panel">
+      <div class="panel-head">
+        <h2>Architecture Stages</h2>
+        <span id="archPath" class="muted"></span>
+      </div>
+      <div id="stages" class="stages"></div>
+    </section>
+
+    <section class="grid two">
+      <article class="panel">
+        <div class="panel-head"><h2>Reward Stream</h2><span class="muted">AgentA / AgentB / AgentC</span></div>
+        <canvas id="rewardCanvas" width="900" height="320"></canvas>
+        <div id="rewardLegend" class="legend"></div>
+      </article>
+      <article class="panel">
+        <div class="panel-head"><h2>Optuna</h2><span id="optunaStudy" class="muted">study waiting</span></div>
+        <div id="optunaParams" class="params"></div>
+        <canvas id="optunaCanvas" width="900" height="320"></canvas>
+      </article>
+    </section>
+
+    <section class="grid two">
+      <article class="panel ray">
+        <div class="panel-head"><h2>Ray / RLlib</h2><span class="muted">PPO trainer</span></div>
+        <div id="rayBody" class="ray-body"></div>
+      </article>
+      <article class="panel">
+        <div class="panel-head"><h2>Artifacts</h2><span class="muted">runtime outputs</span></div>
+        <div id="artifacts" class="artifacts"></div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>Event Log</h2><span class="muted">last 200 events</span></div>
+      <div id="events" class="events"></div>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
