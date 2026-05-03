@@ -1,0 +1,17 @@
+{
+  "problem_id": "wrong_bin_usage-mitigation-1",
+  "final_state": "SubmissionStatus.VALID_SUBMISSION",
+  "history_len": 4,
+  "results": {
+    "TTM": 2.645432949066162,
+    "steps": 2,
+    "in_tokens": 22,
+    "out_tokens": 69,
+    "success": true
+  },
+  "results_dir": "/private/tmp/aiopslab_results",
+  "trace_rows": 21,
+  "trace_out": "reports/evaluations/202605030430_wrong_bin_usage_mitigation_kube_trace.json",
+  "capture_errors": [],
+  "prometheus_base_url": "http://127.0.0.1:19090"
+}

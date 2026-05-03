@@ -1,0 +1,1731 @@
+[
+  {
+    "timestamp": 1777812541,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.285,
+        "mem_util": 0.35573630265019307,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-ntnw7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/consul-7cc67d4f58-pjsv4",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/frontend-8465c7bf94-qgdfp",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/geo-675d59944c-4hxll",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/jaeger-684559c468-dc62v",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-profile-5bfc8df5f6-kx2hb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-rate-f4dc945bb-ndk2g",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-reserve-9b8896b76-lfdt2",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-geo-74dfb54dcb-nfbk6",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-profile-6c774db57-6gwnm",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-rate-796fcd544c-9m5cm",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-recommendation-5d4df4567f-bq5dv",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-reservation-56bdb84bc9-2qmnd",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-user-68d57b4cf9-67kst",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/profile-fd6dd47df-nkdzz",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/rate-54bcbf97c7-zpj4c",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/recommendation-67967b4c67-zw565",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/reservation-754dcc99db-pvk2g",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/search-6c9869645-nmq4n",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/user-76f8ddf8bb-kmqzq",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 0,
+    "completed_tasks": 0,
+    "energy_watts": 135.544178,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.281258
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.281258
+    },
+    "power_calibration": {
+      "idle_watts": 80.0,
+      "cpu_full_scale_watts": 120.0,
+      "mem_full_scale_watts": 60.0,
+      "source": "default_utilization_model; replace with measured node calibration when available"
+    },
+    "telemetry_sources": [
+      "kubernetes_api",
+      "prometheus_node_exporter"
+    ]
+  },
+  {
+    "timestamp": 1777812541,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.285,
+        "mem_util": 0.35573630265019307,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-ntnw7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/consul-7cc67d4f58-pjsv4",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/frontend-8465c7bf94-qgdfp",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/geo-675d59944c-4hxll",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/jaeger-684559c468-dc62v",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-profile-5bfc8df5f6-kx2hb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-rate-f4dc945bb-ndk2g",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-reserve-9b8896b76-lfdt2",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-geo-74dfb54dcb-nfbk6",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-profile-6c774db57-6gwnm",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-rate-796fcd544c-9m5cm",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-recommendation-5d4df4567f-bq5dv",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-reservation-56bdb84bc9-2qmnd",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-user-68d57b4cf9-67kst",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/profile-fd6dd47df-nkdzz",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/rate-54bcbf97c7-zpj4c",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/recommendation-67967b4c67-zw565",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/reservation-754dcc99db-pvk2g",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/search-6c9869645-nmq4n",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/user-76f8ddf8bb-kmqzq",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 0,
+    "completed_tasks": 0,
+    "energy_watts": 135.544178,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.281258
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.281258
+    },
+    "power_calibration": {
+      "idle_watts": 80.0,
+      "cpu_full_scale_watts": 120.0,
+      "mem_full_scale_watts": 60.0,
+      "source": "default_utilization_model; replace with measured node calibration when available"
+    },
+    "telemetry_sources": [
+      "kubernetes_api",
+      "prometheus_node_exporter"
+    ]
+  },
+  {
+    "timestamp": 1777812543,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.295,
+        "mem_util": 0.35573630265019307,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-ntnw7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/consul-7cc67d4f58-pjsv4",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/frontend-8465c7bf94-qgdfp",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/geo-675d59944c-4hxll",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/jaeger-684559c468-dc62v",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-profile-5bfc8df5f6-kx2hb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-rate-f4dc945bb-ndk2g",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-reserve-9b8896b76-lfdt2",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-geo-74dfb54dcb-nfbk6",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-profile-6c774db57-6gwnm",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-rate-796fcd544c-9m5cm",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-recommendation-5d4df4567f-bq5dv",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-reservation-56bdb84bc9-2qmnd",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-user-68d57b4cf9-67kst",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/profile-64776bbdfc-wsg5c",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/profile-fd6dd47df-nkdzz",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/rate-54bcbf97c7-zpj4c",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/recommendation-67967b4c67-zw565",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/reservation-754dcc99db-pvk2g",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/search-6c9869645-nmq4n",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/user-76f8ddf8bb-kmqzq",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 1,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 1,
+    "completed_tasks": 0,
+    "energy_watts": 136.744178,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.95
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.286758
+    },
+    "power_calibration": {
+      "idle_watts": 80.0,
+      "cpu_full_scale_watts": 120.0,
+      "mem_full_scale_watts": 60.0,
+      "source": "default_utilization_model; replace with measured node calibration when available"
+    },
+    "telemetry_sources": [
+      "kubernetes_api",
+      "prometheus_node_exporter"
+    ]
+  },
+  {
+    "timestamp": 1777812545,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.285,
+        "mem_util": 0.35573630265019307,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-ntnw7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/consul-7cc67d4f58-pjsv4",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/frontend-8465c7bf94-qgdfp",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/geo-675d59944c-4hxll",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/jaeger-684559c468-dc62v",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-profile-5bfc8df5f6-kx2hb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-rate-f4dc945bb-ndk2g",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-reserve-9b8896b76-lfdt2",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-geo-74dfb54dcb-nfbk6",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-profile-6c774db57-6gwnm",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-rate-796fcd544c-9m5cm",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-recommendation-5d4df4567f-bq5dv",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-reservation-56bdb84bc9-2qmnd",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-user-68d57b4cf9-67kst",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/profile-64776bbdfc-t2csk",
+        "node_id": "unscheduled",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/profile-64776bbdfc-wsg5c",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-hotel-reservation/rate-54bcbf97c7-zpj4c",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/recommendation-67967b4c67-zw565",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/reservation-754dcc99db-pvk2g",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/search-6c9869645-nmq4n",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/user-76f8ddf8bb-kmqzq",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 1,
+    "energy_price": 0.1,
+    "task_death": true,
+    "sla_violations": 1,
+    "completed_tasks": 0,
+    "energy_watts": 135.544178,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.281258
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.281258
+    },
+    "power_calibration": {
+      "idle_watts": 80.0,
+      "cpu_full_scale_watts": 120.0,
+      "mem_full_scale_watts": 60.0,
+      "source": "default_utilization_model; replace with measured node calibration when available"
+    },
+    "telemetry_sources": [
+      "kubernetes_api",
+      "prometheus_node_exporter"
+    ]
+  },
+  {
+    "timestamp": 1777812548,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.275,
+        "mem_util": 0.35573630265019307,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-ntnw7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/consul-7cc67d4f58-pjsv4",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/frontend-8465c7bf94-qgdfp",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/geo-675d59944c-4hxll",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/jaeger-684559c468-dc62v",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-profile-5bfc8df5f6-kx2hb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-rate-f4dc945bb-ndk2g",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-reserve-9b8896b76-lfdt2",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-geo-74dfb54dcb-nfbk6",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-profile-6c774db57-6gwnm",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-rate-796fcd544c-9m5cm",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-recommendation-5d4df4567f-bq5dv",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-reservation-56bdb84bc9-2qmnd",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-user-68d57b4cf9-67kst",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/profile-64776bbdfc-t2csk",
+        "node_id": "unscheduled",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/rate-54bcbf97c7-zpj4c",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/recommendation-67967b4c67-zw565",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/reservation-754dcc99db-pvk2g",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/search-6c9869645-nmq4n",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/user-76f8ddf8bb-kmqzq",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 1,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 1,
+    "completed_tasks": 0,
+    "energy_watts": 134.344178,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.275758
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.275758
+    },
+    "power_calibration": {
+      "idle_watts": 80.0,
+      "cpu_full_scale_watts": 120.0,
+      "mem_full_scale_watts": 60.0,
+      "source": "default_utilization_model; replace with measured node calibration when available"
+    },
+    "telemetry_sources": [
+      "kubernetes_api",
+      "prometheus_node_exporter"
+    ]
+  },
+  {
+    "timestamp": 1777812550,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.275,
+        "mem_util": 0.35573630265019307,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-ntnw7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": true
+      },
+      {
+        "task_id": "test-hotel-reservation/consul-7cc67d4f58-pjsv4",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-hotel-reservation/frontend-8465c7bf94-qgdfp",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-hotel-reservation/geo-675d59944c-4hxll",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-hotel-reservation/jaeger-684559c468-dc62v",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-profile-5bfc8df5f6-kx2hb",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-rate-f4dc945bb-ndk2g",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-hotel-reservation/memcached-reserve-9b8896b76-lfdt2",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 0.2,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-geo-74dfb54dcb-nfbk6",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-profile-6c774db57-6gwnm",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-rate-796fcd544c-9m5cm",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-recommendation-5d4df4567f-bq5dv",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-reservation-56bdb84bc9-2qmnd",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-hotel-reservation/mongodb-user-68d57b4cf9-67kst",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-hotel-reservation/rate-54bcbf97c7-zpj4c",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-hotel-reservation/recommendation-67967b4c67-zw565",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-hotel-reservation/reservation-754dcc99db-pvk2g",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-hotel-reservation/search-6c9869645-nmq4n",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": false
+      },
+      {
+        "task_id": "test-hotel-reservation/user-76f8ddf8bb-kmqzq",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": false
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": true,
+    "sla_violations": 16,
+    "completed_tasks": 8,
+    "energy_watts": 134.344178,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.95
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.275758
+    },
+    "power_calibration": {
+      "idle_watts": 80.0,
+      "cpu_full_scale_watts": 120.0,
+      "mem_full_scale_watts": 60.0,
+      "source": "default_utilization_model; replace with measured node calibration when available"
+    },
+    "telemetry_sources": [
+      "kubernetes_api",
+      "prometheus_node_exporter"
+    ]
+  },
+  {
+    "timestamp": 1777812552,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.095,
+        "mem_util": 0.35573630265019307,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-ntnw7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 1,
+    "completed_tasks": 2,
+    "energy_watts": 112.744178,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.95
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.176758
+    },
+    "power_calibration": {
+      "idle_watts": 80.0,
+      "cpu_full_scale_watts": 120.0,
+      "mem_full_scale_watts": 60.0,
+      "source": "default_utilization_model; replace with measured node calibration when available"
+    },
+    "telemetry_sources": [
+      "kubernetes_api",
+      "prometheus_node_exporter"
+    ]
+  },
+  {
+    "timestamp": 1777812554,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.095,
+        "mem_util": 0.35573630265019307,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-ntnw7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 1,
+    "completed_tasks": 2,
+    "energy_watts": 112.744178,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.95
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.176758
+    },
+    "power_calibration": {
+      "idle_watts": 80.0,
+      "cpu_full_scale_watts": 120.0,
+      "mem_full_scale_watts": 60.0,
+      "source": "default_utilization_model; replace with measured node calibration when available"
+    },
+    "telemetry_sources": [
+      "kubernetes_api",
+      "prometheus_node_exporter"
+    ]
+  },
+  {
+    "timestamp": 1777812556,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.095,
+        "mem_util": 0.35573630265019307,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-ntnw7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 1,
+    "completed_tasks": 2,
+    "energy_watts": 112.744178,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.95
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.176758
+    },
+    "power_calibration": {
+      "idle_watts": 80.0,
+      "cpu_full_scale_watts": 120.0,
+      "mem_full_scale_watts": 60.0,
+      "source": "default_utilization_model; replace with measured node calibration when available"
+    },
+    "telemetry_sources": [
+      "kubernetes_api",
+      "prometheus_node_exporter"
+    ]
+  },
+  {
+    "timestamp": 1777812558,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.095,
+        "mem_util": 0.35573630265019307,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-ntnw7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 1,
+    "completed_tasks": 2,
+    "energy_watts": 112.744178,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.95
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.176758
+    },
+    "power_calibration": {
+      "idle_watts": 80.0,
+      "cpu_full_scale_watts": 120.0,
+      "mem_full_scale_watts": 60.0,
+      "source": "default_utilization_model; replace with measured node calibration when available"
+    },
+    "telemetry_sources": [
+      "kubernetes_api",
+      "prometheus_node_exporter"
+    ]
+  },
+  {
+    "timestamp": 1777812561,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.095,
+        "mem_util": 0.35573630265019307,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-ntnw7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 1,
+    "completed_tasks": 2,
+    "energy_watts": 112.744178,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.95
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.176758
+    },
+    "power_calibration": {
+      "idle_watts": 80.0,
+      "cpu_full_scale_watts": 120.0,
+      "mem_full_scale_watts": 60.0,
+      "source": "default_utilization_model; replace with measured node calibration when available"
+    },
+    "telemetry_sources": [
+      "kubernetes_api",
+      "prometheus_node_exporter"
+    ]
+  },
+  {
+    "timestamp": 1777812563,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.095,
+        "mem_util": 0.35573630265019307,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-ntnw7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 1,
+    "completed_tasks": 2,
+    "energy_watts": 112.744178,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.95
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.176758
+    },
+    "power_calibration": {
+      "idle_watts": 80.0,
+      "cpu_full_scale_watts": 120.0,
+      "mem_full_scale_watts": 60.0,
+      "source": "default_utilization_model; replace with measured node calibration when available"
+    },
+    "telemetry_sources": [
+      "kubernetes_api",
+      "prometheus_node_exporter"
+    ]
+  },
+  {
+    "timestamp": 1777812565,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.095,
+        "mem_util": 0.35573630265019307,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-ntnw7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 1,
+    "completed_tasks": 2,
+    "energy_watts": 112.744178,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.95
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.176758
+    },
+    "power_calibration": {
+      "idle_watts": 80.0,
+      "cpu_full_scale_watts": 120.0,
+      "mem_full_scale_watts": 60.0,
+      "source": "default_utilization_model; replace with measured node calibration when available"
+    },
+    "telemetry_sources": [
+      "kubernetes_api",
+      "prometheus_node_exporter"
+    ]
+  },
+  {
+    "timestamp": 1777812567,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.095,
+        "mem_util": 0.35573630265019307,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-ntnw7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 1,
+    "completed_tasks": 2,
+    "energy_watts": 112.744178,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.95
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.176758
+    },
+    "power_calibration": {
+      "idle_watts": 80.0,
+      "cpu_full_scale_watts": 120.0,
+      "mem_full_scale_watts": 60.0,
+      "source": "default_utilization_model; replace with measured node calibration when available"
+    },
+    "telemetry_sources": [
+      "kubernetes_api",
+      "prometheus_node_exporter"
+    ]
+  },
+  {
+    "timestamp": 1777812569,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.095,
+        "mem_util": 0.35573630265019307,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-ntnw7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 1,
+    "completed_tasks": 2,
+    "energy_watts": 112.744178,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.95
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.176758
+    },
+    "power_calibration": {
+      "idle_watts": 80.0,
+      "cpu_full_scale_watts": 120.0,
+      "mem_full_scale_watts": 60.0,
+      "source": "default_utilization_model; replace with measured node calibration when available"
+    },
+    "telemetry_sources": [
+      "kubernetes_api",
+      "prometheus_node_exporter"
+    ]
+  },
+  {
+    "timestamp": 1777812571,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.095,
+        "mem_util": 0.35573630265019307,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-ntnw7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 1,
+    "completed_tasks": 2,
+    "energy_watts": 112.744178,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.95
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.176758
+    },
+    "power_calibration": {
+      "idle_watts": 80.0,
+      "cpu_full_scale_watts": 120.0,
+      "mem_full_scale_watts": 60.0,
+      "source": "default_utilization_model; replace with measured node calibration when available"
+    },
+    "telemetry_sources": [
+      "kubernetes_api",
+      "prometheus_node_exporter"
+    ]
+  },
+  {
+    "timestamp": 1777812573,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.095,
+        "mem_util": 0.35573630265019307,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-ntnw7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 1,
+    "completed_tasks": 2,
+    "energy_watts": 112.744178,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.95
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.176758
+    },
+    "power_calibration": {
+      "idle_watts": 80.0,
+      "cpu_full_scale_watts": 120.0,
+      "mem_full_scale_watts": 60.0,
+      "source": "default_utilization_model; replace with measured node calibration when available"
+    },
+    "telemetry_sources": [
+      "kubernetes_api",
+      "prometheus_node_exporter"
+    ]
+  },
+  {
+    "timestamp": 1777812576,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.095,
+        "mem_util": 0.35573630265019307,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-ntnw7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 1,
+    "completed_tasks": 2,
+    "energy_watts": 112.744178,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.95
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.176758
+    },
+    "power_calibration": {
+      "idle_watts": 80.0,
+      "cpu_full_scale_watts": 120.0,
+      "mem_full_scale_watts": 60.0,
+      "source": "default_utilization_model; replace with measured node calibration when available"
+    },
+    "telemetry_sources": [
+      "kubernetes_api",
+      "prometheus_node_exporter"
+    ]
+  },
+  {
+    "timestamp": 1777812578,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.095,
+        "mem_util": 0.037006796210392406,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-ntnw7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 1,
+    "completed_tasks": 2,
+    "energy_watts": 93.620408,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.95
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.065202
+    },
+    "power_calibration": {
+      "idle_watts": 80.0,
+      "cpu_full_scale_watts": 120.0,
+      "mem_full_scale_watts": 60.0,
+      "source": "default_utilization_model; replace with measured node calibration when available"
+    },
+    "telemetry_sources": [
+      "kubernetes_api"
+    ],
+    "prometheus_error": "Remote end closed connection without response"
+  },
+  {
+    "timestamp": 1777812580,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.095,
+        "mem_util": 0.037006796210392406,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-ntnw7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 1,
+    "completed_tasks": 2,
+    "energy_watts": 93.620408,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.95
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.065202
+    },
+    "power_calibration": {
+      "idle_watts": 80.0,
+      "cpu_full_scale_watts": 120.0,
+      "mem_full_scale_watts": 60.0,
+      "source": "default_utilization_model; replace with measured node calibration when available"
+    },
+    "telemetry_sources": [
+      "kubernetes_api"
+    ],
+    "prometheus_error": "<urlopen error [Errno 61] Connection refused>"
+  },
+  {
+    "timestamp": 1777812582,
+    "nodes": [
+      {
+        "node_id": "borg-aiopslab-control-plane",
+        "cpu_util": 0.095,
+        "mem_util": 0.037006796210392406,
+        "disk_util": 0.0,
+        "net_util": 0.0,
+        "power_state": "on"
+      }
+    ],
+    "tasks": [
+      {
+        "task_id": "default/wrk2-job-ntnw7",
+        "node_id": "borg-aiopslab-control-plane",
+        "urgency": 1.0,
+        "queue_priority": 0,
+        "alive": true
+      }
+    ],
+    "queue_length": 0,
+    "energy_price": 0.1,
+    "task_death": false,
+    "sla_violations": 1,
+    "completed_tasks": 2,
+    "energy_watts": 93.620408,
+    "p_fail_scores": {
+      "borg-aiopslab-control-plane": 0.95
+    },
+    "demand_projection": {
+      "borg-aiopslab-control-plane": 0.065202
+    },
+    "power_calibration": {
+      "idle_watts": 80.0,
+      "cpu_full_scale_watts": 120.0,
+      "mem_full_scale_watts": 60.0,
+      "source": "default_utilization_model; replace with measured node calibration when available"
+    },
+    "telemetry_sources": [
+      "kubernetes_api"
+    ],
+    "prometheus_error": "<urlopen error [Errno 61] Connection refused>"
+  }
+]
