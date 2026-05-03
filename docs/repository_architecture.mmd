@@ -1,0 +1,177 @@
+flowchart TB
+    %% Current implemented architecture of Borg-Agent-Orchestrator repository.
+    %% This diagram intentionally describes the repository as built, not only the original proposal.
+
+    subgraph ExternalInputs["External Inputs and Runtime Substrates"]
+        BorgTrace["Google Borg traces\nraw shards outside git"]
+        KubeCluster["Kind Kubernetes cluster\nkind-borg-aiopslab"]
+        AIOpsLab["Upstream AIOpsLab\nproblem registry and session API"]
+        Prometheus["Prometheus / node-exporter\nCPU and memory telemetry"]
+        PowerSource["Measured power exporter\nKepler / RAPL / IPMI\ncurrently not present"]
+    end
+
+    subgraph RootRepo["Repository Root"]
+        RootDocs["README / Agents / NEXT_STEPS\nworkflow and thesis handoff"]
+        ProjectDocs["docs/\nproposal PDF, report docx, Mermaid architecture"]
+        Reports["reports/\nevaluations, tuning, milestones, traces"]
+    end
+
+    subgraph BaselineTrack["Baseline and Advanced XGBoost Track"]
+        RawData["~/Documents/borg_data\nraw baseline data"]
+        AdvancedWorkspace["~/Documents/borg_xgboost_workspace\nraw / processed / models / reports / runtime"]
+        DataScripts["scripts/\ndownload, flatten, repair, join, feature build"]
+        AdvancedSrc["src/advanced_xgboost\nsettings, features, train"]
+        SchemaSrc["src/schema\ncommon and local-cloud contracts"]
+        XGBArtifacts["External XGBoost artifacts\nfeature stores, models, metrics"]
+    end
+
+    subgraph OrchestratorStack["orchestrator_stack: Full 6-Layer Orchestrator"]
+        RunCLI["run.py / orchestrator.cli\ncommand entrypoints"]
+        Configs["config/\nAIOpsLab, PPO, repeated-seed, ablation configs"]
+        Examples["examples/\nsynthetic traces, datasets, model fixtures"]
+
+        subgraph L1["Layer 1: Data Ingestion"]
+            Collector["collector.py\nJSON / JSONL / CSV trace building"]
+            TraceIngestor["trace_ingestor.py\nstrict trace contract"]
+            KubeTrace["kubernetes_trace.py\nkubectl snapshots, Prometheus enrichment, power calibration metadata"]
+            PromClient["prometheus.py\nPromQL export and instant samples"]
+        end
+
+        subgraph L2["Layer 2: Twin and Adapter"]
+            Simulator["simulator.py\ntrace-driven twin, local fallback, reward dynamics"]
+            FeatureExtractor["feature_extractor.py\n8-feature node vectors"]
+            AIOpsContract["aiopslab_contract.py\ninit_problem / register_agent / get_action adapter"]
+            Preflight["aiopslab_preflight.py\nKind and upstream readiness checks"]
+        end
+
+        subgraph L3["Layer 3: Prediction Brains"]
+            Predictors["predictors.py\nXGBoost risk and demand training / inference"]
+            Diagnostics["diagnostics.py\nthresholds, calibration, feature importance"]
+            BrainModels["examples/models/live_full_phase\nrisk_model.json, demand_model.json"]
+        end
+
+        subgraph L4["Layer 4: MARL Control"]
+            Policy["policy.py\ndefault policy and action decoding"]
+            Agents["agents.py\nAgent A risk, Agent B cost, Agent C throughput"]
+            Referee["referee.py\nsafety-first action arbitration"]
+            PettingZoo["pettingzoo_env.py\nparallel multi-agent bridge"]
+            RLlibEnv["rllib_env.py\nPPO MultiAgentEnv"]
+            PPOTrainer["ppo_trainer.py\nseeded PPO and staged curriculum"]
+        end
+
+        subgraph L5["Layer 5: Tuning"]
+            Optuna["optuna_tuner.py\nreward and PPO-backed policy/reward tuning"]
+            OptunaDB["runtime/optuna/orchestrator.db\nlocal study store"]
+        end
+
+        subgraph L6["Layer 6: Evaluation and Reporting"]
+            Scoreboard["scoreboard.py\nalpha beta gamma aggregate score"]
+            TelemetryAudit["telemetry_audit.py\nSLA / task / energy reward audit"]
+            PolicyGate["policy_gate_suite.py\nheld-out PPO-vs-heuristic gate"]
+            ThesisTables["thesis_tables.py\nMarkdown and CSV appendix tables"]
+            EvalStats["evaluation_statistics.py\n95 percent t-interval summaries"]
+            ArchReport["architecture_report.py\ncurrent status report generator"]
+        end
+
+        Scripts["scripts/\nKind setup, AIOpsLab env setup, live smoke runner"]
+        Tests["tests/\n87 passing unit and integration tests"]
+    end
+
+    subgraph ValidationEvidence["Current Thesis Validation Evidence"]
+        LiveFamilies["5 live full-phase AIOpsLab families\nHotel misconfig, Social target-port, Social scale-zero, Social nonexistent-node, Hotel wrong-bin"]
+        GateSuite["Multi-family gate suite\n5/5 held-out entries pass"]
+        RepeatedSeeds["Repeated-seed PPO\n3/3 seeds pass on all 5 families"]
+        Ablations["Controlled ablations\n9/9 Prometheus variants pass; SLA preservation mean gain positive"]
+        StatsReports["Evaluation statistics\ndescriptive 95 percent intervals, n=3 caveat"]
+        PowerCheck["Node-power exporter check\nno direct measured power source in current Kind cluster"]
+    end
+
+    subgraph CodexAutonomy["codex_autonomy: Autonomous Supervisor Track"]
+        AutoCLI["codex_autonomy.cli\noperator entrypoints"]
+        Manager["manager.py / worker.py\ntask orchestration"]
+        Guardian["guardian.py / health.py / status.py\nsafety and observability"]
+        TaskStore["task_store.py / state_db.py\npersistent task state"]
+        GitHubFlow["github_flow.py / worktree.py\nbranch and worktree automation"]
+        AutoRuntime["runtime / tasks / task_journal\nautonomy execution records"]
+    end
+
+    %% Baseline and advanced XGBoost data flow.
+    BorgTrace --> RawData --> DataScripts --> AdvancedWorkspace
+    DataScripts --> AdvancedSrc --> XGBArtifacts
+    SchemaSrc --> AdvancedSrc
+    XGBArtifacts --> Reports
+
+    %% Orchestrator input and runtime flow.
+    KubeCluster --> KubeTrace
+    AIOpsLab --> AIOpsContract
+    Prometheus --> PromClient --> KubeTrace
+    PowerSource -. "not available; calibration fallback" .-> KubeTrace
+    KubeTrace --> TraceIngestor
+    Collector --> TraceIngestor
+    TraceIngestor --> Simulator
+    Simulator --> FeatureExtractor --> Predictors
+    Predictors --> BrainModels
+    BrainModels --> Simulator
+    Simulator --> PettingZoo --> RLlibEnv --> PPOTrainer
+    Policy --> Agents --> Referee --> Simulator
+    PPOTrainer --> PolicyGate
+    Simulator --> Scoreboard --> PPOTrainer
+    Optuna --> PPOTrainer
+    Scoreboard --> Optuna
+    Simulator --> TelemetryAudit
+    PolicyGate --> ThesisTables
+    TelemetryAudit --> ThesisTables
+    EvalStats --> ThesisTables
+    ArchReport --> Reports
+    ThesisTables --> Reports
+    PolicyGate --> Reports
+    TelemetryAudit --> Reports
+    EvalStats --> Reports
+
+    OrchestratorRoot["orchestrator_stack workspace"]
+    BaselineRoot["baseline and advanced model workspace"]
+
+    %% Commands and configs wire the stack.
+    RunCLI --> Collector
+    RunCLI --> PromClient
+    RunCLI --> Predictors
+    RunCLI --> PPOTrainer
+    RunCLI --> Optuna
+    RunCLI --> PolicyGate
+    RunCLI --> TelemetryAudit
+    RunCLI --> ThesisTables
+    RunCLI --> EvalStats
+    RunCLI --> ArchReport
+    Configs --> RunCLI
+    Examples --> Predictors
+    Scripts --> KubeCluster
+    Scripts --> AIOpsLab
+    Scripts --> KubeTrace
+    Tests --> RunCLI
+
+    %% Validation evidence is generated by orchestrator reports.
+    AIOpsContract --> LiveFamilies
+    PPOTrainer --> LiveFamilies
+    LiveFamilies --> GateSuite --> Reports
+    PPOTrainer --> RepeatedSeeds --> Reports
+    Optuna --> Ablations --> Reports
+    EvalStats --> StatsReports --> Reports
+    KubeCluster --> PowerCheck --> Reports
+
+    %% Autonomy track is separate but shares repo and git workflow.
+    AutoCLI --> Manager --> TaskStore
+    Manager --> Guardian
+    Manager --> GitHubFlow
+    Worker["worker.py\nCodex session runner"] --> AutoRuntime
+    Manager --> Worker
+    Guardian --> AutoRuntime
+    GitHubFlow --> RootDocs
+
+    %% Documentation and handoff links.
+    Reports --> RootDocs
+    ProjectDocs --> RootDocs
+    RunCLI --> OrchestratorRoot
+    DataScripts --> BaselineRoot
+    OrchestratorRoot --> RootDocs
+    BaselineRoot --> RootDocs
+    AutoCLI --> RootDocs
