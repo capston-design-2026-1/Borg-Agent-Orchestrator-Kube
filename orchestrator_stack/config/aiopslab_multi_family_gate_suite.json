@@ -27,6 +27,12 @@
       "slice": "assign_nonexistent_full_phase",
       "trace_path": "reports/evaluations/202605030310_assign_nonexistent_full_phase_kube_trace.json",
       "policy_gate_path": "reports/evaluations/202605030315_assign_nonexistent_full_phase_train_policy.json"
+    },
+    {
+      "family": "hotel_reservation_wrong_bin_usage",
+      "slice": "wrong_bin_usage_full_phase",
+      "trace_path": "reports/evaluations/202605030435_wrong_bin_usage_full_phase_kube_trace.json",
+      "policy_gate_path": "reports/evaluations/202605030440_wrong_bin_usage_full_phase_train_policy.json"
     }
   ]
 }
