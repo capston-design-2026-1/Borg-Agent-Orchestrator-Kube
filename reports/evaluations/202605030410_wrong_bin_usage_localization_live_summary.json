@@ -1,0 +1,19 @@
+{
+  "problem_id": "wrong_bin_usage-localization-1",
+  "final_state": "SubmissionStatus.VALID_SUBMISSION",
+  "history_len": 4,
+  "results": {
+    "Localization Accuracy": 100.0,
+    "TTL": 0.27268290519714355,
+    "steps": 2,
+    "in_tokens": 22,
+    "out_tokens": 69,
+    "success": true,
+    "is_subset": true
+  },
+  "results_dir": "/private/tmp/aiopslab_results",
+  "trace_rows": 20,
+  "trace_out": "reports/evaluations/202605030410_wrong_bin_usage_localization_kube_trace.json",
+  "capture_errors": [],
+  "prometheus_base_url": "http://127.0.0.1:19090"
+}
