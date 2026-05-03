@@ -1,7 +1,19 @@
 # Orchestrator Stack Next Steps
 
-1. Expand the current four-family policy gate suite with another full-phase AIOpsLab family when available.
+1. Expand the current five-family policy gate suite with another full-phase AIOpsLab family when available.
 2. Replace calibrated utilization-derived energy watts with a direct measured node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
+
+## Latest Session Note (2026-05-03 KST, fifth-family AIOpsLab validation slice)
+
+- Ran live Kind-backed `wrong_bin_usage-*` on the Hotel Reservation app:
+  - detection `reports/evaluations/202605030405_wrong_bin_usage_detection_live_summary.json`: `Detection Accuracy=Correct`
+  - localization `reports/evaluations/202605030410_wrong_bin_usage_localization_live_summary.json`: `Localization Accuracy=100.0`, `success=true`
+  - analysis `reports/evaluations/202605030415_wrong_bin_usage_analysis_live_summary.json`: `system_level_correct=true`, `fault_type_correct=true`, `success=true`
+  - mitigation `reports/evaluations/202605030430_wrong_bin_usage_mitigation_live_summary.json`: `success=true`
+- Added local pre-submit remediation execution because AIOpsLab `exec_shell` reported missing Docker container `kind-control-plane` for mitigation commands.
+- Built fifth-family full-phase trace `reports/evaluations/202605030435_wrong_bin_usage_full_phase_kube_trace.json` with `81` rows and telemetry coverage `1.0`.
+- PPO output `reports/evaluations/202605030440_wrong_bin_usage_full_phase_train_policy.json` records `beats_heuristic=true` with delta `+295.0030654248894`.
+- Multi-family gate suite `reports/evaluations/202605030445_aiopslab_multi_family_policy_gate_suite.json` now passes `5/5` held-out entries.
 
 ## Latest Session Note (2026-05-03 KST, fourth-family AIOpsLab validation slice)
 
