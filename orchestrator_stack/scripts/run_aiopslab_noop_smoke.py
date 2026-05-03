@@ -73,11 +73,13 @@ class CapturingAIOpsLabPolicyAgent(AIOpsLabPolicyAgent):
         pre_submit_commands: list[str],
         prometheus_base_url: str | None,
         power_calibration_path: Path | None,
+        execute_pre_submit_locally: bool,
     ) -> None:
         super().__init__(
             detection_answer=detection_answer,
             submission_code=submission_code,
             pre_submit_commands=pre_submit_commands,
+            execute_pre_submit_locally=execute_pre_submit_locally,
         )
         self.kubeconfig = kubeconfig
         self.namespace_prefixes = namespace_prefixes
@@ -171,6 +173,7 @@ def run_smoke(args: argparse.Namespace) -> dict:
             pre_submit_commands=args.pre_submit_command,
             prometheus_base_url=prometheus_base_url,
             power_calibration_path=Path(args.power_calibration).expanduser().resolve() if args.power_calibration else None,
+            execute_pre_submit_locally=args.execute_pre_submit_locally,
         )
         initialize_aiopslab_problem(orch, problem_id=args.problem_id, agent=agent)
         prometheus_process = _start_prometheus_port_forward(kubeconfig, args.prometheus_port_forward_port)
@@ -250,6 +253,11 @@ def main() -> None:
     parser.add_argument(
         "--power-calibration",
         help="Optional JSON file with idle_watts, cpu_full_scale_watts, mem_full_scale_watts, and source fields.",
+    )
+    parser.add_argument(
+        "--execute-pre-submit-locally",
+        action="store_true",
+        help="Execute pre-submit remediation commands from this process instead of routing through AIOpsLab exec_shell.",
     )
     parser.add_argument("--out")
     args = parser.parse_args()

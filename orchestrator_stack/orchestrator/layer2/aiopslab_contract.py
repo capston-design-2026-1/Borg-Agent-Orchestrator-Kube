@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 from typing import Any
 
 from orchestrator.layer2.simulator import state_to_observation
@@ -18,6 +19,7 @@ class AIOpsLabPolicyAgent:
         detection_answer: str = "No",
         submission_code: str | None = None,
         pre_submit_commands: list[str] | None = None,
+        execute_pre_submit_locally: bool = False,
     ) -> None:
         self.problem_desc: Any | None = None
         self.instructions: Any | None = None
@@ -26,6 +28,7 @@ class AIOpsLabPolicyAgent:
         self.detection_answer = detection_answer
         self.submission_code = submission_code
         self.pre_submit_commands = pre_submit_commands or []
+        self.execute_pre_submit_locally = execute_pre_submit_locally
 
     def init_context(self, problem_desc: Any, instructions: Any, apis: Any) -> None:
         self.problem_desc = problem_desc
@@ -41,6 +44,20 @@ class AIOpsLabPolicyAgent:
                 command_index = self.text_turns - 2
                 if command_index < len(self.pre_submit_commands):
                     command = self.pre_submit_commands[command_index].replace('"', '\\"')
+                    if self.execute_pre_submit_locally:
+                        completed = subprocess.run(
+                            self.pre_submit_commands[command_index],
+                            shell=True,
+                            text=True,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.STDOUT,
+                            check=False,
+                        )
+                        if completed.returncode != 0:
+                            output = completed.stdout[-1000:].replace('"', '\\"')
+                            return f'Pre-submit remediation failed locally: {output}\n```\nsubmit()\n```'
+                        if command_index + 1 >= len(self.pre_submit_commands) and self.submission_code:
+                            return f'Local pre-submit remediation completed.\n```\n{self.submission_code}\n```'
                     return f'Pre-submit remediation command.\n```\nexec_shell("{command}")\n```'
                 if self.submission_code:
                     return f'Configured task submission.\n```\n{self.submission_code}\n```'
