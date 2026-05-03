@@ -69,6 +69,7 @@ Read Agents.md, NEXT_STEPS.md, MAS_ARCHITECTURE.md, and README.md, inspect the l
 - Follow-up validation on 2026-05-03 KST: `wrong_bin_usage-*` now validates a fifth live full-phase AIOpsLab family; PPO beats heuristic by `+295.0030654248894`, and the multi-family suite passes `5/5` entries.
 - Follow-up validation on 2026-05-03 KST: repeated-seed PPO statistics now include `wrong_bin_usage-*`; `reports/evaluations/202605030505_repeated_seed_ppo_summary.md` records `3/3` seeds passing on all five reported families.
 - Follow-up reporting on 2026-05-03 KST: latest descriptive 95% Student-t interval report is `reports/evaluations/202605030510_evaluation_statistics.md`.
+- Follow-up reporting on 2026-05-03 KST: node-power exporter availability check is recorded at `reports/evaluations/202605030520_node_power_exporter_availability.md`; no direct measured power source is present in the current Kind cluster.
 - Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `87 passed`.
 
 ## Pipeline Status

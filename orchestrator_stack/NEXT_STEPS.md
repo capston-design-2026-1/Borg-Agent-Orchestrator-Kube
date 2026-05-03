@@ -3,6 +3,14 @@
 1. Expand the current five-family policy gate suite with another full-phase AIOpsLab family when available.
 2. Replace calibrated utilization-derived energy watts with a direct measured node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
 
+## Latest Session Note (2026-05-03 KST, node-power exporter availability slice)
+
+- Checked current Kind validation cluster for direct node-power telemetry exporters.
+- Recorded:
+  - `reports/evaluations/202605030520_node_power_exporter_availability.json`
+  - `reports/evaluations/202605030520_node_power_exporter_availability.md`
+- Result: no Kepler/RAPL/IPMI/DCGM/direct power exporter pod or service is present; `energy_watts` remains calibrated utilization-derived with explicit `power_calibration` metadata.
+
 ## Latest Session Note (2026-05-03 KST, fifth-family AIOpsLab validation slice)
 
 - Ran live Kind-backed `wrong_bin_usage-*` on the Hotel Reservation app:
