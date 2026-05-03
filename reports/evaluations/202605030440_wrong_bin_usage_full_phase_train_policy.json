@@ -1,0 +1,71 @@
+{
+  "status": "trained",
+  "stages": [
+    {
+      "stage": 1,
+      "status": "trained",
+      "checkpoint": "/Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator/orchestrator_stack/runtime/rllib/wrong_bin_usage_full_phase/stage_01",
+      "train_iters": 12,
+      "episode_reward_mean": -5391.906225326667,
+      "train_batch_size": 768,
+      "minibatch_size": 128,
+      "num_epochs": 4,
+      "rollout_fragment_length": 128,
+      "learning_rate": 0.0003,
+      "seed": 909
+    },
+    {
+      "stage": 2,
+      "status": "trained",
+      "checkpoint": "/Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator/orchestrator_stack/runtime/rllib/wrong_bin_usage_full_phase/stage_02",
+      "train_iters": 24,
+      "episode_reward_mean": -5456.9270586600005,
+      "train_batch_size": 1024,
+      "minibatch_size": 256,
+      "num_epochs": 4,
+      "rollout_fragment_length": 256,
+      "learning_rate": 0.0002,
+      "seed": 910
+    },
+    {
+      "stage": 3,
+      "status": "trained",
+      "checkpoint": "/Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator/orchestrator_stack/runtime/rllib/wrong_bin_usage_full_phase/stage_03",
+      "train_iters": 48,
+      "episode_reward_mean": -5367.6145586600005,
+      "train_batch_size": 1536,
+      "minibatch_size": 256,
+      "num_epochs": 5,
+      "rollout_fragment_length": 256,
+      "learning_rate": 0.0001,
+      "seed": 911
+    },
+    {
+      "stage": 4,
+      "status": "trained",
+      "checkpoint": "/Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator/orchestrator_stack/runtime/rllib/wrong_bin_usage_full_phase/stage_04",
+      "train_iters": 36,
+      "episode_reward_mean": -5376.350669771111,
+      "train_batch_size": 1536,
+      "minibatch_size": 256,
+      "num_epochs": 5,
+      "rollout_fragment_length": 256,
+      "learning_rate": 5e-05,
+      "seed": 912
+    }
+  ],
+  "stage_count": 4,
+  "heuristic_baseline": {
+    "steps": 80,
+    "total_score": -5671.353735196,
+    "avg_score": -70.89192168995001
+  },
+  "policy_vs_heuristic": {
+    "status": "compared",
+    "policy_episode_reward_mean": -5376.350669771111,
+    "heuristic_total_score": -5671.353735196,
+    "heuristic_avg_score": -70.89192168995001,
+    "delta_vs_heuristic": 295.0030654248894,
+    "beats_heuristic": true
+  }
+}
