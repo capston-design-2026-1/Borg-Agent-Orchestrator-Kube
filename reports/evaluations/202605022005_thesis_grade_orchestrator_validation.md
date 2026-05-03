@@ -131,8 +131,8 @@ This is the first machine-checkable multi-family policy gate. It does not replac
 
 ### Repeated-Seed PPO Statistics
 
-- Summary JSON: `reports/evaluations/202605030350_repeated_seed_ppo_summary.json`
-- Summary table: `reports/evaluations/202605030350_repeated_seed_ppo_summary.md`
+- Summary JSON: `reports/evaluations/202605030505_repeated_seed_ppo_summary.json`
+- Summary table: `reports/evaluations/202605030505_repeated_seed_ppo_summary.md`
 - Seeds: `101`, `202`, `303`
 - Hotel Reservation Prometheus mitigation pass rate: `3/3`
 - Hotel Reservation Prometheus mitigation mean delta: `+69.34464389837028`
@@ -146,8 +146,11 @@ This is the first machine-checkable multi-family policy gate. It does not replac
 - SocialNetwork assign-to-nonexistent-node full-phase pass rate: `3/3`
 - SocialNetwork assign-to-nonexistent-node full-phase mean delta: `+49.58072176414854`
 - SocialNetwork assign-to-nonexistent-node full-phase delta standard deviation: `11.375274959397744`
+- Hotel Reservation wrong-binary full-phase pass rate: `3/3`
+- Hotel Reservation wrong-binary full-phase mean delta: `+254.84565801748158`
+- Hotel Reservation wrong-binary full-phase delta standard deviation: `51.6215124022043`
 
-This strengthens the PPO evidence from one-off gate passes to seed-repeated gate passes on all four reported live fault families.
+This strengthens the PPO evidence from one-off gate passes to seed-repeated gate passes on all five reported live fault families.
 
 ### Ablation Evidence Matrix
 
@@ -177,8 +180,8 @@ This shows SLA-risk preservation keeps a positive mean gain across repeated seed
 
 ### Statistical Reporting
 
-- Statistics JSON: `reports/evaluations/202605030355_evaluation_statistics.json`
-- Statistics table: `reports/evaluations/202605030355_evaluation_statistics.md`
+- Statistics JSON: `reports/evaluations/202605030510_evaluation_statistics.json`
+- Statistics table: `reports/evaluations/202605030510_evaluation_statistics.md`
 - Method: descriptive 95% Student-t confidence intervals for seed-repeated deltas.
 - Caveat: `n=3` intervals are intentionally wide; use them to report uncertainty, not as definitive significance proof.
 
@@ -203,7 +206,7 @@ Key diagnostics:
 - Current latest mitigation CPU and memory signals come from Prometheus/node-exporter. Energy watts now carry explicit calibration metadata, but are still utilization-derived rather than measured by hardware power telemetry.
 - Current validated full-phase fault families are Hotel Reservation application misconfiguration, SocialNetwork Kubernetes target-port misconfiguration, SocialNetwork scale-to-zero operation error, SocialNetwork assign-to-nonexistent-node dependency fault, and Hotel Reservation wrong-binary usage; external validity still requires broader held-out multi-family testing.
 - Kind is a local control plane; production cluster behavior may differ in scheduling, resource pressure, and exporter availability.
-- PPO pass is validated on enriched mitigation traces, including one Prometheus/node-exporter slice, on three SocialNetwork full-phase families, on two Hotel Reservation full-phase families, on the current five-entry multi-family gate suite, and across three seeds for the first four reported families. Broader external coverage remains open.
+- PPO pass is validated on enriched mitigation traces, including one Prometheus/node-exporter slice, on three SocialNetwork full-phase families, on two Hotel Reservation full-phase families, on the current five-entry multi-family gate suite, and across three seeds for all five reported families. Broader external coverage remains open.
 - Prometheus enrichment currently uses node-exporter CPU and memory utilization; additional PromQL mappings are still needed for service-level latency, queue pressure, and direct power signals if those exporters are available.
 
 ## Next Thesis-Grade Work

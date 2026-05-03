@@ -15,6 +15,15 @@
 - PPO output `reports/evaluations/202605030440_wrong_bin_usage_full_phase_train_policy.json` records `beats_heuristic=true` with delta `+295.0030654248894`.
 - Multi-family gate suite `reports/evaluations/202605030445_aiopslab_multi_family_policy_gate_suite.json` now passes `5/5` held-out entries.
 
+## Latest Session Note (2026-05-03 KST, fifth-family repeated-seed PPO slice)
+
+- Added repeated-seed PPO configs for `wrong_bin_usage-*` seeds `101`, `202`, and `303`.
+- Recorded PPO artifacts under `reports/evaluations/repeated_seeds/202605030500_wrong_bin_usage_full_phase_seed_*.json`.
+- Updated combined repeated-seed summary:
+  - `reports/evaluations/202605030505_repeated_seed_ppo_summary.json`
+  - `reports/evaluations/202605030505_repeated_seed_ppo_summary.md`
+- Result: `hotel_reservation_wrong_bin_usage_full_phase` passes `3/3` seeds with mean delta `+254.84565801748158` and sample standard deviation `51.6215124022043`.
+
 ## Latest Session Note (2026-05-03 KST, fourth-family AIOpsLab validation slice)
 
 - Ran live Kind-backed `assign_to_non_existent_node_social_net-*` on the SocialNetwork app:
@@ -46,8 +55,8 @@
 
 - Added `evaluation-statistics` CLI for descriptive 95% Student-t intervals over repeated-seed PPO and controlled-ablation deltas.
 - Generated latest:
-  - `reports/evaluations/202605030355_evaluation_statistics.json`
-  - `reports/evaluations/202605030355_evaluation_statistics.md`
+  - `reports/evaluations/202605030510_evaluation_statistics.json`
+  - `reports/evaluations/202605030510_evaluation_statistics.md`
 - Caveat recorded in the artifact: current `n=3` intervals are wide and descriptive, not definitive significance proof.
 
 ## Latest Session Note (2026-05-03 KST, repeated-seed controlled ablation slice)
