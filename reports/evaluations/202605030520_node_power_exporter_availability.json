@@ -1,0 +1,28 @@
+{
+  "status": "not_available",
+  "generated_kst": "2026-05-03 22:05",
+  "cluster": "kind-borg-aiopslab",
+  "kubeconfig": "~/Documents/aiopslab_validation_env/kubeconfig",
+  "checked_patterns": [
+    "kepler",
+    "power",
+    "rapl",
+    "ipmi",
+    "dcgm",
+    "node-exporter",
+    "prometheus"
+  ],
+  "namespace_count": 7,
+  "namespaces": [
+    "default",
+    "kube-node-lease",
+    "kube-public",
+    "kube-system",
+    "local-path-storage",
+    "observe",
+    "test-social-network"
+  ],
+  "matching_pods": [],
+  "matching_services": [],
+  "conclusion": "No direct node-power exporter is installed in the current Kind validation cluster. Energy watts remain utilization-derived with explicit power_calibration metadata until Kepler, RAPL, IPMI, or an equivalent measured power source is installed."
+}
