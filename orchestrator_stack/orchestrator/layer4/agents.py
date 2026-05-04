@@ -58,7 +58,7 @@ class AgentCGatekeeper:
 
     def act(self, obs: Observation) -> AgentAction:
         overloaded = sum(1 for n in obs.nodes if n.cpu_util > 0.85 or n.mem_util > 0.85)
-        if obs.queue_length > 120 or overloaded > max(1, len(obs.nodes) // 2):
+        if obs.queue_length > 120 or overloaded >= max(1, len(obs.nodes) // 2):
             return AgentAction(
                 "AgentC",
                 ActionKind.RESOURCE_CAP,
