@@ -236,6 +236,8 @@ def cmd_live_kubernetes_run(args: argparse.Namespace) -> None:
         exercise_cluster=args.exercise_cluster,
         exercise_namespace=args.exercise_namespace,
         exercise_interval_iterations=args.exercise_interval_iterations,
+        exercise_randomize=args.exercise_randomize,
+        exercise_seed=args.exercise_seed,
     )
     print(json.dumps(result, indent=2))
 
@@ -404,6 +406,8 @@ def build_parser() -> argparse.ArgumentParser:
     p_live.add_argument("--exercise-cluster", action="store_true", help="Rotate safe load patterns in a dedicated namespace to force varied agent decisions")
     p_live.add_argument("--exercise-namespace", default="borg-orchestrator-exercise")
     p_live.add_argument("--exercise-interval-iterations", type=int, default=3)
+    p_live.add_argument("--exercise-randomize", action="store_true", help="Randomize exercise phase selection and workload request sizes")
+    p_live.add_argument("--exercise-seed", type=int, help="Optional deterministic seed for randomized exercise phases")
     p_live.set_defaults(func=cmd_live_kubernetes_run)
 
     p_arch = sub.add_parser("architecture-status")

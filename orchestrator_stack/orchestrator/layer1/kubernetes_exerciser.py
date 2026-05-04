@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import subprocess
+import random
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -87,6 +88,51 @@ def exercise_phases(namespace: str) -> list[ExercisePhase]:
     ]
 
 
+def _randomized_phase(namespace: str, phase_index: int, *, seed: int | None = None) -> ExercisePhase:
+    rng = random.Random(None if seed is None else seed + phase_index)
+    phase_name = rng.choices(
+        ["idle-efficiency", "moderate-demand", "high-risk", "bursty-safety", "memory-pressure"],
+        weights=[0.18, 0.28, 0.28, 0.16, 0.10],
+        k=1,
+    )[0]
+    if phase_name == "idle-efficiency":
+        return ExercisePhase(
+            name=phase_name,
+            detail="randomized idle window: clear exercise deployments so efficiency and observation paths can settle",
+        )
+    if phase_name == "moderate-demand":
+        cpu_milli = rng.randint(6500, 8800)
+        mem_mi = rng.randint(96, 768)
+        return ExercisePhase(
+            name=phase_name,
+            detail=f"randomized moderate demand: cpu={cpu_milli}m memory={mem_mi}Mi",
+            manifest=_deployment_manifest(namespace, phase_name, cpu=f"{cpu_milli}m", memory=f"{mem_mi}Mi"),
+        )
+    if phase_name == "high-risk":
+        cpu_milli = rng.randint(8600, 9900)
+        mem_mi = rng.randint(1536, 4096)
+        return ExercisePhase(
+            name=phase_name,
+            detail=f"randomized high risk: cpu={cpu_milli}m memory={mem_mi}Mi",
+            manifest=_deployment_manifest(namespace, phase_name, cpu=f"{cpu_milli}m", memory=f"{mem_mi}Mi"),
+        )
+    if phase_name == "bursty-safety":
+        cpu_milli = rng.randint(9000, 10000)
+        mem_mi = rng.randint(512, 2048)
+        return ExercisePhase(
+            name=phase_name,
+            detail=f"randomized burst: cpu={cpu_milli}m memory={mem_mi}Mi",
+            manifest=_deployment_manifest(namespace, phase_name, cpu=f"{cpu_milli}m", memory=f"{mem_mi}Mi"),
+        )
+    cpu_milli = rng.randint(4000, 7200)
+    mem_mi = rng.randint(2048, 5120)
+    return ExercisePhase(
+        name=phase_name,
+        detail=f"randomized memory pressure: cpu={cpu_milli}m memory={mem_mi}Mi",
+        manifest=_deployment_manifest(namespace, phase_name, cpu=f"{cpu_milli}m", memory=f"{mem_mi}Mi"),
+    )
+
+
 def _run_kubectl(kubeconfig: str | Path, args: list[str], *, stdin: str | None = None) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         ["kubectl", "--kubeconfig", str(kubeconfig), *args],
@@ -117,9 +163,16 @@ def cleanup_exercise_workloads(kubeconfig: str | Path, namespace: str) -> dict[s
     }
 
 
-def apply_exercise_phase(kubeconfig: str | Path, namespace: str, phase_index: int) -> dict[str, Any]:
+def apply_exercise_phase(
+    kubeconfig: str | Path,
+    namespace: str,
+    phase_index: int,
+    *,
+    randomize: bool = False,
+    seed: int | None = None,
+) -> dict[str, Any]:
     phases = exercise_phases(namespace)
-    phase = phases[phase_index % len(phases)]
+    phase = _randomized_phase(namespace, phase_index, seed=seed) if randomize else phases[phase_index % len(phases)]
     cleanup = cleanup_exercise_workloads(kubeconfig, namespace)
     result = {
         "phase": phase.name,
@@ -127,6 +180,7 @@ def apply_exercise_phase(kubeconfig: str | Path, namespace: str, phase_index: in
         "namespace": namespace,
         "cleanup": cleanup,
         "applied": None,
+        "randomized": randomize,
     }
     if phase.manifest is not None:
         completed = _run_kubectl(kubeconfig, ["apply", "-f", "-"], stdin=phase.manifest)

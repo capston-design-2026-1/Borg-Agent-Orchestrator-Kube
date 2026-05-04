@@ -92,6 +92,9 @@ def test_live_kubernetes_run_cli_accepts_continuous_options():
             "demo-exercise",
             "--exercise-interval-iterations",
             "4",
+            "--exercise-randomize",
+            "--exercise-seed",
+            "17",
         ]
     )
 
@@ -105,6 +108,8 @@ def test_live_kubernetes_run_cli_accepts_continuous_options():
     assert args.exercise_cluster is True
     assert args.exercise_namespace == "demo-exercise"
     assert args.exercise_interval_iterations == 4
+    assert args.exercise_randomize is True
+    assert args.exercise_seed == 17
 
 
 def test_visualization_state_writes_state_and_events(tmp_path: Path):

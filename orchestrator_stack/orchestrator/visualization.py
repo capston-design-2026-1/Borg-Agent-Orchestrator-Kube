@@ -240,6 +240,8 @@ def run_live_kubernetes_orchestration(
     exercise_cluster: bool = False,
     exercise_namespace: str = "borg-orchestrator-exercise",
     exercise_interval_iterations: int = 3,
+    exercise_randomize: bool = False,
+    exercise_seed: int | None = None,
 ) -> dict[str, Any]:
     state = VisualizationState(event_dir)
     config = OrchestratorConfig.load(config_path)
@@ -255,6 +257,8 @@ def run_live_kubernetes_orchestration(
             "interval_seconds": interval_seconds,
             "exercise_cluster": exercise_cluster,
             "exercise_namespace": exercise_namespace if exercise_cluster else None,
+            "exercise_randomize": exercise_randomize if exercise_cluster else None,
+            "exercise_seed": exercise_seed if exercise_cluster else None,
         }
     )
     if exercise_cluster and exercise_namespace not in namespace_prefixes:
@@ -314,6 +318,8 @@ def run_live_kubernetes_orchestration(
                     kubeconfig=kubeconfig_path,
                     namespace=exercise_namespace,
                     phase_index=iteration // max(1, exercise_interval_iterations),
+                    randomize=exercise_randomize,
+                    seed=exercise_seed,
                 )
                 state.emit(
                     "exercise",

@@ -37,3 +37,29 @@ def test_apply_exercise_phase_deletes_before_apply(monkeypatch):
     assert "moderate-demand" in calls[2]["stdin"]
     assert calls[3]["args"] == ["-n", "demo", "rollout", "status", "deployment/moderate-demand", "--timeout=30s"]
     assert result["rollout"]["returncode"] == 0
+
+
+def test_apply_exercise_phase_can_randomize_workload_shape(monkeypatch):
+    calls = []
+
+    def fake_run(kubeconfig, args, *, stdin=None):
+        calls.append({"kubeconfig": kubeconfig, "args": args, "stdin": stdin})
+
+        class Completed:
+            returncode = 0
+            stdout = "ok"
+            stderr = ""
+
+        return Completed()
+
+    monkeypatch.setattr(kubernetes_exerciser, "_run_kubectl", fake_run)
+
+    result = kubernetes_exerciser.apply_exercise_phase("/tmp/kubeconfig", "demo", 3, randomize=True, seed=7)
+
+    assert result["randomized"] is True
+    assert result["phase"] in {"idle-efficiency", "moderate-demand", "high-risk", "bursty-safety", "memory-pressure"}
+    if result["phase"] != "idle-efficiency":
+        assert "randomized" in result["detail"]
+        assert "cpu=" in result["detail"]
+        assert "memory=" in result["detail"]
+        assert any("resources:" in call["stdin"] for call in calls if call["stdin"])
