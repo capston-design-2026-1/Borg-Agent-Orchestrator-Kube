@@ -61,6 +61,8 @@ def test_visualization_state_writes_state_and_events(tmp_path: Path):
 
     assert payload["active_stage"] == "episode"
     assert payload["rewards"][-1]["action"] == "AgentA:migrate"
+    assert payload["reward_summary"]["count"] == 1
+    assert payload["reward_summary"]["last_total"] == 1.4
     assert payload["cluster"]["max_risk"] == 0.4
     assert payload["decision"]["reason"] == "risk=0.4"
     assert payload["optuna"]["best_score"] == 3.2
@@ -137,6 +139,9 @@ def test_live_kubernetes_orchestration_loop_uses_cluster_snapshots(monkeypatch, 
     assert summary["iterations"] == 2
     assert len(rows) == 2
     assert state["summary"]["mode"] == "live_kubernetes"
+    assert state["ray"]["status"] == "disabled"
+    assert state["optuna"]["status"] == "disabled"
+    assert state["reward_summary"]["count"] == 2
     assert state["summary"]["last_action"]["kind"] == "replicate"
     assert state["summary"]["last_action"]["reason"].startswith("risk=0.96")
     assert state["decision"]["repeat_count"] == 2
