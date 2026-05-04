@@ -30,6 +30,8 @@ class VisualizationState:
             "rewards": [],
             "optuna": {"study": None, "trial": None, "best_score": None, "best_params": {}, "history": []},
             "ray": {"status": "idle", "train_iters": None, "reward_mean": None, "checkpoint": None},
+            "cluster": {},
+            "decision": {},
             "artifacts": [],
             "errors": [],
             "summary": {},
@@ -74,6 +76,30 @@ class VisualizationState:
         history.append(row)
         del history[:-80]
         self.emit("reward", f"step {step}: {action}", **row)
+
+    def cluster_snapshot(self, snapshot: dict[str, Any]) -> None:
+        self.state["cluster"] = {"time": kst_now_iso(), **snapshot}
+        self.emit(
+            "cluster",
+            (
+                f"nodes={snapshot.get('nodes')} tasks={snapshot.get('tasks')} "
+                f"sla={snapshot.get('sla_violations')} risk={snapshot.get('max_risk')}"
+            ),
+            **self.state["cluster"],
+        )
+
+    def decision(self, decision: dict[str, Any]) -> None:
+        self.state["decision"] = {"time": kst_now_iso(), **decision}
+        event_payload = dict(self.state["decision"])
+        event_payload["action_kind"] = event_payload.pop("kind", None)
+        self.emit(
+            "decision",
+            (
+                f"{decision.get('agent')}:{decision.get('kind')} target={decision.get('target')} "
+                f"repeat={decision.get('repeat_count')} reason={decision.get('reason')}"
+            ),
+            **event_payload,
+        )
 
     def optuna_trial(self, study: str, number: int, value: float | None, params: dict[str, Any], best_value: float | None) -> None:
         optuna = self.state["optuna"]

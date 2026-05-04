@@ -63,6 +63,37 @@ def _visual_episode(config: OrchestratorConfig, rows: list[dict[str, Any]], stat
     return scoreboard.snapshot()
 
 
+def _cluster_snapshot(obs: Any) -> dict[str, Any]:
+    max_risk_node, max_risk = max(obs.p_fail_scores.items(), key=lambda item: item[1], default=(None, 0.0))
+    min_demand_node, min_demand = min(obs.demand_projection.items(), key=lambda item: item[1], default=(None, 0.0))
+    avg_cpu = sum(node.cpu_util for node in obs.nodes) / max(1, len(obs.nodes))
+    avg_mem = sum(node.mem_util for node in obs.nodes) / max(1, len(obs.nodes))
+    return {
+        "nodes": len(obs.nodes),
+        "tasks": len(obs.tasks),
+        "queue_length": obs.queue_length,
+        "sla_violations": obs.sla_violations,
+        "completed_tasks": obs.completed_tasks,
+        "energy_watts": obs.energy_watts,
+        "max_risk": round(float(max_risk), 6),
+        "max_risk_node": max_risk_node,
+        "min_demand": round(float(min_demand), 6),
+        "min_demand_node": min_demand_node,
+        "avg_cpu": round(float(avg_cpu), 6),
+        "avg_mem": round(float(avg_mem), 6),
+    }
+
+
+def _decision_reason(snapshot: dict[str, Any], action_agent: str, action_kind: str) -> str:
+    if action_agent == "AgentA":
+        return f"risk={snapshot['max_risk']} on {snapshot['max_risk_node']}; sla={snapshot['sla_violations']}"
+    if action_agent == "AgentB":
+        return f"low demand={snapshot['min_demand']} on {snapshot['min_demand_node']}; energy={snapshot['energy_watts']:.3f}W"
+    if action_agent == "AgentC":
+        return f"queue={snapshot['queue_length']}; avg_cpu={snapshot['avg_cpu']}; avg_mem={snapshot['avg_mem']}"
+    return "no-op or unknown action"
+
+
 def _tune_rewards(config: OrchestratorConfig, rows: list[dict[str, Any]], state: VisualizationState, *, trials: int) -> dict[str, Any]:
     if optuna is None:
         return {"status": "skipped", "reason": "optuna is not installed"}
@@ -236,6 +267,9 @@ def run_live_kubernetes_orchestration(
         state.stage("live_kubernetes_loop", "running", detail="capturing cluster snapshots until stopped", progress=0.0)
         agents = [AgentARiskMitigator(), AgentBEfficiencyOptimizer(), AgentCGatekeeper()]
         iteration = 0
+        trace_artifact_announced = False
+        last_signature: tuple[str, str, str | None, str] | None = None
+        repeat_count = 0
         while max_iterations is None or iteration < max_iterations:
             row = capture_kubernetes_trace_row(
                 kubeconfig=kubeconfig_path,
@@ -245,12 +279,35 @@ def run_live_kubernetes_orchestration(
             )
             trace_rows.append(row)
             write_kubernetes_trace(trace_rows, trace_out)
-            state.artifact(trace_out, "live Kubernetes trace")
+            if not trace_artifact_announced or (iteration + 1) % 10 == 0:
+                state.artifact(trace_out, "live Kubernetes trace")
+                trace_artifact_announced = True
 
             backend = _backend([row], config)
             obs = backend.reset()
+            snapshot = _cluster_snapshot(obs)
+            state.cluster_snapshot(snapshot)
             proposals = [agent.act(obs) for agent in agents]
             action = resolve(proposals)
+            reason = _decision_reason(snapshot, action.agent_name, action.kind.value)
+            signature = (action.agent_name, action.kind.value, action.target, json.dumps(snapshot, sort_keys=True))
+            if signature == last_signature:
+                repeat_count += 1
+            else:
+                repeat_count = 1
+                last_signature = signature
+            decision_payload = {
+                "agent": action.agent_name,
+                "kind": action.kind.value,
+                "target": action.target,
+                "payload": dict(action.payload),
+                "score": float(action.score),
+                "priority": int(action.priority),
+                "repeat_count": repeat_count,
+                "reason": reason,
+                "proposal_count": len(proposals),
+            }
+            state.decision(decision_payload)
             result = backend.step(action)
             score = scoreboard.update(result.reward_by_agent)
             state.reward(
@@ -262,14 +319,8 @@ def run_live_kubernetes_orchestration(
             state.state["summary"].update(
                 {
                     "iterations": iteration + 1,
-                    "last_action": {"agent": action.agent_name, "kind": action.kind.value, "target": action.target},
-                    "last_cluster": {
-                        "nodes": len(obs.nodes),
-                        "tasks": len(obs.tasks),
-                        "queue_length": obs.queue_length,
-                        "sla_violations": obs.sla_violations,
-                        "energy_watts": obs.energy_watts,
-                    },
+                    "last_action": decision_payload,
+                    "last_cluster": snapshot,
                     "scoreboard": scoreboard.snapshot(),
                 }
             )
@@ -277,7 +328,10 @@ def run_live_kubernetes_orchestration(
             state.stage(
                 "live_kubernetes_loop",
                 "running",
-                detail=f"iteration {iteration + 1}; action {action.agent_name}:{action.kind.value}",
+                detail=(
+                    f"iteration {iteration + 1}; recommendation {action.agent_name}:{action.kind.value}; "
+                    f"repeat={repeat_count}; {reason}"
+                ),
                 progress=progress,
             )
             iteration += 1
