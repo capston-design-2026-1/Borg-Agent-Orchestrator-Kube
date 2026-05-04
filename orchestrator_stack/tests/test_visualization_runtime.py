@@ -134,3 +134,69 @@ def test_live_kubernetes_orchestration_loop_uses_cluster_snapshots(monkeypatch, 
     assert len(rows) == 2
     assert state["summary"]["mode"] == "live_kubernetes"
     assert state["summary"]["last_action"]["kind"] == "replicate"
+
+
+def test_live_kubernetes_loop_continues_without_xgboost(monkeypatch, tmp_path: Path):
+    from orchestrator import visualization
+
+    trace_path = tmp_path / "trace.json"
+    trace_path.write_text(
+        json.dumps(
+            [
+                {
+                    "timestamp": 1,
+                    "nodes": [{"node_id": "node-1", "cpu_util": 0.3, "mem_util": 0.3, "disk_util": 0.0, "net_util": 0.0}],
+                    "tasks": [],
+                    "p_fail_scores": {"node-1": 0.2},
+                    "demand_projection": {"node-1": 0.2},
+                    "queue_length": 0,
+                    "energy_price": 0.1,
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    cfg = tmp_path / "config.json"
+    cfg.write_text(
+        json.dumps(
+            {
+                "trace_path": str(trace_path),
+                "risk_model_path": str(tmp_path / "risk.json"),
+                "demand_model_path": str(tmp_path / "demand.json"),
+                "episode_steps": 1,
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        visualization,
+        "capture_kubernetes_trace_row",
+        lambda **kwargs: {
+            "timestamp": 2,
+            "nodes": [{"node_id": "node-1", "cpu_util": 0.2, "mem_util": 0.2, "disk_util": 0.0, "net_util": 0.0}],
+            "tasks": [],
+            "p_fail_scores": {"node-1": 0.2},
+            "demand_projection": {"node-1": 0.2},
+            "queue_length": 0,
+            "energy_price": 0.1,
+        },
+    )
+
+    def missing_xgboost(config):
+        raise ModuleNotFoundError("No module named 'xgboost'", name="xgboost")
+
+    monkeypatch.setattr(visualization, "train_brain_models", missing_xgboost)
+
+    summary = visualization.run_live_kubernetes_orchestration(
+        cfg,
+        event_dir=tmp_path / "events",
+        kubeconfig="/tmp/kubeconfig",
+        max_iterations=1,
+        trace_out=tmp_path / "live_trace.json",
+        train_policy=False,
+        tune_rewards=False,
+    )
+    state = json.loads((tmp_path / "events" / "state.json").read_text(encoding="utf-8"))
+
+    assert summary["iterations"] == 1
+    assert state["stages"][0]["status"] == "skipped"
