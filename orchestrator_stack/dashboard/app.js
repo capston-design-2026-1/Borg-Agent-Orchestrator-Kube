@@ -313,8 +313,8 @@ function renderFlow(state, events) {
       <span><b class="legend-reward"></b>reward/meta loop</span>
     </div>
     ${nodes.map(node => diagramNodeMarkup(node, activeKeys)).join('')}
-    <div class="diagram-event-rail">${recentEvents.map(diagramEventMarkup).join('')}</div>
   `;
+  $('flowEvents').innerHTML = recentEvents.map(diagramEventMarkup).join('');
 }
 function renderState(state, events) {
   $('statusText').textContent = state.status || 'waiting';
