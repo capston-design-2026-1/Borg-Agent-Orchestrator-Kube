@@ -108,7 +108,6 @@ function eventTone(kind) {
 }
 function eventNode(kind) {
   if (kind === 'cluster' || kind === 'exercise') return 'cluster';
-  if (kind === 'decision') return 'agents';
   if (kind === 'reward') return 'scoreboard';
   if (kind === 'ray') return 'rllib';
   if (kind === 'optuna') return 'optuna';
@@ -126,7 +125,7 @@ function diagramNodeMarkup(node, activeKeys) {
   `;
 }
 function diagramCalloutMarkup(event, index) {
-  const node = eventNode(event.kind);
+  const node = event.kind === 'decision' && event.agent ? event.agent : eventNode(event.kind);
   return `
     <article class="diagram-callout ${eventTone(event.kind)} node-${node}" style="--delay:${index * 75}ms">
       <span>${safeText(shortTime(event.time))} · ${safeText(event.kind)}</span>
@@ -145,10 +144,16 @@ function renderFlow(state, events) {
   const ray = state.ray || {};
   const latestExercise = (events || []).slice().reverse().find(e => e.kind === 'exercise');
   const recentEvents = (events || []).slice(-8).reverse();
-  const activeKeys = new Set(recentEvents.map(e => eventNode(e.kind)));
-  if (decision.agent) activeKeys.add('agents');
+  const activeKeys = new Set(recentEvents.map(e => e.kind === 'decision' && e.agent ? e.agent : eventNode(e.kind)));
+  if (decision.agent) activeKeys.add(decision.agent);
 
   $('flowClock').textContent = shortTime(state.updated_at || decision.time || cluster.time);
+  const agentMetric = (agent) => decision.agent === agent ? decision.kind : 'candidate';
+  const agentDetail = (agent) => {
+    const reward = byAgent[agent];
+    if (decision.agent === agent) return `${decision.target || 'cluster'} / score ${fmt(decision.score)}`;
+    return `last reward ${fmt(reward)} / observing`;
+  };
   const nodes = [
     {
       id: 'cluster', tone: 'cluster', x: 5, y: 18,
@@ -179,11 +184,25 @@ function renderFlow(state, events) {
       detail: `risk node ${cluster.max_risk_node || 'n/a'}`,
     },
     {
-      id: 'agents', tone: decision.agent || 'agents', x: 45, y: 62,
-      kicker: 'Layer 4',
-      title: 'Agents A / B / C',
-      metric: decision.agent ? `${decision.agent}:${decision.kind}` : 'waiting',
-      detail: `${decision.proposal_count ?? 0} proposals / repeat ${decision.repeat_count ?? 0}`,
+      id: 'AgentA', tone: 'AgentA', x: 42, y: 50,
+      kicker: 'Layer 4 Safety',
+      title: 'Agent A',
+      metric: agentMetric('AgentA'),
+      detail: agentDetail('AgentA'),
+    },
+    {
+      id: 'AgentB', tone: 'AgentB', x: 42, y: 72,
+      kicker: 'Layer 4 Efficiency',
+      title: 'Agent B',
+      metric: agentMetric('AgentB'),
+      detail: agentDetail('AgentB'),
+    },
+    {
+      id: 'AgentC', tone: 'AgentC', x: 42, y: 94,
+      kicker: 'Layer 4 Admission',
+      title: 'Agent C',
+      metric: agentMetric('AgentC'),
+      detail: agentDetail('AgentC'),
     },
     {
       id: 'referee', tone: 'referee', x: 64, y: 40,
@@ -225,9 +244,13 @@ function renderFlow(state, events) {
       <path id="flow-cluster-twin" class="arrow main" d="M170 155 C245 155 250 260 315 260" />
       <path id="flow-exercise-twin" class="arrow main" d="M170 380 C250 380 250 270 315 270" />
       <path id="flow-twin-brain" class="arrow main" d="M400 250 C455 160 485 145 545 145" />
-      <path id="flow-twin-agents" class="arrow main" d="M400 285 C455 365 485 375 545 375" />
+      <path id="flow-twin-agent-a" class="arrow main agent-a" d="M400 285 C430 300 455 300 500 292" />
+      <path id="flow-twin-agent-b" class="arrow main agent-b" d="M400 292 C435 360 460 382 500 398" />
+      <path id="flow-twin-agent-c" class="arrow main agent-c" d="M400 302 C430 455 455 495 500 505" />
       <path id="flow-brain-referee" class="arrow main" d="M625 170 C675 215 690 235 735 255" />
-      <path id="flow-agents-referee" class="arrow main" d="M625 375 C680 355 695 315 735 285" />
+      <path id="flow-agent-a-referee" class="arrow main agent-a" d="M595 292 C650 280 690 268 735 260" />
+      <path id="flow-agent-b-referee" class="arrow main agent-b" d="M595 398 C660 370 700 320 735 285" />
+      <path id="flow-agent-c-referee" class="arrow main agent-c" d="M595 505 C680 430 705 345 735 295" />
       <path id="flow-referee-score" class="arrow main" d="M810 255 C855 215 865 170 890 150" />
       <path id="flow-feedback" class="arrow feedback" d="M890 365 C825 490 585 500 505 410" />
       <path id="flow-meta" class="arrow meta" d="M800 415 C760 450 725 450 700 420" />
@@ -238,7 +261,7 @@ function renderFlow(state, events) {
       </circle>
       <circle class="packet packet-two" r="6">
         <animateMotion dur="5s" begin=".9s" repeatCount="indefinite">
-          <mpath href="#flow-agents-referee" />
+          <mpath href="#flow-agent-b-referee" />
         </animateMotion>
       </circle>
       <circle class="packet packet-three" r="5">

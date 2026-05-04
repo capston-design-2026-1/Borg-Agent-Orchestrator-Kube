@@ -56,7 +56,7 @@ h2 { margin: 0; font-size: 20px; }
 .stage p { margin: 0; color: var(--muted); font-size: 13px; }
 .flow-panel { margin-top: 18px; }
 .flow-shell {
-  min-height: 620px;
+  min-height: 720px;
   border-radius: 28px;
   background:
     radial-gradient(circle at 18% 20%, rgba(22,131,95,.15), transparent 22rem),
@@ -67,7 +67,7 @@ h2 { margin: 0; font-size: 20px; }
 }
 .flow-diagram {
   position: relative;
-  min-height: 620px;
+  min-height: 720px;
   padding: 18px;
 }
 .diagram-grid {
@@ -95,6 +95,9 @@ h2 { margin: 0; font-size: 20px; }
   stroke-linecap: round;
 }
 .arrow.main { stroke-dasharray: 8 9; animation: dashMove 2.8s linear infinite; }
+.arrow.agent-a { stroke: rgba(180,70,52,.50); }
+.arrow.agent-b { stroke: rgba(22,131,95,.52); }
+.arrow.agent-c { stroke: rgba(47,111,159,.52); }
 .arrow.feedback { stroke: rgba(22,131,95,.54); stroke-dasharray: 4 10; animation: dashMove 3.4s linear infinite reverse; }
 .arrow.meta { stroke: rgba(212,138,32,.62); stroke-dasharray: 12 8; animation: dashMove 3s linear infinite; }
 .packet {
@@ -107,10 +110,10 @@ h2 { margin: 0; font-size: 20px; }
 .diagram-node {
   position: absolute;
   z-index: 3;
-  width: 15.5%;
-  min-width: 150px;
-  min-height: 130px;
-  padding: 14px;
+  width: 15%;
+  min-width: 142px;
+  min-height: 112px;
+  padding: 12px;
   border-radius: 20px;
   background: rgba(255,255,255,.76);
   border: 1px solid rgba(20,33,27,.16);
@@ -174,7 +177,9 @@ h2 { margin: 0; font-size: 20px; }
 .diagram-callout.stage:before { background: var(--red); }
 .diagram-callout.node-cluster { left: 15%; top: 8%; }
 .diagram-callout.node-simulator { left: 31%; top: 58%; }
-.diagram-callout.node-agents { left: 47%; top: 82%; }
+.diagram-callout.node-AgentA { left: 49%; top: 50%; }
+.diagram-callout.node-AgentB { left: 49%; top: 68%; }
+.diagram-callout.node-AgentC { left: 49%; top: 84%; }
 .diagram-callout.node-scoreboard { left: 72%; top: 6%; }
 .diagram-callout.node-rllib { left: 72%; top: 72%; }
 .diagram-callout.node-optuna { left: 56%; top: 88%; }
@@ -204,7 +209,7 @@ canvas { width: 100%; height: 250px; border-radius: 20px; background: linear-gra
 @media (max-width: 980px) {
   .hero { align-items: stretch; flex-direction: column; }
   .metrics, .two, .stages, .decision-grid { grid-template-columns: 1fr; }
-  .flow-shell, .flow-diagram { min-height: 980px; }
+  .flow-shell, .flow-diagram { min-height: 1120px; }
   .diagram-node { width: 42%; min-width: 0; }
   .diagram-callout { display: none; }
 }
