@@ -128,6 +128,106 @@ function diagramNodeMarkup(node, activeKeys) {
     </article>
   `;
 }
+function actionSemantics(kind) {
+  const normalized = String(kind || 'noop');
+  const table = {
+    migrate: {
+      tone: 'movement',
+      title: 'Node Movement',
+      verb: 'move workload away from risky node',
+      path: 'source node -> safer placement',
+    },
+    replicate: {
+      tone: 'movement',
+      title: 'Replica Placement',
+      verb: 'create redundant task copy',
+      path: 'target node -> replica slot',
+    },
+    throttle: {
+      tone: 'safety',
+      title: 'Safety Throttle',
+      verb: 'reduce pressure on risky node',
+      path: 'referee -> node throttle',
+    },
+    memory_balloon: {
+      tone: 'efficiency',
+      title: 'Memory Balloon',
+      verb: 'compress memory footprint',
+      path: 'referee -> memory control',
+    },
+    dvfs: {
+      tone: 'efficiency',
+      title: 'DVFS Clock Scaling',
+      verb: 'lower CPU frequency for idle capacity',
+      path: 'referee -> node clock',
+    },
+    power_state: {
+      tone: 'efficiency',
+      title: 'Power State Change',
+      verb: 'change node power mode',
+      path: 'referee -> power controller',
+    },
+    admission: {
+      tone: 'admission',
+      title: 'Admission Decision',
+      verb: 'admit, queue, reject, or deprioritize work',
+      path: 'referee -> workload queue',
+    },
+    resource_cap: {
+      tone: 'admission',
+      title: 'Resource Cap',
+      verb: 'cap CPU and memory on overloaded node',
+      path: 'referee -> resource limits',
+    },
+    noop: {
+      tone: 'neutral',
+      title: 'No-Op',
+      verb: 'observe without changing the cluster',
+      path: 'policy -> observation',
+    },
+  };
+  return table[normalized] || { tone: 'neutral', title: actionLabel(normalized), verb: 'execute selected orchestration action', path: 'referee -> cluster' };
+}
+function proposalMarkup(proposal, selected) {
+  const active = proposal.agent === selected.agent && proposal.kind === selected.kind ? 'selected' : '';
+  return `
+    <span class="proposal-chip ${safeText(proposal.agent)} ${active}">
+      <b>${safeText(proposal.agent)}</b>
+      ${safeText(actionLabel(proposal.kind))}
+      <em>${fmt(proposal.score)}</em>
+    </span>
+  `;
+}
+function actionTraceMarkup(decision, cluster) {
+  const semantics = actionSemantics(decision.kind);
+  const proposals = Array.isArray(decision.proposals) ? decision.proposals : [];
+  const selected = { agent: decision.agent, kind: decision.kind };
+  const target = decision.target || cluster.max_risk_node || cluster.min_demand_node || 'cluster';
+  const payload = decision.payload && Object.keys(decision.payload).length
+    ? Object.entries(decision.payload).map(([key, value]) => `${key}=${value}`).join(', ')
+    : 'no payload';
+  return `
+    <aside class="diagram-action-trace ${semantics.tone}" data-action="${safeText(decision.kind || 'noop')}">
+      <div class="action-main">
+        <span class="action-kicker">performed action</span>
+        <strong>${safeText(decision.agent ? `${decision.agent}:${actionLabel(decision.kind)}` : 'waiting')}</strong>
+        <p>${safeText(semantics.verb)}</p>
+      </div>
+      <div class="action-route">
+        <span>referee</span>
+        <b>${safeText(semantics.title)}</b>
+        <span>${safeText(target)}</span>
+      </div>
+      <div class="action-meta">
+        <span><b>path</b>${safeText(semantics.path)}</span>
+        <span><b>payload</b>${safeText(payload)}</span>
+      </div>
+      <div class="proposal-strip">
+        ${proposals.length ? proposals.map(proposal => proposalMarkup(proposal, selected)).join('') : '<span class="proposal-chip">proposals unavailable in this run</span>'}
+      </div>
+    </aside>
+  `;
+}
 const diagramConnectors = [
   ['cluster', 'simulator', 'telemetry', 'flow-cluster-simulator'],
   ['exercise', 'simulator', 'telemetry', 'flow-exercise-simulator'],
@@ -350,6 +450,7 @@ function renderFlow(state, events) {
         </section>
       `).join('')}
     </div>
+    ${actionTraceMarkup(decision, cluster)}
   `;
   $('flowEvents').innerHTML = recentEvents.map(diagramEventMarkup).join('');
   requestAnimationFrame(drawDiagramConnectors);
