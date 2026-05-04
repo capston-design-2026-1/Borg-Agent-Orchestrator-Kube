@@ -233,6 +233,9 @@ def cmd_live_kubernetes_run(args: argparse.Namespace) -> None:
         train_policy=not args.no_policy,
         tune_rewards=not args.no_tune,
         trials=args.trials,
+        exercise_cluster=args.exercise_cluster,
+        exercise_namespace=args.exercise_namespace,
+        exercise_interval_iterations=args.exercise_interval_iterations,
     )
     print(json.dumps(result, indent=2))
 
@@ -398,6 +401,9 @@ def build_parser() -> argparse.ArgumentParser:
     p_live.add_argument("--trials", type=int, default=3)
     p_live.add_argument("--no-policy", action="store_true", help="Skip Ray/RLlib PPO bootstrap")
     p_live.add_argument("--no-tune", action="store_true", help="Skip Optuna reward bootstrap")
+    p_live.add_argument("--exercise-cluster", action="store_true", help="Rotate safe load patterns in a dedicated namespace to force varied agent decisions")
+    p_live.add_argument("--exercise-namespace", default="borg-orchestrator-exercise")
+    p_live.add_argument("--exercise-interval-iterations", type=int, default=3)
     p_live.set_defaults(func=cmd_live_kubernetes_run)
 
     p_arch = sub.add_parser("architecture-status")

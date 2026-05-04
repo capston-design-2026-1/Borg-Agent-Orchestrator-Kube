@@ -27,6 +27,13 @@ NAMESPACE_PREFIXES="${NAMESPACE_PREFIXES:-test-,default}"
 PROMETHEUS_BASE_URL="${PROMETHEUS_BASE_URL:-}"
 POWER_CALIBRATION="${POWER_CALIBRATION:-}"
 TRACE_OUT="${TRACE_OUT:-orchestrator_stack/runtime/visualization/live_kubernetes_trace.json}"
+if [[ "$LIVE_K8S" == "1" ]]; then
+  EXERCISE_CLUSTER="${EXERCISE_CLUSTER:-1}"
+else
+  EXERCISE_CLUSTER="${EXERCISE_CLUSTER:-0}"
+fi
+EXERCISE_NAMESPACE="${EXERCISE_NAMESPACE:-borg-orchestrator-exercise}"
+EXERCISE_INTERVAL_ITERATIONS="${EXERCISE_INTERVAL_ITERATIONS:-3}"
 
 if [[ ! -x "$PYTHON_BIN" ]]; then
   PYTHON_BIN="$(command -v python3)"
@@ -63,6 +70,9 @@ if [[ "$LIVE_K8S" == "1" ]]; then
   if [[ -n "$LIVE_MAX_ITERATIONS" ]]; then ARGS+=(--max-iterations "$LIVE_MAX_ITERATIONS"); fi
   if [[ -n "$PROMETHEUS_BASE_URL" ]]; then ARGS+=(--prometheus-base-url "$PROMETHEUS_BASE_URL"); fi
   if [[ -n "$POWER_CALIBRATION" ]]; then ARGS+=(--power-calibration "$POWER_CALIBRATION"); fi
+  if [[ "$EXERCISE_CLUSTER" == "1" ]]; then
+    ARGS+=(--exercise-cluster --exercise-namespace "$EXERCISE_NAMESPACE" --exercise-interval-iterations "$EXERCISE_INTERVAL_ITERATIONS")
+  fi
 else
   ARGS=(orchestrator_stack/run.py visualized-run --config "$CONFIG" --trials "$TRIALS" --event-dir "$EVENT_DIR")
 fi

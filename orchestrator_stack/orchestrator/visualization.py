@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from orchestrator.config import OrchestratorConfig
+from orchestrator.layer1.kubernetes_exerciser import apply_exercise_phase
 from orchestrator.layer1.kubernetes_trace import capture_kubernetes_trace_row, load_power_calibration, write_kubernetes_trace
 from orchestrator.layer1.trace_ingestor import load_trace_rows
 from orchestrator.layer2.simulator import AIOpsLabBackend, TraceDrivenTwinBackend
@@ -236,6 +237,9 @@ def run_live_kubernetes_orchestration(
     train_policy: bool = True,
     tune_rewards: bool = False,
     trials: int = 3,
+    exercise_cluster: bool = False,
+    exercise_namespace: str = "borg-orchestrator-exercise",
+    exercise_interval_iterations: int = 3,
 ) -> dict[str, Any]:
     state = VisualizationState(event_dir)
     config = OrchestratorConfig.load(config_path)
@@ -249,8 +253,12 @@ def run_live_kubernetes_orchestration(
             "config": str(config_path),
             "kubeconfig": str(kubeconfig_path),
             "interval_seconds": interval_seconds,
+            "exercise_cluster": exercise_cluster,
+            "exercise_namespace": exercise_namespace if exercise_cluster else None,
         }
     )
+    if exercise_cluster and exercise_namespace not in namespace_prefixes:
+        namespace_prefixes = (*namespace_prefixes, exercise_namespace)
     state.set_status("running", stage="live_boot")
 
     try:
@@ -301,6 +309,21 @@ def run_live_kubernetes_orchestration(
         last_signature: tuple[str, str, str | None, str] | None = None
         repeat_count = 0
         while max_iterations is None or iteration < max_iterations:
+            if exercise_cluster and iteration % max(1, exercise_interval_iterations) == 0:
+                phase = apply_exercise_phase(
+                    kubeconfig=kubeconfig_path,
+                    namespace=exercise_namespace,
+                    phase_index=iteration // max(1, exercise_interval_iterations),
+                )
+                state.emit(
+                    "exercise",
+                    f"{phase['phase']}: {phase['detail']}",
+                    phase=phase["phase"],
+                    namespace=phase["namespace"],
+                    cleanup=phase.get("cleanup"),
+                    applied=phase.get("applied"),
+                    rollout=phase.get("rollout"),
+                )
             row = capture_kubernetes_trace_row(
                 kubeconfig=kubeconfig_path,
                 namespace_prefixes=namespace_prefixes,
