@@ -51,6 +51,8 @@ def test_visualization_state_writes_state_and_events(tmp_path: Path):
 
     state.stage("episode", "running", detail="step 1/2", progress=0.5)
     state.reward(1, {"AgentA": 1.0, "AgentB": 2.0, "AgentC": -1.0}, 1.4, "AgentA:migrate")
+    state.cluster_snapshot({"nodes": 1, "tasks": 2, "sla_violations": 0, "max_risk": 0.4})
+    state.decision({"agent": "AgentA", "kind": "migrate", "target": "node-1", "repeat_count": 1, "reason": "risk=0.4"})
     state.optuna_trial("study", 0, 3.2, {"alpha": 1.0}, 3.2)
     state.ray_update("trained", reward_mean=5.0, checkpoint="ckpt")
 
@@ -59,6 +61,8 @@ def test_visualization_state_writes_state_and_events(tmp_path: Path):
 
     assert payload["active_stage"] == "episode"
     assert payload["rewards"][-1]["action"] == "AgentA:migrate"
+    assert payload["cluster"]["max_risk"] == 0.4
+    assert payload["decision"]["reason"] == "risk=0.4"
     assert payload["optuna"]["best_score"] == 3.2
     assert payload["ray"]["status"] == "trained"
     assert len(events) >= 4
@@ -134,6 +138,9 @@ def test_live_kubernetes_orchestration_loop_uses_cluster_snapshots(monkeypatch, 
     assert len(rows) == 2
     assert state["summary"]["mode"] == "live_kubernetes"
     assert state["summary"]["last_action"]["kind"] == "replicate"
+    assert state["summary"]["last_action"]["reason"].startswith("risk=0.96")
+    assert state["decision"]["repeat_count"] == 2
+    assert state["cluster"]["sla_violations"] == 0
 
 
 def test_live_kubernetes_loop_continues_without_xgboost(monkeypatch, tmp_path: Path):
