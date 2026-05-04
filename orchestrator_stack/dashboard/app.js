@@ -106,13 +106,32 @@ function eventTone(kind) {
   if (kind === 'stage') return 'stage';
   return 'neutral';
 }
-function flowLaneMarkup({ key, title, subtitle, metric, detail, tone }) {
+function eventNode(kind) {
+  if (kind === 'cluster' || kind === 'exercise') return 'cluster';
+  if (kind === 'decision') return 'agents';
+  if (kind === 'reward') return 'scoreboard';
+  if (kind === 'ray') return 'rllib';
+  if (kind === 'optuna') return 'optuna';
+  return 'simulator';
+}
+function diagramNodeMarkup(node, activeKeys) {
+  const active = activeKeys.has(node.id) ? 'active' : '';
   return `
-    <article class="flow-lane ${tone || key}">
-      <div class="lane-cap">${safeText(title)}</div>
-      <strong>${safeText(metric)}</strong>
-      <span>${safeText(subtitle)}</span>
-      <p>${safeText(detail)}</p>
+    <article class="diagram-node ${node.tone} ${active}" style="left:${node.x}%;top:${node.y}%">
+      <div class="node-kicker">${safeText(node.kicker)}</div>
+      <strong>${safeText(node.title)}</strong>
+      <span>${safeText(node.metric)}</span>
+      <p>${safeText(node.detail)}</p>
+    </article>
+  `;
+}
+function diagramCalloutMarkup(event, index) {
+  const node = eventNode(event.kind);
+  return `
+    <article class="diagram-callout ${eventTone(event.kind)} node-${node}" style="--delay:${index * 75}ms">
+      <span>${safeText(shortTime(event.time))} · ${safeText(event.kind)}</span>
+      <strong>${safeText(event.action || event.phase || event.agent || event.name || 'runtime')}</strong>
+      <p>${safeText(event.message)}</p>
     </article>
   `;
 }
@@ -125,61 +144,113 @@ function renderFlow(state, events) {
   const opt = state.optuna || {};
   const ray = state.ray || {};
   const latestExercise = (events || []).slice().reverse().find(e => e.kind === 'exercise');
+  const recentEvents = (events || []).slice(-8).reverse();
+  const activeKeys = new Set(recentEvents.map(e => eventNode(e.kind)));
+  if (decision.agent) activeKeys.add('agents');
 
   $('flowClock').textContent = shortTime(state.updated_at || decision.time || cluster.time);
-  $('flowLanes').innerHTML = [
-    flowLaneMarkup({
-      key: 'cluster',
+  const nodes = [
+    {
+      id: 'cluster', tone: 'cluster', x: 5, y: 18,
+      kicker: 'Layer 1',
       title: 'Kubernetes',
-      subtitle: `${cluster.nodes ?? 0} node / ${cluster.tasks ?? 0} active task`,
       metric: `risk ${fmt(cluster.max_risk)}`,
-      detail: `cpu ${fmt(cluster.avg_cpu)} mem ${fmt(cluster.avg_mem)} sla ${cluster.sla_violations ?? 0}`,
-    }),
-    flowLaneMarkup({
-      key: 'exercise',
+      detail: `${cluster.nodes ?? 0} node / ${cluster.tasks ?? 0} task / sla ${cluster.sla_violations ?? 0}`,
+    },
+    {
+      id: 'exercise', tone: 'exercise', x: 5, y: 62,
+      kicker: 'Perturbation',
       title: 'Workload pulse',
-      subtitle: latestExercise?.phase || 'observing',
       metric: latestExercise ? 'active' : 'idle',
-      detail: latestExercise?.message || 'waiting for cluster perturbation',
-    }),
-    flowLaneMarkup({
-      key: 'brain',
-      title: 'Brain / Referee',
-      subtitle: `${decision.proposal_count ?? 0} proposals scored`,
+      detail: latestExercise?.phase || 'observing cluster state',
+    },
+    {
+      id: 'simulator', tone: 'simulator', x: 25, y: 40,
+      kicker: 'Layer 2',
+      title: 'AIOps Twin',
+      metric: `cpu ${fmt(cluster.avg_cpu)}`,
+      detail: `mem ${fmt(cluster.avg_mem)} energy ${fmt(cluster.energy_watts)}W`,
+    },
+    {
+      id: 'brain', tone: 'brain', x: 45, y: 16,
+      kicker: 'Layer 3',
+      title: 'XGBoost Brain',
+      metric: `demand ${fmt(cluster.min_demand)}`,
+      detail: `risk node ${cluster.max_risk_node || 'n/a'}`,
+    },
+    {
+      id: 'agents', tone: decision.agent || 'agents', x: 45, y: 62,
+      kicker: 'Layer 4',
+      title: 'Agents A / B / C',
+      metric: decision.agent ? `${decision.agent}:${decision.kind}` : 'waiting',
+      detail: `${decision.proposal_count ?? 0} proposals / repeat ${decision.repeat_count ?? 0}`,
+    },
+    {
+      id: 'referee', tone: 'referee', x: 64, y: 40,
+      kicker: 'Referee',
+      title: 'Decision Gate',
       metric: `score ${fmt(decision.score)}`,
       detail: decision.reason || 'waiting for recommendation',
-    }),
-    flowLaneMarkup({
-      key: 'agent',
-      title: 'Agent Decision',
-      subtitle: decision.target || 'no target yet',
-      metric: decision.agent ? `${decision.agent}:${decision.kind}` : 'waiting',
-      detail: `priority ${decision.priority ?? 'n/a'} repeat ${decision.repeat_count ?? 0}`,
-      tone: decision.agent || 'agent',
-    }),
-    flowLaneMarkup({
-      key: 'reward',
+    },
+    {
+      id: 'scoreboard', tone: 'scoreboard', x: 82, y: 18,
+      kicker: 'Layer 6',
       title: 'Reward Feedback',
-      subtitle: lastReward.action || 'no reward yet',
       metric: fmt(lastReward.total),
       detail: `A ${fmt(byAgent.AgentA)} / B ${fmt(byAgent.AgentB)} / C ${fmt(byAgent.AgentC)}`,
-    }),
-    flowLaneMarkup({
-      key: 'meta',
+    },
+    {
+      id: 'rllib', tone: 'rllib', x: 82, y: 62,
+      kicker: 'Ray RLlib',
+      title: 'PPO Trainer',
+      metric: ray.status || 'idle',
+      detail: ray.reward_mean === undefined ? 'policy loop' : `reward mean ${fmt(ray.reward_mean)}`,
+    },
+    {
+      id: 'optuna', tone: 'optuna', x: 64, y: 78,
+      kicker: 'Layer 5',
       title: 'Ray + Optuna',
-      subtitle: `Ray ${ray.status || 'idle'} / Optuna ${opt.status || 'waiting'}`,
       metric: opt.best_score === undefined ? 'n/a' : fmt(opt.best_score),
-      detail: opt.study || ray.checkpoint || 'meta-loop awaiting update',
-    }),
-  ].join('');
+      detail: opt.study || 'reward and policy search',
+    },
+  ];
 
-  $('flowPopups').innerHTML = (events || []).slice(-9).reverse().map((event, index) => `
-    <article class="flow-popup ${eventTone(event.kind)}" style="--delay:${index * 80}ms">
-      <span>${safeText(shortTime(event.time))} · ${safeText(event.kind)}</span>
-      <strong>${safeText(event.action || event.phase || event.agent || event.name || 'runtime')}</strong>
-      <p>${safeText(event.message)}</p>
-    </article>
-  `).join('');
+  $('flowDiagram').innerHTML = `
+    <svg class="diagram-arrows" viewBox="0 0 1000 520" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <marker id="arrowHead" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z"></path>
+        </marker>
+      </defs>
+      <path id="flow-cluster-twin" class="arrow main" d="M170 155 C245 155 250 260 315 260" />
+      <path id="flow-exercise-twin" class="arrow main" d="M170 380 C250 380 250 270 315 270" />
+      <path id="flow-twin-brain" class="arrow main" d="M400 250 C455 160 485 145 545 145" />
+      <path id="flow-twin-agents" class="arrow main" d="M400 285 C455 365 485 375 545 375" />
+      <path id="flow-brain-referee" class="arrow main" d="M625 170 C675 215 690 235 735 255" />
+      <path id="flow-agents-referee" class="arrow main" d="M625 375 C680 355 695 315 735 285" />
+      <path id="flow-referee-score" class="arrow main" d="M810 255 C855 215 865 170 890 150" />
+      <path id="flow-feedback" class="arrow feedback" d="M890 365 C825 490 585 500 505 410" />
+      <path id="flow-meta" class="arrow meta" d="M800 415 C760 450 725 450 700 420" />
+      <circle class="packet packet-one" r="7">
+        <animateMotion dur="6s" repeatCount="indefinite">
+          <mpath href="#flow-cluster-twin" />
+        </animateMotion>
+      </circle>
+      <circle class="packet packet-two" r="6">
+        <animateMotion dur="5s" begin=".9s" repeatCount="indefinite">
+          <mpath href="#flow-agents-referee" />
+        </animateMotion>
+      </circle>
+      <circle class="packet packet-three" r="5">
+        <animateMotion dur="4.8s" begin=".3s" repeatCount="indefinite">
+          <mpath href="#flow-feedback" />
+        </animateMotion>
+      </circle>
+    </svg>
+    <div class="diagram-grid"></div>
+    ${nodes.map(node => diagramNodeMarkup(node, activeKeys)).join('')}
+    <div class="diagram-callouts">${recentEvents.map(diagramCalloutMarkup).join('')}</div>
+  `;
 }
 function renderState(state, events) {
   $('statusText').textContent = state.status || 'waiting';

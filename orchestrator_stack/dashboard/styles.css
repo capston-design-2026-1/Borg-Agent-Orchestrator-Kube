@@ -54,117 +54,142 @@ h2 { margin: 0; font-size: 20px; }
 .stage.failed:before { background: var(--red); }
 .stage h3 { margin: 0 0 8px; font-size: 15px; }
 .stage p { margin: 0; color: var(--muted); font-size: 13px; }
-.flow-panel { margin-top: 18px; position: relative; }
+.flow-panel { margin-top: 18px; }
 .flow-shell {
-  display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(340px, .65fr);
-  gap: 16px;
-  min-height: 390px;
-}
-.flow-lanes {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  position: relative;
-  padding: 10px;
-  border-radius: 26px;
+  min-height: 620px;
+  border-radius: 28px;
   background:
-    linear-gradient(90deg, rgba(20,33,27,.08), transparent 16%, transparent 84%, rgba(20,33,27,.08)),
-    radial-gradient(circle at 18% 28%, rgba(22,131,95,.16), transparent 18rem),
-    radial-gradient(circle at 72% 68%, rgba(212,138,32,.18), transparent 18rem),
-    rgba(255,255,255,.38);
+    radial-gradient(circle at 18% 20%, rgba(22,131,95,.15), transparent 22rem),
+    radial-gradient(circle at 78% 76%, rgba(212,138,32,.17), transparent 20rem),
+    linear-gradient(135deg, rgba(255,255,255,.46), rgba(255,255,255,.18));
   border: 1px solid var(--line);
   overflow: hidden;
 }
-.flow-lanes:before {
-  content: "";
-  position: absolute;
-  left: 8%;
-  right: 8%;
-  top: 50%;
-  height: 3px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--green), var(--amber), var(--red), var(--blue), var(--ink));
-  opacity: .38;
-}
-.flow-lanes:after {
-  content: "";
-  position: absolute;
-  top: calc(50% - 6px);
-  left: 8%;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 0 10px rgba(22,131,95,.15), 0 0 32px rgba(22,131,95,.72);
-  animation: packetFlow 4.8s linear infinite;
-}
-.flow-lane {
+.flow-diagram {
   position: relative;
+  min-height: 620px;
+  padding: 18px;
+}
+.diagram-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(20,33,27,.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20,33,27,.045) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(circle at center, black 20%, transparent 82%);
+}
+.diagram-arrows {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   z-index: 1;
-  min-height: 164px;
-  padding: 16px;
-  border-radius: 22px;
-  background: rgba(255,255,255,.72);
-  border: 1px solid rgba(20,33,27,.12);
-  box-shadow: 0 14px 38px rgba(35,27,12,.10);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
 }
-.flow-lane strong { font-size: clamp(20px, 2.3vw, 30px); line-height: 1; letter-spacing: -.04em; overflow-wrap: anywhere; }
-.flow-lane span, .lane-cap { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .11em; }
-.flow-lane p { margin: 10px 0 0; color: var(--muted); font-size: 13px; line-height: 1.35; overflow-wrap: anywhere; }
-.flow-lane.cluster { border-color: rgba(22,131,95,.28); }
-.flow-lane.exercise { border-color: rgba(212,138,32,.32); }
-.flow-lane.brain, .flow-lane.AgentA { border-color: rgba(180,70,52,.30); }
-.flow-lane.agent, .flow-lane.AgentB { border-color: rgba(22,131,95,.30); }
-.flow-lane.AgentC { border-color: rgba(47,111,159,.32); }
-.flow-lane.reward { border-color: rgba(20,33,27,.24); }
-.flow-lane.meta { border-color: rgba(212,138,32,.30); }
-.flow-popups {
-  display: grid;
-  align-content: start;
-  gap: 10px;
-  max-height: 390px;
-  overflow: auto;
-  padding: 2px 4px 2px 0;
+.diagram-arrows marker path { fill: rgba(20,33,27,.48); }
+.arrow {
+  fill: none;
+  stroke: rgba(20,33,27,.42);
+  stroke-width: 3;
+  marker-end: url(#arrowHead);
+  stroke-linecap: round;
 }
-.flow-popup {
-  position: relative;
-  padding: 12px 14px 12px 18px;
-  border-radius: 18px;
-  background: rgba(255,255,255,.68);
+.arrow.main { stroke-dasharray: 8 9; animation: dashMove 2.8s linear infinite; }
+.arrow.feedback { stroke: rgba(22,131,95,.54); stroke-dasharray: 4 10; animation: dashMove 3.4s linear infinite reverse; }
+.arrow.meta { stroke: rgba(212,138,32,.62); stroke-dasharray: 12 8; animation: dashMove 3s linear infinite; }
+.packet {
+  z-index: 2;
+  fill: var(--green);
+  filter: drop-shadow(0 0 10px rgba(22,131,95,.8));
+}
+.packet-two { fill: var(--amber); }
+.packet-three { fill: var(--blue); }
+.diagram-node {
+  position: absolute;
+  z-index: 3;
+  width: 15.5%;
+  min-width: 150px;
+  min-height: 130px;
+  padding: 14px;
+  border-radius: 20px;
+  background: rgba(255,255,255,.76);
+  border: 1px solid rgba(20,33,27,.16);
+  box-shadow: 0 18px 42px rgba(35,27,12,.12);
+  transform: translateY(-50%);
+  backdrop-filter: blur(14px);
+}
+.diagram-node.active {
+  animation: nodePulse 1.5s ease-in-out infinite;
+  border-width: 2px;
+}
+.diagram-node.cluster { border-color: rgba(22,131,95,.35); }
+.diagram-node.exercise, .diagram-node.optuna, .diagram-node.rllib { border-color: rgba(212,138,32,.38); }
+.diagram-node.simulator, .diagram-node.brain, .diagram-node.referee { border-color: rgba(47,111,159,.34); }
+.diagram-node.AgentA { border-color: rgba(180,70,52,.50); }
+.diagram-node.AgentB { border-color: rgba(22,131,95,.48); }
+.diagram-node.AgentC { border-color: rgba(47,111,159,.48); }
+.diagram-node.scoreboard { border-color: rgba(20,33,27,.32); }
+.node-kicker {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.diagram-node strong { display: block; font-size: 18px; line-height: 1.1; margin-bottom: 8px; }
+.diagram-node span { display: block; font-size: 20px; font-weight: 800; letter-spacing: -.03em; overflow-wrap: anywhere; }
+.diagram-node p { margin: 8px 0 0; color: var(--muted); font-size: 12px; line-height: 1.35; overflow-wrap: anywhere; }
+.diagram-callouts {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  pointer-events: none;
+}
+.diagram-callout {
+  position: absolute;
+  width: 230px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: rgba(255,252,244,.9);
   border: 1px solid var(--line);
-  box-shadow: 0 14px 34px rgba(35,27,12,.09);
-  animation: popupIn .46s ease both;
+  box-shadow: 0 18px 48px rgba(35,27,12,.18);
+  animation: calloutFloat 5.8s ease both;
   animation-delay: var(--delay, 0ms);
 }
-.flow-popup:before {
+.diagram-callout:before {
   content: "";
   position: absolute;
-  left: 0;
-  top: 12px;
-  bottom: 12px;
-  width: 5px;
-  border-radius: 999px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  left: -5px;
+  top: 18px;
   background: var(--muted);
+  box-shadow: 0 0 0 8px rgba(20,33,27,.08);
 }
-.flow-popup.cluster:before { background: var(--green); }
-.flow-popup.agent:before { background: var(--blue); }
-.flow-popup.reward:before { background: var(--ink); }
-.flow-popup.optuna:before, .flow-popup.ray:before { background: var(--amber); }
-.flow-popup.stage:before { background: var(--red); }
-.flow-popup span { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 5px; }
-.flow-popup strong { display: block; font-size: 15px; margin-bottom: 4px; overflow-wrap: anywhere; }
-.flow-popup p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.35; overflow-wrap: anywhere; }
-@keyframes packetFlow {
-  from { left: 8%; }
-  to { left: calc(92% - 14px); }
+.diagram-callout.cluster:before { background: var(--green); }
+.diagram-callout.agent:before { background: var(--blue); }
+.diagram-callout.reward:before { background: var(--ink); }
+.diagram-callout.optuna:before, .diagram-callout.ray:before { background: var(--amber); }
+.diagram-callout.stage:before { background: var(--red); }
+.diagram-callout.node-cluster { left: 15%; top: 8%; }
+.diagram-callout.node-simulator { left: 31%; top: 58%; }
+.diagram-callout.node-agents { left: 47%; top: 82%; }
+.diagram-callout.node-scoreboard { left: 72%; top: 6%; }
+.diagram-callout.node-rllib { left: 72%; top: 72%; }
+.diagram-callout.node-optuna { left: 56%; top: 88%; }
+.diagram-callout span { display: block; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 4px; }
+.diagram-callout strong { display: block; font-size: 14px; margin-bottom: 4px; overflow-wrap: anywhere; }
+.diagram-callout p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.3; overflow-wrap: anywhere; }
+@keyframes dashMove { to { stroke-dashoffset: -34; } }
+@keyframes nodePulse {
+  0%, 100% { box-shadow: 0 18px 42px rgba(35,27,12,.12); transform: translateY(-50%) scale(1); }
+  50% { box-shadow: 0 20px 58px rgba(22,131,95,.24); transform: translateY(-50%) scale(1.025); }
 }
-@keyframes popupIn {
-  from { opacity: 0; transform: translateY(10px) scale(.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+@keyframes calloutFloat {
+  0% { opacity: 0; transform: translateY(8px) scale(.96); }
+  10%, 78% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: .28; transform: translateY(-10px) scale(.98); }
 }
 canvas { width: 100%; height: 250px; border-radius: 20px; background: linear-gradient(180deg, rgba(255,255,255,.58), rgba(255,255,255,.2)); border: 1px solid var(--line); }
 .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px; color: var(--muted); font-size: 13px; }
@@ -178,6 +203,8 @@ canvas { width: 100%; height: 250px; border-radius: 20px; background: linear-gra
 .event b { color: var(--green); }
 @media (max-width: 980px) {
   .hero { align-items: stretch; flex-direction: column; }
-  .metrics, .two, .stages, .decision-grid, .flow-shell, .flow-lanes { grid-template-columns: 1fr; }
-  .flow-lanes:before, .flow-lanes:after { display: none; }
+  .metrics, .two, .stages, .decision-grid { grid-template-columns: 1fr; }
+  .flow-shell, .flow-diagram { min-height: 980px; }
+  .diagram-node { width: 42%; min-width: 0; }
+  .diagram-callout { display: none; }
 }
