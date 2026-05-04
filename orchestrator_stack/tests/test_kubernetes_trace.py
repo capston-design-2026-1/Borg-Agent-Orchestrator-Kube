@@ -74,6 +74,41 @@ def test_kubernetes_snapshot_to_trace_row_uses_real_kube_payload_shape():
     }
 
 
+def test_completed_pods_count_as_completed_not_active_sla_violations():
+    nodes = {
+        "items": [
+            {
+                "metadata": {"name": "kind-control-plane"},
+                "status": {"allocatable": {"cpu": "2000m", "memory": "1Gi"}},
+            }
+        ]
+    }
+    pods = {
+        "items": [
+            {
+                "metadata": {"namespace": "default", "name": "completed-job-pod"},
+                "spec": {
+                    "nodeName": "kind-control-plane",
+                    "containers": [{"resources": {"requests": {"cpu": "100m", "memory": "64Mi"}}}],
+                },
+                "status": {"phase": "Succeeded", "containerStatuses": [{"ready": False, "restartCount": 0}]},
+            }
+        ]
+    }
+
+    row = kubernetes_snapshot_to_trace_row(
+        nodes_payload=nodes,
+        pods_payload=pods,
+        timestamp=123,
+        namespace_prefixes=("default",),
+    )
+
+    assert row["completed_tasks"] == 1
+    assert row["sla_violations"] == 0
+    assert row["tasks"] == []
+    assert row["p_fail_scores"]["kind-control-plane"] < 0.95
+
+
 def test_write_kubernetes_trace_orders_rows_by_timestamp(tmp_path):
     out = tmp_path / "trace.json"
 
