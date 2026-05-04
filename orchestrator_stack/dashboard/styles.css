@@ -94,19 +94,29 @@ h2 { margin: 0; font-size: 20px; }
   marker-end: url(#arrowHead);
   stroke-linecap: round;
 }
-.arrow.main { stroke-dasharray: 8 9; animation: dashMove 2.8s linear infinite; }
+.arrow.telemetry, .arrow.inference, .arrow.observation, .arrow.proposal { stroke-dasharray: 8 9; animation: dashMove 2.8s linear infinite; }
+.arrow.telemetry { stroke: rgba(20,33,27,.48); }
+.arrow.inference { stroke: rgba(47,111,159,.48); }
+.arrow.observation { stroke: rgba(20,33,27,.30); stroke-width: 2.2; }
+.arrow.proposal { stroke-width: 3.4; }
 .arrow.agent-a { stroke: rgba(180,70,52,.50); }
 .arrow.agent-b { stroke: rgba(22,131,95,.52); }
 .arrow.agent-c { stroke: rgba(47,111,159,.52); }
+.arrow.control { stroke: rgba(180,70,52,.58); stroke-dasharray: 2 10; animation: dashMove 3.2s linear infinite; }
+.arrow.reward { stroke: rgba(20,33,27,.58); stroke-width: 3.4; stroke-dasharray: 7 7; animation: dashMove 3s linear infinite; }
 .arrow.feedback { stroke: rgba(22,131,95,.54); stroke-dasharray: 4 10; animation: dashMove 3.4s linear infinite reverse; }
 .arrow.meta { stroke: rgba(212,138,32,.62); stroke-dasharray: 12 8; animation: dashMove 3s linear infinite; }
+.arrow.policy { stroke-dasharray: 14 8; animation: dashMove 3.6s linear infinite reverse; stroke-width: 2.8; opacity: .82; }
 .packet {
   z-index: 2;
   fill: var(--green);
   filter: drop-shadow(0 0 10px rgba(22,131,95,.8));
 }
-.packet-two { fill: var(--amber); }
-.packet-three { fill: var(--blue); }
+.packet-two { fill: var(--red); }
+.packet-three { fill: var(--green); }
+.packet-four { fill: var(--amber); }
+.packet-five { fill: var(--amber); }
+.packet-six { fill: var(--amber); }
 .diagram-node {
   position: absolute;
   z-index: 3;
