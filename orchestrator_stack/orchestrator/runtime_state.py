@@ -28,7 +28,8 @@ class VisualizationState:
             "architecture_path": str(architecture_path),
             "stages": [],
             "rewards": [],
-            "optuna": {"study": None, "trial": None, "best_score": None, "best_params": {}, "history": []},
+            "reward_summary": {"count": 0, "last_total": None, "average_total": None, "last_by_agent": {}},
+            "optuna": {"status": "idle", "study": None, "trial": None, "best_score": None, "best_params": {}, "history": []},
             "ray": {"status": "idle", "train_iters": None, "reward_mean": None, "checkpoint": None},
             "cluster": {},
             "decision": {},
@@ -75,6 +76,17 @@ class VisualizationState:
         history = self.state["rewards"]
         history.append(row)
         del history[:-80]
+        previous = self.state["reward_summary"]
+        count = int(previous.get("count") or 0) + 1
+        old_average = float(previous.get("average_total") or 0.0)
+        new_average = old_average + ((float(total) - old_average) / count)
+        self.state["reward_summary"] = {
+            "count": count,
+            "last_total": float(total),
+            "average_total": new_average,
+            "last_by_agent": rewards,
+            "last_action": action,
+        }
         self.emit("reward", f"step {step}: {action}", **row)
 
     def cluster_snapshot(self, snapshot: dict[str, Any]) -> None:
@@ -103,10 +115,14 @@ class VisualizationState:
 
     def optuna_trial(self, study: str, number: int, value: float | None, params: dict[str, Any], best_value: float | None) -> None:
         optuna = self.state["optuna"]
-        optuna.update({"study": study, "trial": int(number), "best_score": best_value, "best_params": params if value == best_value else optuna.get("best_params", {})})
+        optuna.update({"status": "running", "study": study, "trial": int(number), "best_score": best_value, "best_params": params if value == best_value else optuna.get("best_params", {})})
         optuna["history"].append({"trial": int(number), "value": value, "params": params, "time": kst_now_iso()})
         del optuna["history"][:-40]
         self.emit("optuna", f"trial {number} value={value}", study=study, trial=number, value=value, params=params, best_score=best_value)
+
+    def optuna_update(self, status: str, **data: Any) -> None:
+        self.state["optuna"].update({"status": status, **data})
+        self.emit("optuna", f"Optuna {status}", **self.state["optuna"])
 
     def ray_update(self, status: str, **data: Any) -> None:
         self.state["ray"].update({"status": status, **data})

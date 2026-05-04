@@ -94,6 +94,26 @@ def _decision_reason(snapshot: dict[str, Any], action_agent: str, action_kind: s
     return "no-op or unknown action"
 
 
+def _write_live_summary(event_dir: str | Path, state: VisualizationState, *, status: str = "running") -> Path:
+    summary = {
+        "status": status,
+        "updated_at": state.state.get("updated_at"),
+        "active_stage": state.state.get("active_stage"),
+        "cluster": state.state.get("cluster"),
+        "decision": state.state.get("decision"),
+        "ray": state.state.get("ray"),
+        "optuna": state.state.get("optuna"),
+        "reward_summary": state.state.get("reward_summary"),
+        "summary": state.state.get("summary"),
+        "errors": state.state.get("errors"),
+    }
+    out = Path(event_dir) / "summary.json"
+    tmp = out.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(summary, indent=2, sort_keys=True), encoding="utf-8")
+    tmp.replace(out)
+    return out
+
+
 def _tune_rewards(config: OrchestratorConfig, rows: list[dict[str, Any]], state: VisualizationState, *, trials: int) -> dict[str, Any]:
     if optuna is None:
         return {"status": "skipped", "reason": "optuna is not installed"}
@@ -257,12 +277,18 @@ def run_live_kubernetes_orchestration(
             ppo = run_policy_training(config, output_dir="orchestrator_stack/runtime/rllib")
             state.ray_update(str(ppo.get("status", "complete")), reward_mean=ppo.get("episode_reward_mean"), checkpoint=ppo.get("checkpoint"))
             state.stage("ray_ppo", "complete", detail=str(ppo.get("status", "complete")), progress=1.0)
+        else:
+            state.ray_update("disabled", reason="live fast mode sets --no-policy; use NO_POLICY=0 to bootstrap Ray/RLlib")
 
         if tune_rewards:
             rows = load_trace_rows(ensure_trace_exists(config))
             state.stage("optuna", "running", detail=f"bootstrap reward tuning, {trials} trials", progress=0.1)
+            state.optuna_update("initializing", trials=trials)
             tuning = _tune_rewards(config, rows, state, trials=trials)
+            state.optuna_update("complete", best_score=tuning.get("score"), best_params={k: tuning.get(k) for k in ("alpha", "beta", "gamma") if k in tuning})
             state.stage("optuna", "complete", detail=f"best score {float(tuning.get('score', 0.0)):.3f}", progress=1.0)
+        else:
+            state.optuna_update("disabled", reason="live fast mode sets --no-tune; use NO_TUNE=0 to bootstrap Optuna")
 
         state.stage("live_kubernetes_loop", "running", detail="capturing cluster snapshots until stopped", progress=0.0)
         agents = [AgentARiskMitigator(), AgentBEfficiencyOptimizer(), AgentCGatekeeper()]
@@ -334,6 +360,7 @@ def run_live_kubernetes_orchestration(
                 ),
                 progress=progress,
             )
+            _write_live_summary(event_dir, state)
             iteration += 1
             if max_iterations is not None and iteration >= max_iterations:
                 break
@@ -345,12 +372,12 @@ def run_live_kubernetes_orchestration(
             "trace_out": str(trace_out),
             "scoreboard": scoreboard.snapshot(),
         }
-        out = Path(event_dir) / "summary.json"
-        out.write_text(json.dumps(summary, indent=2, sort_keys=True), encoding="utf-8")
-        state.artifact(out, "live launch summary")
         state.state["summary"].update(summary)
+        out = _write_live_summary(event_dir, state, status="complete")
+        state.artifact(out, "live launch summary")
         state.stage("live_kubernetes_loop", "complete", detail=f"completed {iteration} iterations", progress=1.0)
         state.set_status("complete", stage="complete")
+        _write_live_summary(event_dir, state, status="complete")
         return summary
     except KeyboardInterrupt:
         summary = {
@@ -360,10 +387,11 @@ def run_live_kubernetes_orchestration(
             "trace_out": str(trace_out),
             "scoreboard": scoreboard.snapshot(),
         }
-        out = Path(event_dir) / "summary.json"
-        out.write_text(json.dumps(summary, indent=2, sort_keys=True), encoding="utf-8")
+        state.state["summary"].update(summary)
+        out = _write_live_summary(event_dir, state, status="stopped")
         state.artifact(out, "live launch summary")
         state.set_status("stopped", stage="stopped")
+        _write_live_summary(event_dir, state, status="stopped")
         return summary
     except Exception as exc:
         state.error(str(exc))
