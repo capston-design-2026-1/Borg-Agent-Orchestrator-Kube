@@ -19,6 +19,10 @@ function shortTime(value) {
   const match = String(value).match(/T(\d\d:\d\d:\d\d)/);
   return match ? match[1] : String(value);
 }
+function actionLabel(value) {
+  if (!value) return 'candidate';
+  return String(value).replaceAll('_', ' ');
+}
 function niceTick(value) {
   if (!Number.isFinite(value)) return 'n/a';
   const abs = Math.abs(value);
@@ -109,7 +113,7 @@ function eventTone(kind) {
 function eventNode(kind) {
   if (kind === 'cluster' || kind === 'exercise') return 'cluster';
   if (kind === 'reward') return 'scoreboard';
-  if (kind === 'ray') return 'rllib';
+  if (kind === 'ray') return 'policy';
   if (kind === 'optuna') return 'optuna';
   return 'simulator';
 }
@@ -145,9 +149,11 @@ function renderFlow(state, events) {
   const recentEvents = (events || []).slice(-5).reverse();
   const activeKeys = new Set(recentEvents.map(e => e.kind === 'decision' && e.agent ? e.agent : eventNode(e.kind)));
   if (decision.agent) activeKeys.add(decision.agent);
+  if (ray.status) activeKeys.add('policy');
+  if (opt.status) activeKeys.add('optuna');
 
   $('flowClock').textContent = shortTime(state.updated_at || decision.time || cluster.time);
-  const agentMetric = (agent) => decision.agent === agent ? decision.kind : 'candidate';
+  const agentMetric = (agent) => decision.agent === agent ? actionLabel(decision.kind) : 'candidate';
   const agentDetail = (agent) => {
     const reward = byAgent[agent];
     if (decision.agent === agent) return `${decision.target || 'cluster'} / score ${fmt(decision.score)}`;
@@ -155,111 +161,119 @@ function renderFlow(state, events) {
   };
   const nodes = [
     {
-      id: 'cluster', tone: 'cluster', x: 5, y: 16,
-      kicker: 'Layer 1',
-      title: 'Kubernetes',
+      id: 'cluster', tone: 'cluster', x: 4, y: 18,
+      kicker: 'Layer 1 source',
+      title: 'Kubernetes Cluster',
       metric: `risk ${fmt(cluster.max_risk)}`,
       detail: `${cluster.nodes ?? 0} node / ${cluster.tasks ?? 0} task / sla ${cluster.sla_violations ?? 0}`,
     },
     {
-      id: 'exercise', tone: 'exercise', x: 5, y: 49,
-      kicker: 'Perturbation',
-      title: 'Workload pulse',
+      id: 'exercise', tone: 'exercise', x: 4, y: 47,
+      kicker: 'Live perturbation',
+      title: 'Workload Exerciser',
       metric: latestExercise ? 'active' : 'idle',
       detail: latestExercise?.phase || 'observing cluster state',
     },
     {
-      id: 'simulator', tone: 'simulator', x: 24, y: 38,
-      kicker: 'Layer 2',
-      title: 'AIOps Twin',
+      id: 'simulator', tone: 'simulator', x: 22, y: 32,
+      kicker: 'Layer 2 digital twin',
+      title: 'AIOpsLab Twin',
       metric: `cpu ${fmt(cluster.avg_cpu)}`,
       detail: `mem ${fmt(cluster.avg_mem)} energy ${fmt(cluster.energy_watts)}W`,
     },
     {
-      id: 'brain', tone: 'brain', x: 43, y: 16,
-      kicker: 'Layer 3',
-      title: 'XGBoost Brain',
-      metric: `demand ${fmt(cluster.min_demand)}`,
-      detail: `risk node ${cluster.max_risk_node || 'n/a'}`,
+      id: 'brain', tone: 'brain', x: 39, y: 18,
+      kicker: 'Layer 3 predictors',
+      title: 'XGBoost Brains',
+      metric: `risk ${fmt(cluster.max_risk)} / demand ${fmt(cluster.min_demand)}`,
+      detail: `safety forecast + resource demand projection`,
     },
     {
-      id: 'AgentA', tone: 'AgentA', x: 43, y: 38,
-      kicker: 'Layer 4 Safety',
+      id: 'observation', tone: 'observation', x: 39, y: 47,
+      kicker: 'Observation space',
+      title: 'State Vector',
+      metric: `${decision.proposal_count ?? 0} proposals`,
+      detail: `node map + tasks + forecasts`,
+    },
+    {
+      id: 'policy', tone: 'policy', x: 56, y: 18,
+      kicker: 'Layer 4 MARL',
+      title: 'Ray RLlib PPO Policy',
+      metric: ray.status || 'idle',
+      detail: ray.reward_mean === undefined ? 'policy network for A/B/C' : `reward mean ${fmt(ray.reward_mean)}`,
+    },
+    {
+      id: 'AgentA', tone: 'AgentA', x: 56, y: 41,
+      kicker: 'Agent A safety',
       title: 'Agent A',
       metric: agentMetric('AgentA'),
       detail: agentDetail('AgentA'),
     },
     {
-      id: 'AgentB', tone: 'AgentB', x: 43, y: 57,
-      kicker: 'Layer 4 Efficiency',
+      id: 'AgentB', tone: 'AgentB', x: 56, y: 60,
+      kicker: 'Agent B efficiency',
       title: 'Agent B',
       metric: agentMetric('AgentB'),
       detail: agentDetail('AgentB'),
     },
     {
-      id: 'AgentC', tone: 'AgentC', x: 43, y: 76,
-      kicker: 'Layer 4 Admission',
+      id: 'AgentC', tone: 'AgentC', x: 56, y: 79,
+      kicker: 'Agent C admission',
       title: 'Agent C',
       metric: agentMetric('AgentC'),
       detail: agentDetail('AgentC'),
     },
     {
-      id: 'referee', tone: 'referee', x: 62, y: 49,
-      kicker: 'Referee',
+      id: 'referee', tone: 'referee', x: 71, y: 56,
+      kicker: 'Safety-first referee',
       title: 'Decision Gate',
       metric: `score ${fmt(decision.score)}`,
       detail: decision.reason || 'waiting for recommendation',
     },
     {
-      id: 'scoreboard', tone: 'scoreboard', x: 80, y: 18,
-      kicker: 'Layer 6',
-      title: 'Reward Feedback',
+      id: 'scoreboard', tone: 'scoreboard', x: 80, y: 24,
+      kicker: 'Layer 6 feedback',
+      title: 'Global Scoreboard',
       metric: fmt(lastReward.total),
       detail: `A ${fmt(byAgent.AgentA)} / B ${fmt(byAgent.AgentB)} / C ${fmt(byAgent.AgentC)}`,
     },
     {
-      id: 'rllib', tone: 'rllib', x: 80, y: 51,
-      kicker: 'Ray RLlib',
-      title: 'PPO Trainer',
-      metric: ray.status || 'idle',
-      detail: ray.reward_mean === undefined ? 'policy loop' : `reward mean ${fmt(ray.reward_mean)}`,
-    },
-    {
-      id: 'optuna', tone: 'optuna', x: 62, y: 76,
-      kicker: 'Layer 5',
-      title: 'Ray + Optuna',
+      id: 'optuna', tone: 'optuna', x: 80, y: 66,
+      kicker: 'Layer 5 meta optimizer',
+      title: 'Optuna Trial Manager',
       metric: opt.best_score === undefined ? 'n/a' : fmt(opt.best_score),
-      detail: opt.study || 'reward and policy search',
+      detail: opt.study || 'tunes reward weights + PPO params',
     },
   ];
 
   $('flowDiagram').innerHTML = `
-    <svg class="diagram-arrows" viewBox="0 0 1000 640" preserveAspectRatio="none" aria-hidden="true">
+    <svg class="diagram-arrows" viewBox="0 0 1400 780" preserveAspectRatio="none" aria-hidden="true">
       <defs>
         <marker id="arrowHead" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
           <path d="M0,0 L10,5 L0,10 z"></path>
         </marker>
       </defs>
-      <path id="flow-cluster-twin" class="arrow telemetry" d="M170 105 C250 110 270 205 330 225" />
-      <path id="flow-exercise-twin" class="arrow telemetry" d="M170 345 C245 335 275 250 330 238" />
-      <path id="flow-twin-brain" class="arrow inference" d="M405 225 C455 140 500 110 545 105" />
-      <path id="flow-brain-agent-a" class="arrow inference agent-a" d="M585 145 C570 200 560 225 545 245" />
-      <path id="flow-brain-agent-b" class="arrow inference agent-b" d="M585 145 C600 270 585 335 545 365" />
-      <path id="flow-brain-agent-c" class="arrow inference agent-c" d="M585 145 C625 330 605 455 545 485" />
-      <path id="flow-twin-agent-a" class="arrow observation agent-a" d="M405 245 C435 250 475 245 505 245" />
-      <path id="flow-twin-agent-b" class="arrow observation agent-b" d="M405 250 C455 330 475 355 505 365" />
-      <path id="flow-twin-agent-c" class="arrow observation agent-c" d="M405 260 C440 430 470 478 505 485" />
-      <path id="flow-agent-a-referee" class="arrow proposal agent-a" d="M595 245 C645 255 700 300 735 315" />
-      <path id="flow-agent-b-referee" class="arrow proposal agent-b" d="M595 365 C655 360 695 332 735 320" />
-      <path id="flow-agent-c-referee" class="arrow proposal agent-c" d="M595 485 C665 430 705 355 735 330" />
-      <path id="flow-referee-cluster" class="arrow control" d="M805 315 C900 300 925 125 875 105" />
-      <path id="flow-referee-score" class="arrow reward" d="M805 305 C850 250 860 155 875 115" />
-      <path id="flow-score-optuna" class="arrow feedback" d="M875 160 C830 570 710 575 690 485" />
-      <path id="flow-score-rllib" class="arrow feedback" d="M900 160 C940 260 925 335 875 335" />
-      <path id="flow-optuna-rllib" class="arrow meta" d="M710 485 C760 460 795 420 830 370" />
-      <path id="flow-rllib-agent-a" class="arrow policy agent-a" d="M830 370 C760 245 660 230 595 245" />
-      <path id="flow-rllib-agent-b" class="arrow policy agent-b" d="M830 370 C750 365 665 362 595 365" />
-      <path id="flow-rllib-agent-c" class="arrow policy agent-c" d="M830 370 C750 470 660 490 595 485" />
+      <path id="flow-cluster-twin" class="arrow telemetry" d="M220 145 C300 165 330 235 405 260" />
+      <path id="flow-exercise-twin" class="arrow telemetry" d="M220 380 C300 360 335 300 405 275" />
+      <path id="flow-twin-brain" class="arrow inference" d="M535 250 C610 165 675 145 735 145" />
+      <path id="flow-twin-observation" class="arrow observation" d="M535 285 C610 330 675 360 735 370" />
+      <path id="flow-brain-observation" class="arrow inference" d="M790 215 C805 275 805 315 790 360" />
+      <path id="flow-observation-policy" class="arrow policy" d="M840 360 C900 240 930 175 975 145" />
+      <path id="flow-policy-agent-a" class="arrow policy agent-a" d="M1035 215 C1040 260 1035 290 1020 310" />
+      <path id="flow-policy-agent-b" class="arrow policy agent-b" d="M1035 215 C1065 340 1050 420 1020 455" />
+      <path id="flow-policy-agent-c" class="arrow policy agent-c" d="M1035 215 C1090 430 1060 570 1020 600" />
+      <path id="flow-observation-agent-a" class="arrow observation agent-a" d="M840 375 C910 365 960 335 1010 320" />
+      <path id="flow-observation-agent-b" class="arrow observation agent-b" d="M840 385 C910 425 955 445 1010 455" />
+      <path id="flow-observation-agent-c" class="arrow observation agent-c" d="M840 395 C900 545 955 600 1010 600" />
+      <path id="flow-agent-a-referee" class="arrow proposal agent-a" d="M1110 320 C1170 340 1215 380 1260 415" />
+      <path id="flow-agent-b-referee" class="arrow proposal agent-b" d="M1110 455 C1170 455 1215 435 1260 425" />
+      <path id="flow-agent-c-referee" class="arrow proposal agent-c" d="M1110 600 C1180 545 1220 470 1260 435" />
+      <path id="flow-referee-act" class="arrow control" d="M1300 410 C1370 260 1320 95 1220 95 C930 95 505 85 230 125" />
+      <path id="flow-referee-score" class="arrow reward" d="M1315 405 C1370 325 1370 235 1330 185" />
+      <path id="flow-score-optuna" class="arrow feedback" d="M1330 225 C1390 410 1380 535 1330 560" />
+      <path id="flow-score-policy" class="arrow feedback" d="M1315 190 C1240 100 1110 95 1035 130" />
+      <path id="flow-optuna-policy" class="arrow meta" d="M1270 575 C1190 500 1110 285 1035 175" />
+      <path id="flow-optuna-score" class="arrow meta" d="M1330 560 C1390 460 1390 300 1330 205" />
       <circle class="packet packet-one" r="7">
         <animateMotion dur="6s" repeatCount="indefinite">
           <mpath href="#flow-cluster-twin" />
@@ -267,7 +281,7 @@ function renderFlow(state, events) {
       </circle>
       <circle class="packet packet-two" r="6">
         <animateMotion dur="5s" begin=".9s" repeatCount="indefinite">
-          <mpath href="#flow-agent-a-referee" />
+          <mpath href="#flow-agent-b-referee" />
         </animateMotion>
       </circle>
       <circle class="packet packet-three" r="5">
@@ -277,17 +291,17 @@ function renderFlow(state, events) {
       </circle>
       <circle class="packet packet-four" r="5">
         <animateMotion dur="5.4s" begin=".6s" repeatCount="indefinite">
-          <mpath href="#flow-rllib-agent-a" />
+          <mpath href="#flow-policy-agent-a" />
         </animateMotion>
       </circle>
       <circle class="packet packet-five" r="5">
         <animateMotion dur="5.4s" begin="1.4s" repeatCount="indefinite">
-          <mpath href="#flow-rllib-agent-b" />
+          <mpath href="#flow-policy-agent-b" />
         </animateMotion>
       </circle>
       <circle class="packet packet-six" r="5">
         <animateMotion dur="5.4s" begin="2.2s" repeatCount="indefinite">
-          <mpath href="#flow-rllib-agent-c" />
+          <mpath href="#flow-policy-agent-c" />
         </animateMotion>
       </circle>
     </svg>
@@ -296,7 +310,7 @@ function renderFlow(state, events) {
       <span><b class="legend-telemetry"></b>telemetry</span>
       <span><b class="legend-inference"></b>inference</span>
       <span><b class="legend-policy"></b>policy</span>
-      <span><b class="legend-reward"></b>reward loop</span>
+      <span><b class="legend-reward"></b>reward/meta loop</span>
     </div>
     ${nodes.map(node => diagramNodeMarkup(node, activeKeys)).join('')}
     <div class="diagram-event-rail">${recentEvents.map(diagramEventMarkup).join('')}</div>

@@ -140,15 +140,15 @@ h2 { margin: 0; font-size: 21px; letter-spacing: -.02em; }
 .diagram-node:before { content: ""; position: absolute; inset: 10px auto 10px 0; width: 5px; border-radius: 999px; background: var(--muted); opacity: .8; }
 .diagram-node.active { animation: nodePulse 1.45s ease-in-out infinite; border-width: 2px; }
 .diagram-node.cluster:before { background: var(--green); }
-.diagram-node.exercise:before, .diagram-node.optuna:before, .diagram-node.rllib:before { background: var(--amber); }
-.diagram-node.simulator:before, .diagram-node.brain:before, .diagram-node.referee:before { background: var(--blue); }
+.diagram-node.exercise:before, .diagram-node.optuna:before, .diagram-node.policy:before { background: var(--amber); }
+.diagram-node.simulator:before, .diagram-node.brain:before, .diagram-node.referee:before, .diagram-node.observation:before { background: var(--blue); }
 .diagram-node.AgentA:before { background: var(--red); }
 .diagram-node.AgentB:before { background: var(--green); }
 .diagram-node.AgentC:before { background: var(--blue); }
 .diagram-node.scoreboard:before { background: var(--ink); }
 .diagram-node.cluster { border-color: rgba(22,131,95,.34); }
-.diagram-node.exercise, .diagram-node.optuna, .diagram-node.rllib { border-color: rgba(212,138,32,.38); }
-.diagram-node.simulator, .diagram-node.brain, .diagram-node.referee { border-color: rgba(47,111,159,.34); }
+.diagram-node.exercise, .diagram-node.optuna, .diagram-node.policy { border-color: rgba(212,138,32,.38); }
+.diagram-node.simulator, .diagram-node.brain, .diagram-node.referee, .diagram-node.observation { border-color: rgba(47,111,159,.34); }
 .diagram-node.AgentA { border-color: rgba(180,70,52,.50); }
 .diagram-node.AgentB { border-color: rgba(22,131,95,.48); }
 .diagram-node.AgentC { border-color: rgba(47,111,159,.48); }
