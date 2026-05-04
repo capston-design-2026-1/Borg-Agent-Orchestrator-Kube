@@ -47,7 +47,7 @@ def test_kubernetes_snapshot_to_trace_row_uses_real_kube_payload_shape():
             },
         ]
     }
-    jobs = {"items": [{"status": {"succeeded": 3}}]}
+    jobs = {"items": [{"metadata": {"namespace": "test-hotel-reservation"}, "status": {"succeeded": 3}}]}
 
     row = kubernetes_snapshot_to_trace_row(
         nodes_payload=nodes,
@@ -107,6 +107,51 @@ def test_completed_pods_count_as_completed_not_active_sla_violations():
     assert row["sla_violations"] == 0
     assert row["tasks"] == []
     assert row["p_fail_scores"]["kind-control-plane"] < 0.95
+
+
+def test_job_owned_completed_pods_are_not_double_counted_as_completed_tasks():
+    nodes = {
+        "items": [
+            {
+                "metadata": {"name": "kind-control-plane"},
+                "status": {"allocatable": {"cpu": "2000m", "memory": "1Gi"}},
+            }
+        ]
+    }
+    pods = {
+        "items": [
+            {
+                "metadata": {
+                    "namespace": "default",
+                    "name": "job-pod",
+                    "ownerReferences": [{"kind": "Job", "name": "wrk2-job"}],
+                },
+                "spec": {
+                    "nodeName": "kind-control-plane",
+                    "containers": [{"resources": {"requests": {"cpu": "100m", "memory": "64Mi"}}}],
+                },
+                "status": {"phase": "Succeeded", "containerStatuses": [{"ready": False, "restartCount": 0}]},
+            }
+        ]
+    }
+    jobs = {
+        "items": [
+            {"metadata": {"namespace": "default", "name": "wrk2-job"}, "status": {"succeeded": 1}},
+            {"metadata": {"namespace": "kube-system", "name": "ignored-job"}, "status": {"succeeded": 7}},
+        ]
+    }
+
+    row = kubernetes_snapshot_to_trace_row(
+        nodes_payload=nodes,
+        pods_payload=pods,
+        jobs_payload=jobs,
+        timestamp=123,
+        namespace_prefixes=("default",),
+    )
+
+    assert row["completed_tasks"] == 1
+    assert row["sla_violations"] == 0
+    assert row["tasks"] == []
 
 
 def test_write_kubernetes_trace_orders_rows_by_timestamp(tmp_path):
