@@ -385,11 +385,11 @@ function renderState(state, events) {
   ], { xLabel: 'orchestration step', yLabel: 'reward' });
   const byAgent = rewardSummary.last_by_agent || {};
   $('rewardStats').innerHTML = [
-    ['count', rewardSummary.count],
+    ['steps', rewardSummary.count],
     ['avg total', fmt(rewardSummary.average_total)],
-    ['AgentA', fmt(byAgent.AgentA)],
-    ['AgentB', fmt(byAgent.AgentB)],
-    ['AgentC', fmt(byAgent.AgentC)],
+    ['last AgentA', fmt(byAgent.AgentA)],
+    ['last AgentB', fmt(byAgent.AgentB)],
+    ['last AgentC', fmt(byAgent.AgentC)],
   ].map(([k, v]) => `<div><b>${k}</b><br>${v ?? 'n/a'}</div>`).join('');
   $('rewardLegend').innerHTML = ['total','AgentA','AgentB','AgentC'].map(k => `<span><b style="color:${colors[k]}">■</b> ${k}</span>`).join('');
 
