@@ -24,6 +24,8 @@ KUBECONFIG=~/Documents/aiopslab_validation_env/kubeconfig \
 
 Live mode defaults to `MODE=full`: Ray/RLlib policy bootstrap and Optuna reward tuning run before the continuous Kubernetes loop. Use the repository `.venv` Python for this full mode because it contains Ray, Optuna, XGBoost, and Torch.
 
+Live mode also defaults to `EXERCISE_CLUSTER=1`. The launcher rotates safe synthetic Kubernetes workloads in the dedicated `borg-orchestrator-exercise` namespace so the live cluster does not stay idle. The rotation intentionally creates idle, moderate-demand, and high-risk request patterns so Agent B, Agent C, and Agent A all receive decision opportunities.
+
 What it does:
 
 1. Starts the local visualization dashboard at `http://127.0.0.1:8765`.
@@ -95,6 +97,18 @@ Fast live Kubernetes mode without Ray/RLlib or Optuna:
 
 ```bash
 MODE=fast LIVE_K8S=1 ./orchestrator_stack/scripts/launch_orchestration.sh
+```
+
+Disable synthetic cluster exercise and only observe existing workloads:
+
+```bash
+LIVE_K8S=1 EXERCISE_CLUSTER=0 ./orchestrator_stack/scripts/launch_orchestration.sh
+```
+
+Change exercise cadence:
+
+```bash
+LIVE_K8S=1 EXERCISE_INTERVAL_ITERATIONS=2 ./orchestrator_stack/scripts/launch_orchestration.sh
 ```
 
 Use another port:

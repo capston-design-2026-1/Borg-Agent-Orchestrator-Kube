@@ -53,6 +53,8 @@ This keeps observing Kubernetes through `kubectl`, selecting Agent A/B/C/referee
 
 In `LIVE_K8S=1` mode, the default is `MODE=full`: Ray/RLlib and Optuna bootstrap run before the continuous Kubernetes loop. Use `MODE=fast LIVE_K8S=1` only for quick debugging without Ray/Optuna.
 
+`LIVE_K8S=1` also enables `EXERCISE_CLUSTER=1` by default. This creates and rotates safe workloads in `borg-orchestrator-exercise` so the cluster state fluctuates and Agent A, Agent B, and Agent C all receive decision opportunities. Set `EXERCISE_CLUSTER=0` to observe without synthetic workload changes.
+
 ## New Isolated Track: Codex Autonomy Runner
 
 An independent local agentic supervisor now exists at `codex_autonomy/`.
