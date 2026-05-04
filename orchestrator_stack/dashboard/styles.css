@@ -54,20 +54,25 @@ h2 { margin: 0; font-size: 20px; }
 .stage.failed:before { background: var(--red); }
 .stage h3 { margin: 0 0 8px; font-size: 15px; }
 .stage p { margin: 0; color: var(--muted); font-size: 13px; }
-.flow-panel { margin-top: 18px; }
+.flow-panel {
+  margin-top: 18px;
+  margin-left: calc((100% - 100vw) / 2 + 18px);
+  margin-right: calc((100% - 100vw) / 2 + 18px);
+}
 .flow-shell {
-  min-height: 720px;
+  min-height: min(82vh, 920px);
   border-radius: 28px;
   background:
     radial-gradient(circle at 18% 20%, rgba(22,131,95,.15), transparent 22rem),
     radial-gradient(circle at 78% 76%, rgba(212,138,32,.17), transparent 20rem),
     linear-gradient(135deg, rgba(255,255,255,.46), rgba(255,255,255,.18));
   border: 1px solid var(--line);
-  overflow: hidden;
+  overflow: auto;
 }
 .flow-diagram {
   position: relative;
-  min-height: 720px;
+  min-width: 1540px;
+  min-height: 860px;
   padding: 18px;
 }
 .diagram-grid {
@@ -120,10 +125,10 @@ h2 { margin: 0; font-size: 20px; }
 .diagram-node {
   position: absolute;
   z-index: 3;
-  width: 15%;
-  min-width: 142px;
-  min-height: 112px;
-  padding: 12px;
+  width: 17%;
+  min-width: 185px;
+  min-height: 132px;
+  padding: 16px;
   border-radius: 20px;
   background: rgba(255,255,255,.76);
   border: 1px solid rgba(20,33,27,.16);
@@ -149,9 +154,9 @@ h2 { margin: 0; font-size: 20px; }
   text-transform: uppercase;
   margin-bottom: 8px;
 }
-.diagram-node strong { display: block; font-size: 18px; line-height: 1.1; margin-bottom: 8px; }
-.diagram-node span { display: block; font-size: 20px; font-weight: 800; letter-spacing: -.03em; overflow-wrap: anywhere; }
-.diagram-node p { margin: 8px 0 0; color: var(--muted); font-size: 12px; line-height: 1.35; overflow-wrap: anywhere; }
+.diagram-node strong { display: block; font-size: 20px; line-height: 1.1; margin-bottom: 8px; }
+.diagram-node span { display: block; font-size: 23px; font-weight: 800; letter-spacing: -.03em; overflow-wrap: anywhere; }
+.diagram-node p { margin: 8px 0 0; color: var(--muted); font-size: 13px; line-height: 1.35; overflow-wrap: anywhere; }
 .diagram-callouts {
   position: absolute;
   z-index: 4;
@@ -160,8 +165,8 @@ h2 { margin: 0; font-size: 20px; }
 }
 .diagram-callout {
   position: absolute;
-  width: 230px;
-  padding: 10px 12px;
+  width: 270px;
+  padding: 12px 14px;
   border-radius: 16px;
   background: rgba(255,252,244,.9);
   border: 1px solid var(--line);
@@ -193,9 +198,9 @@ h2 { margin: 0; font-size: 20px; }
 .diagram-callout.node-scoreboard { left: 72%; top: 6%; }
 .diagram-callout.node-rllib { left: 72%; top: 72%; }
 .diagram-callout.node-optuna { left: 56%; top: 88%; }
-.diagram-callout span { display: block; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 4px; }
-.diagram-callout strong { display: block; font-size: 14px; margin-bottom: 4px; overflow-wrap: anywhere; }
-.diagram-callout p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.3; overflow-wrap: anywhere; }
+.diagram-callout span { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .12em; margin-bottom: 4px; }
+.diagram-callout strong { display: block; font-size: 15px; margin-bottom: 4px; overflow-wrap: anywhere; }
+.diagram-callout p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.3; overflow-wrap: anywhere; }
 @keyframes dashMove { to { stroke-dashoffset: -34; } }
 @keyframes nodePulse {
   0%, 100% { box-shadow: 0 18px 42px rgba(35,27,12,.12); transform: translateY(-50%) scale(1); }
@@ -219,7 +224,9 @@ canvas { width: 100%; height: 250px; border-radius: 20px; background: linear-gra
 @media (max-width: 980px) {
   .hero { align-items: stretch; flex-direction: column; }
   .metrics, .two, .stages, .decision-grid { grid-template-columns: 1fr; }
-  .flow-shell, .flow-diagram { min-height: 1120px; }
-  .diagram-node { width: 42%; min-width: 0; }
+  .flow-panel { margin-left: 0; margin-right: 0; }
+  .flow-shell { min-height: 760px; }
+  .flow-diagram { min-width: 1180px; min-height: 760px; }
+  .diagram-node { width: 20%; min-width: 160px; }
   .diagram-callout { display: none; }
 }
