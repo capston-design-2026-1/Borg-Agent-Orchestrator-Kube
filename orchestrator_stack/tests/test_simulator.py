@@ -160,6 +160,26 @@ def test_trace_driven_backend_applies_secondary_architecture_actions():
     assert n1.mem_util <= 0.85
 
 
+def test_trace_driven_backend_rewards_moderate_risk_throttle():
+    rows = [
+        {
+            "timestamp": 100,
+            "nodes": [{"node_id": "n1", "cpu_util": 0.97, "mem_util": 0.42, "disk_util": 0.2, "net_util": 0.2}],
+            "tasks": [{"task_id": "t1", "node_id": "n1", "urgency": 0.8, "queue_priority": 2, "alive": True}],
+            "queue_length": 0,
+            "energy_price": 0.1,
+            "p_fail_scores": {"n1": 0.52},
+            "demand_projection": {"n1": 0.32},
+        }
+    ]
+
+    backend = TraceDrivenTwinBackend(rows)
+    backend.reset()
+    result = backend.step(AgentAction("AgentA", ActionKind.THROTTLE, target="n1"))
+
+    assert result.reward_by_agent["AgentA"] > 1.0
+
+
 def test_trace_driven_backend_rewards_live_sla_energy_and_completion_metrics():
     rows = [
         {

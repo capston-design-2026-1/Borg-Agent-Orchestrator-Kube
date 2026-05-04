@@ -17,7 +17,7 @@ class AgentARiskMitigator:
             return AgentAction("AgentA", ActionKind.REPLICATE, target=node_id, score=float(score), priority=self.priority)
         if score >= 0.7:
             return AgentAction("AgentA", ActionKind.MIGRATE, target=node_id, score=float(score), priority=self.priority)
-        if score >= 0.6:
+        if score >= 0.5:
             return AgentAction("AgentA", ActionKind.THROTTLE, target=node_id, score=float(score), priority=self.priority)
         return AgentAction("AgentA", ActionKind.NOOP, score=float(score), priority=self.priority)
 

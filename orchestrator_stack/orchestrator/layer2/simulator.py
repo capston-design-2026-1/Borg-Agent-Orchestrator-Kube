@@ -725,7 +725,7 @@ class TraceDrivenTwinBackend:
                 rewards["AgentA"] += 10.0
             if applied["replicated"] and p_fail > 0.85:
                 rewards["AgentA"] += 8.0
-            if applied["throttled"] and p_fail > 0.6:
+            if applied["throttled"] and p_fail >= 0.5:
                 rewards["AgentA"] += 3.0
             if applied["migrated"] and p_fail < 0.4:
                 rewards["AgentA"] -= 20.0
@@ -943,7 +943,12 @@ class AIOpsLabBackend(SimulatorBackend):
         has_live_metrics = obs.sla_violations > 0 or obs.completed_tasks > 0 or obs.energy_watts > 0.0
 
         if action.agent_name == "AgentA" and action.kind in {ActionKind.MIGRATE, ActionKind.REPLICATE, ActionKind.THROTTLE}:
-            rewards["AgentA"] += 10.0 if max_risk >= 0.75 else -20.0
+            is_valid_safety_action = (
+                (action.kind == ActionKind.THROTTLE and max_risk >= 0.5)
+                or (action.kind == ActionKind.MIGRATE and max_risk >= 0.7)
+                or (action.kind == ActionKind.REPLICATE and max_risk >= 0.85)
+            )
+            rewards["AgentA"] += 10.0 if is_valid_safety_action else -20.0
         if action.agent_name == "AgentB" and action.kind in {
             ActionKind.POWER_STATE,
             ActionKind.DVFS,
