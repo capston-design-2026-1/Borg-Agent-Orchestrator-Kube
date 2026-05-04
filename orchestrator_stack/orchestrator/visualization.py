@@ -285,8 +285,12 @@ def run_live_kubernetes_orchestration(
             state.stage("optuna", "running", detail=f"bootstrap reward tuning, {trials} trials", progress=0.1)
             state.optuna_update("initializing", trials=trials)
             tuning = _tune_rewards(config, rows, state, trials=trials)
-            state.optuna_update("complete", best_score=tuning.get("score"), best_params={k: tuning.get(k) for k in ("alpha", "beta", "gamma") if k in tuning})
-            state.stage("optuna", "complete", detail=f"best score {float(tuning.get('score', 0.0)):.3f}", progress=1.0)
+            if tuning.get("status") == "skipped":
+                state.optuna_update("skipped", reason=tuning.get("reason", "Optuna tuning skipped"))
+                state.stage("optuna", "skipped", detail=str(tuning.get("reason", "Optuna tuning skipped")), progress=1.0)
+            else:
+                state.optuna_update("complete", best_score=tuning.get("score"), best_params={k: tuning.get(k) for k in ("alpha", "beta", "gamma") if k in tuning})
+                state.stage("optuna", "complete", detail=f"best score {float(tuning.get('score', 0.0)):.3f}", progress=1.0)
         else:
             state.optuna_update("disabled", reason="live fast mode sets --no-tune; use NO_TUNE=0 to bootstrap Optuna")
 
