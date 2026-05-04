@@ -12,7 +12,8 @@ PYTHON_BIN="${PYTHON_BIN:-$ROOT/.venv/bin/python}"
 OPEN_BROWSER="${OPEN_BROWSER:-1}"
 KEEP_DASHBOARD="${KEEP_DASHBOARD:-1}"
 LIVE_K8S="${LIVE_K8S:-0}"
-if [[ "$LIVE_K8S" == "1" ]]; then
+MODE="${MODE:-full}"
+if [[ "$LIVE_K8S" == "1" && "$MODE" == "fast" ]]; then
   NO_POLICY="${NO_POLICY:-1}"
   NO_TUNE="${NO_TUNE:-1}"
 else
