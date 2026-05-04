@@ -11,21 +11,79 @@ async function reloadIfDashboardChanged() {
   }
 }
 function fmt(x) { return x === null || x === undefined || Number.isNaN(Number(x)) ? 'n/a' : Number(x).toFixed(3); }
-function drawSeries(canvas, rows, series) {
+function niceTick(value) {
+  if (!Number.isFinite(value)) return 'n/a';
+  const abs = Math.abs(value);
+  if (abs >= 100) return value.toFixed(0);
+  if (abs >= 10) return value.toFixed(1);
+  return value.toFixed(2);
+}
+function drawSeries(canvas, rows, series, options = {}) {
   const ctx = canvas.getContext('2d');
   const w = canvas.width, h = canvas.height;
+  const pad = { left: 68, right: 20, top: 18, bottom: 48 };
+  const plotW = w - pad.left - pad.right;
+  const plotH = h - pad.top - pad.bottom;
   ctx.clearRect(0, 0, w, h);
-  ctx.strokeStyle = 'rgba(20,33,27,.12)'; ctx.lineWidth = 1;
-  for (let i = 1; i < 5; i++) { const y = (h / 5) * i; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
-  if (!rows.length) return;
   const values = rows.flatMap(row => series.map(s => s.value(row))).filter(Number.isFinite);
-  const min = Math.min(...values, 0), max = Math.max(...values, 1);
+  const min = Math.min(...values, 0);
+  const max = Math.max(...values, 1);
   const span = max - min || 1;
+
+  ctx.save();
+  ctx.font = '12px "Avenir Next", "Gill Sans", sans-serif';
+  ctx.textBaseline = 'middle';
+  ctx.strokeStyle = 'rgba(20,33,27,.16)';
+  ctx.fillStyle = 'rgba(20,33,27,.62)';
+  ctx.lineWidth = 1;
+
+  for (let i = 0; i <= 4; i++) {
+    const ratio = i / 4;
+    const y = pad.top + ratio * plotH;
+    const value = max - ratio * span;
+    ctx.beginPath();
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(w - pad.right, y);
+    ctx.stroke();
+    ctx.textAlign = 'right';
+    ctx.fillText(niceTick(value), pad.left - 10, y);
+  }
+
+  const xTicks = rows.length > 1 ? [0, Math.floor((rows.length - 1) / 2), rows.length - 1] : [0];
+  xTicks.forEach((index) => {
+    const x = rows.length <= 1 ? pad.left : pad.left + (index / (rows.length - 1)) * plotW;
+    ctx.beginPath();
+    ctx.moveTo(x, pad.top);
+    ctx.lineTo(x, h - pad.bottom);
+    ctx.stroke();
+    ctx.textAlign = 'center';
+    ctx.fillText(String(index), x, h - 24);
+  });
+
+  ctx.strokeStyle = 'rgba(20,33,27,.58)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(pad.left, pad.top);
+  ctx.lineTo(pad.left, h - pad.bottom);
+  ctx.lineTo(w - pad.right, h - pad.bottom);
+  ctx.stroke();
+
+  ctx.fillStyle = 'rgba(20,33,27,.78)';
+  ctx.textAlign = 'center';
+  ctx.fillText(options.xLabel || 'step', pad.left + plotW / 2, h - 8);
+  ctx.save();
+  ctx.translate(18, pad.top + plotH / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText(options.yLabel || 'value', 0, 0);
+  ctx.restore();
+  ctx.restore();
+
+  if (!rows.length) return;
   series.forEach(s => {
     ctx.strokeStyle = s.color; ctx.lineWidth = 3; ctx.beginPath();
     rows.forEach((row, i) => {
-      const x = rows.length === 1 ? 0 : (i / (rows.length - 1)) * (w - 24) + 12;
-      const y = h - 18 - ((s.value(row) - min) / span) * (h - 36);
+      const x = rows.length === 1 ? pad.left : pad.left + (i / (rows.length - 1)) * plotW;
+      const y = h - pad.bottom - ((s.value(row) - min) / span) * plotH;
       if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     });
     ctx.stroke();
@@ -57,7 +115,7 @@ function renderState(state, events) {
     { color: colors.AgentA, value: r => r.rewards?.AgentA },
     { color: colors.AgentB, value: r => r.rewards?.AgentB },
     { color: colors.AgentC, value: r => r.rewards?.AgentC },
-  ]);
+  ], { xLabel: 'orchestration step', yLabel: 'reward' });
   const byAgent = rewardSummary.last_by_agent || {};
   $('rewardStats').innerHTML = [
     ['count', rewardSummary.count],
@@ -72,7 +130,7 @@ function renderState(state, events) {
   $('optunaStudy').textContent = opt.status === 'disabled' ? (opt.reason || 'disabled') : (opt.study || 'study waiting');
   const params = opt.best_params || {};
   $('optunaParams').innerHTML = Object.keys(params).length ? Object.entries(params).map(([k,v]) => `<div><b>${k}</b><br>${fmt(v)}</div>`).join('') : '<div>no completed trial yet</div>';
-  drawSeries($('optunaCanvas'), opt.history || [], [{ color: colors.optuna, value: r => r.value }]);
+  drawSeries($('optunaCanvas'), opt.history || [], [{ color: colors.optuna, value: r => r.value }], { xLabel: 'trial', yLabel: 'objective' });
 
   const ray = state.ray || {};
   $('rayBody').innerHTML = Object.entries(ray).map(([k,v]) => `<div><b>${k}</b><br>${v ?? 'n/a'}</div>`).join('');
