@@ -147,6 +147,10 @@ def _pod_task(pod: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _pod_owned_by_job(pod: dict[str, Any]) -> bool:
+    return any(owner.get("kind") == "Job" for owner in pod.get("metadata", {}).get("ownerReferences", []))
+
+
 def _bounded_ratio(value: float) -> float:
     return min(1.0, max(0.0, float(value)))
 
@@ -265,6 +269,11 @@ def kubernetes_snapshot_to_trace_row(
         for pod in pods
         if pod.get("metadata", {}).get("namespace", "").startswith(namespace_prefixes)
     ]
+    target_jobs = [
+        job
+        for job in jobs
+        if job.get("metadata", {}).get("namespace", "").startswith(namespace_prefixes)
+    ]
     active_target_pods = [pod for pod in target_pods if pod.get("status", {}).get("phase") != "Succeeded"]
     tasks = [_pod_task(pod) for pod in active_target_pods]
     sla_violations = sum(
@@ -272,8 +281,12 @@ def kubernetes_snapshot_to_trace_row(
         for pod in active_target_pods
         if pod.get("status", {}).get("phase") in {"Failed", "Pending", "Unknown"} or not _pod_ready(pod)
     )
-    completed_tasks = sum(1 for pod in target_pods if pod.get("status", {}).get("phase") == "Succeeded")
-    completed_tasks += sum(int(job.get("status", {}).get("succeeded", 0)) for job in jobs)
+    completed_pods_without_job = sum(
+        1
+        for pod in target_pods
+        if pod.get("status", {}).get("phase") == "Succeeded" and not _pod_owned_by_job(pod)
+    )
+    completed_tasks = completed_pods_without_job + sum(int(job.get("status", {}).get("succeeded", 0)) for job in target_jobs)
     queue_length = sum(1 for pod in target_pods if pod.get("status", {}).get("phase") == "Pending")
     task_death = any(not task["alive"] for task in tasks)
 
