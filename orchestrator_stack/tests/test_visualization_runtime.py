@@ -16,6 +16,36 @@ def test_visualized_run_cli_defaults():
     assert args.no_tune is True
 
 
+def test_live_kubernetes_run_cli_accepts_continuous_options():
+    parser = build_parser()
+
+    args = parser.parse_args(
+        [
+            "live-kubernetes-run",
+            "--kubeconfig",
+            "/tmp/kubeconfig",
+            "--interval-seconds",
+            "0.2",
+            "--max-iterations",
+            "2",
+            "--namespace-prefixes",
+            "test-,observe",
+            "--prometheus-base-url",
+            "http://127.0.0.1:19090",
+            "--no-policy",
+            "--no-tune",
+        ]
+    )
+
+    assert args.kubeconfig == "/tmp/kubeconfig"
+    assert args.interval_seconds == 0.2
+    assert args.max_iterations == 2
+    assert args.namespace_prefixes == "test-,observe"
+    assert args.prometheus_base_url == "http://127.0.0.1:19090"
+    assert args.no_policy is True
+    assert args.no_tune is True
+
+
 def test_visualization_state_writes_state_and_events(tmp_path: Path):
     state = VisualizationState(tmp_path)
 
@@ -32,3 +62,75 @@ def test_visualization_state_writes_state_and_events(tmp_path: Path):
     assert payload["optuna"]["best_score"] == 3.2
     assert payload["ray"]["status"] == "trained"
     assert len(events) >= 4
+
+
+def test_live_kubernetes_orchestration_loop_uses_cluster_snapshots(monkeypatch, tmp_path: Path):
+    from orchestrator import visualization
+
+    trace_path = tmp_path / "trace.json"
+    trace_path.write_text(
+        json.dumps(
+            [
+                {
+                    "timestamp": 1,
+                    "nodes": [{"node_id": "node-1", "cpu_util": 0.7, "mem_util": 0.6, "disk_util": 0.0, "net_util": 0.0}],
+                    "tasks": [{"task_id": "task-1", "node_id": "node-1", "urgency": 0.5, "queue_priority": 1, "alive": True}],
+                    "p_fail_scores": {"node-1": 0.8},
+                    "demand_projection": {"node-1": 0.7},
+                    "queue_length": 1,
+                    "energy_price": 0.1,
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    cfg = tmp_path / "config.json"
+    cfg.write_text(
+        json.dumps(
+            {
+                "trace_path": str(trace_path),
+                "risk_model_path": str(tmp_path / "risk.json"),
+                "demand_model_path": str(tmp_path / "demand.json"),
+                "episode_steps": 1,
+                "use_predictor_runtime": False,
+            }
+        ),
+        encoding="utf-8",
+    )
+    live_row = {
+        "timestamp": 2,
+        "nodes": [{"node_id": "node-1", "cpu_util": 0.95, "mem_util": 0.9, "disk_util": 0.0, "net_util": 0.0}],
+        "tasks": [{"task_id": "pod-1", "node_id": "node-1", "urgency": 1.0, "queue_priority": 1, "alive": True}],
+        "p_fail_scores": {"node-1": 0.96},
+        "demand_projection": {"node-1": 0.9},
+        "queue_length": 4,
+        "energy_price": 0.1,
+        "sla_violations": 0,
+        "completed_tasks": 0,
+        "energy_watts": 210.0,
+    }
+    monkeypatch.setattr(visualization, "capture_kubernetes_trace_row", lambda **kwargs: dict(live_row))
+    monkeypatch.setattr(
+        visualization,
+        "train_brain_models",
+        lambda config: {"risk_model": str(tmp_path / "risk.json"), "demand_model": str(tmp_path / "demand.json")},
+    )
+
+    summary = visualization.run_live_kubernetes_orchestration(
+        cfg,
+        event_dir=tmp_path / "events",
+        kubeconfig="/tmp/kubeconfig",
+        interval_seconds=0.1,
+        max_iterations=2,
+        trace_out=tmp_path / "live_trace.json",
+        train_policy=False,
+        tune_rewards=False,
+    )
+
+    state = json.loads((tmp_path / "events" / "state.json").read_text(encoding="utf-8"))
+    rows = json.loads((tmp_path / "live_trace.json").read_text(encoding="utf-8"))
+
+    assert summary["iterations"] == 2
+    assert len(rows) == 2
+    assert state["summary"]["mode"] == "live_kubernetes"
+    assert state["summary"]["last_action"]["kind"] == "replicate"
