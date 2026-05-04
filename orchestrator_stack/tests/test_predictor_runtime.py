@@ -65,3 +65,18 @@ class PredictorRuntimeTest(unittest.TestCase):
         self.assertEqual(result.next_observation.p_fail_scores, {"node-1": 0.83, "node-2": 0.21})
         self.assertEqual(result.next_observation.demand_projection, {"node-1": 0.62, "node-2": 0.14})
         self.assertEqual(result.info["status"], "stubbed")
+
+    def test_predictor_backed_backend_preserves_higher_live_telemetry(self) -> None:
+        source = StubBackend()
+        source.reset_observation.p_fail_scores = {"node-1": 0.91, "node-2": 0.12}
+        source.reset_observation.demand_projection = {"node-1": 0.87, "node-2": 0.18}
+        backend = PredictorBackedBackend(
+            source,
+            risk_model=StaticPredictor({"node-1": 0.42, "node-2": 0.21}),
+            demand_model=StaticPredictor({"node-1": 0.31, "node-2": 0.14}),
+        )
+
+        reset_obs = backend.reset()
+
+        self.assertEqual(reset_obs.p_fail_scores, {"node-1": 0.91, "node-2": 0.21})
+        self.assertEqual(reset_obs.demand_projection, {"node-1": 0.87, "node-2": 0.18})
