@@ -46,13 +46,12 @@ For the continuous Kubernetes/AIOpsLab-style control loop, launch live mode:
 ```bash
 LIVE_K8S=1 \
 KUBECONFIG=~/Documents/aiopslab_validation_env/kubeconfig \
-PYTHON_BIN=~/Documents/aiopslab_validation_env/bin/python \
 ./orchestrator_stack/scripts/launch_orchestration.sh
 ```
 
 This keeps observing Kubernetes through `kubectl`, selecting Agent A/B/C/referee actions, computing rewards, appending a live trace, and refreshing the dashboard until stopped.
 
-In `LIVE_K8S=1` mode, Ray/RLlib and Optuna bootstrap are skipped by default for fast startup. Set `NO_POLICY=0` or `NO_TUNE=0` only when you intentionally want those bootstraps before the live loop.
+In `LIVE_K8S=1` mode, the default is `MODE=full`: Ray/RLlib and Optuna bootstrap run before the continuous Kubernetes loop. Use `MODE=fast LIVE_K8S=1` only for quick debugging without Ray/Optuna.
 
 ## New Isolated Track: Codex Autonomy Runner
 

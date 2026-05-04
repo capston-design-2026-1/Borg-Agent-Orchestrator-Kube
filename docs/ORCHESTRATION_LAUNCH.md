@@ -17,13 +17,12 @@ For the intended continuously running Kubernetes control-loop visualization, use
 ```bash
 LIVE_K8S=1 \
 KUBECONFIG=~/Documents/aiopslab_validation_env/kubeconfig \
-PYTHON_BIN=~/Documents/aiopslab_validation_env/bin/python \
 ./orchestrator_stack/scripts/launch_orchestration.sh
 ```
 
 `LIVE_K8S=1` keeps capturing real Kubernetes snapshots, selecting Agent A/B/C/referee actions, scoring rewards, appending `live_kubernetes_trace.json`, and refreshing the dashboard until you press `Ctrl-C`.
 
-Live mode defaults to fast observation/control-loop startup: Ray/RLlib policy bootstrap and Optuna tuning are skipped unless explicitly enabled with `NO_POLICY=0` or `NO_TUNE=0`.
+Live mode defaults to `MODE=full`: Ray/RLlib policy bootstrap and Optuna reward tuning run before the continuous Kubernetes loop. Use the repository `.venv` Python for this full mode because it contains Ray, Optuna, XGBoost, and Torch.
 
 What it does:
 
@@ -92,6 +91,12 @@ Enable Optuna bootstrap in live Kubernetes mode:
 LIVE_K8S=1 NO_TUNE=0 ./orchestrator_stack/scripts/launch_orchestration.sh
 ```
 
+Fast live Kubernetes mode without Ray/RLlib or Optuna:
+
+```bash
+MODE=fast LIVE_K8S=1 ./orchestrator_stack/scripts/launch_orchestration.sh
+```
+
 Use another port:
 
 ```bash
@@ -141,6 +146,8 @@ PYTHON_BIN=~/Documents/aiopslab_validation_env/bin/python \
 ./orchestrator_stack/scripts/launch_orchestration.sh
 ```
 
+Only use the AIOpsLab validation Python when you specifically need upstream AIOpsLab package imports. For the full repository architecture with Ray/Optuna/XGBoost, prefer the default `./.venv/bin/python`.
+
 ## Live Kubernetes / AIOpsLab Mode
 
 For live cluster evidence mode, point `CONFIG` to a config backed by traces collected from the Kind/AIOpsLab run and use your kube context for preflight/collection commands. Add `LIVE_K8S=1` when you want the dashboard to keep evaluating the live cluster instead of ending after one finite demo pass:
@@ -149,7 +156,6 @@ For live cluster evidence mode, point `CONFIG` to a config backed by traces coll
 LIVE_K8S=1 \
 KUBECONFIG=~/Documents/aiopslab_validation_env/kubeconfig \
 CONFIG=orchestrator_stack/config/aiopslab_prometheus_mitigation_kind.json \
-PYTHON_BIN=~/Documents/aiopslab_validation_env/bin/python \
 ./orchestrator_stack/scripts/launch_orchestration.sh
 ```
 
