@@ -33,6 +33,12 @@ function renderState(state, events) {
   $('lastReward').textContent = fmt(last?.total);
   $('optunaBest').textContent = fmt(state.optuna?.best_score);
   $('rayStatus').textContent = state.ray?.status || 'idle';
+  $('maxRisk').textContent = fmt(state.cluster?.max_risk);
+  $('repeatCount').textContent = state.decision?.repeat_count ?? 0;
+  $('decisionTime').textContent = state.decision?.time || 'waiting';
+  $('decisionAction').textContent = state.decision?.agent ? `${state.decision.agent}:${state.decision.kind}` : 'n/a';
+  $('decisionTarget').textContent = state.decision?.target || 'n/a';
+  $('decisionReason').textContent = state.decision?.reason || 'n/a';
 
   $('stages').innerHTML = (state.stages || []).map(s => `<article class="stage ${s.status}" style="--progress:${s.progress ?? (s.status === 'complete' ? 1 : .08)}"><h3>${s.name}</h3><p>${s.status}</p><p>${s.detail || ''}</p></article>`).join('');
   drawSeries($('rewardCanvas'), rewards, [
