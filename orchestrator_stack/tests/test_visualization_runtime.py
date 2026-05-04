@@ -58,6 +58,9 @@ def test_dashboard_flow_diagram_uses_measured_card_connectors():
     assert "getBoundingClientRect" in app_js
     assert "data-node=" in app_js
     assert "diagram-action-trace" in app_js
+    assert "diagram-stimulus" in app_js
+    assert "exerciseSummary" in app_js
+    assert "optunaParamCanvas" in Path("orchestrator_stack/dashboard/index.html").read_text(encoding="utf-8")
     assert "actionSemantics" in app_js
     for action_kind in ("migrate", "replicate", "throttle", "memory_balloon", "dvfs", "admission", "resource_cap"):
         assert f"{action_kind}:" in app_js

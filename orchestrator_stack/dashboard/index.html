@@ -77,7 +77,11 @@
       <article class="panel">
         <div class="panel-head"><h2>Optuna</h2><span id="optunaStudy" class="muted">study waiting</span></div>
         <div id="optunaParams" class="params"></div>
+        <p class="chart-note">Objective score shows what Optuna maximizes; alpha, beta, and gamma are reward-weight parameters sampled per trial.</p>
         <canvas id="optunaCanvas" width="900" height="320"></canvas>
+        <div id="optunaObjectiveLegend" class="legend"></div>
+        <canvas id="optunaParamCanvas" class="small-canvas" width="900" height="220"></canvas>
+        <div id="optunaParamLegend" class="legend"></div>
       </article>
     </section>
 

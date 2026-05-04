@@ -1,5 +1,5 @@
 const $ = (id) => document.getElementById(id);
-const colors = { total: '#14211b', AgentA: '#b44634', AgentB: '#16835f', AgentC: '#2f6f9f', optuna: '#d48a20' };
+const colors = { total: '#14211b', AgentA: '#b44634', AgentB: '#16835f', AgentC: '#2f6f9f', optuna: '#d48a20', alpha: '#b44634', beta: '#16835f', gamma: '#2f6f9f' };
 async function getJSON(path) { const res = await fetch(path, { cache: 'no-store' }); return res.json(); }
 let reloadingForVersion = false;
 async function reloadIfDashboardChanged() {
@@ -228,6 +228,36 @@ function actionTraceMarkup(decision, cluster) {
     </aside>
   `;
 }
+function exerciseSummary(event) {
+  if (!event) return 'no live perturbation event yet';
+  const resources = event.resources || {};
+  const bits = [
+    event.operation || 'observe',
+    event.deployment ? `deployment/${event.deployment}` : 'exercise deployments',
+    event.namespace ? `ns=${event.namespace}` : null,
+    resources.cpu_request ? `cpu=${resources.cpu_request}` : null,
+    resources.memory_request ? `mem=${resources.memory_request}` : null,
+  ].filter(Boolean);
+  return bits.join(' · ');
+}
+function clusterStimulusMarkup(event) {
+  const resources = event?.resources || {};
+  const rollout = event?.rollout;
+  return `
+    <aside class="diagram-stimulus">
+      <span class="action-kicker">intentional Kubernetes stimulus</span>
+      <strong>${safeText(event?.phase || 'waiting')}</strong>
+      <p>${safeText(exerciseSummary(event))}</p>
+      <div class="stimulus-grid">
+        <span><b>namespace</b>${safeText(event?.namespace || 'n/a')}</span>
+        <span><b>operation</b>${safeText(event?.operation || 'n/a')}</span>
+        <span><b>cpu request</b>${safeText(resources.cpu_request || 'n/a')}</span>
+        <span><b>memory request</b>${safeText(resources.memory_request || 'n/a')}</span>
+        <span><b>rollout rc</b>${safeText(rollout?.returncode ?? 'n/a')}</span>
+      </div>
+    </aside>
+  `;
+}
 const diagramConnectors = [
   ['cluster', 'simulator', 'telemetry', 'flow-cluster-simulator'],
   ['exercise', 'simulator', 'telemetry', 'flow-exercise-simulator'],
@@ -304,13 +334,30 @@ function drawDiagramConnectors() {
   `;
 }
 function diagramEventMarkup(event, index) {
+  const detail = eventDetail(event);
   return `
     <article class="diagram-event ${eventTone(event.kind)}" style="--delay:${index * 75}ms">
       <span>${safeText(shortTime(event.time))} · ${safeText(event.kind)}</span>
       <strong>${safeText(event.action || event.phase || event.agent || event.name || 'runtime')}</strong>
-      <p>${safeText(event.message)}</p>
+      <p>${safeText(detail || event.message)}</p>
     </article>
   `;
+}
+function eventDetail(event) {
+  if (!event) return '';
+  if (event.kind === 'exercise') return exerciseSummary(event);
+  if (event.kind === 'decision') {
+    const payload = event.payload && Object.keys(event.payload).length
+      ? Object.entries(event.payload).map(([key, value]) => `${key}=${value}`).join(', ')
+      : 'no payload';
+    return `${event.agent}:${event.action_kind || event.kind} -> ${event.target || 'cluster'}; ${payload}; ${event.reason || ''}`;
+  }
+  if (event.kind === 'optuna') {
+    const params = event.params || {};
+    const weights = ['alpha', 'beta', 'gamma'].filter(key => params[key] !== undefined).map(key => `${key}=${fmt(params[key])}`).join(', ');
+    return weights ? `objective=${fmt(event.value)}; ${weights}` : event.message;
+  }
+  return event.message || '';
 }
 function renderFlow(state, events) {
   const cluster = state.cluster || {};
@@ -348,7 +395,7 @@ function renderFlow(state, events) {
       kicker: 'Live perturbation',
       title: 'Workload Exerciser',
       metric: latestExercise ? 'active' : 'idle',
-      detail: latestExercise?.phase || 'observing cluster state',
+      detail: latestExercise ? exerciseSummary(latestExercise) : 'observing cluster state',
     },
     {
       id: 'simulator', tone: 'simulator',
@@ -451,6 +498,7 @@ function renderFlow(state, events) {
         </section>
       `).join('')}
     </div>
+    ${clusterStimulusMarkup(latestExercise)}
     ${actionTraceMarkup(decision, cluster)}
   `;
   $('flowEvents').innerHTML = recentEvents.map(diagramEventMarkup).join('');
@@ -499,12 +547,19 @@ function renderState(state, events) {
   $('optunaStudy').textContent = opt.status === 'disabled' ? (opt.reason || 'disabled') : (opt.study || 'study waiting');
   const params = opt.best_params || {};
   $('optunaParams').innerHTML = Object.keys(params).length ? Object.entries(params).map(([k,v]) => `<div><b>${k}</b><br>${fmt(v)}</div>`).join('') : '<div>no completed trial yet</div>';
-  drawSeries($('optunaCanvas'), opt.history || [], [{ color: colors.optuna, value: r => r.value }], { xLabel: 'trial', yLabel: 'objective' });
+  drawSeries($('optunaCanvas'), opt.history || [], [{ color: colors.optuna, value: r => r.value }], { xLabel: 'trial', yLabel: 'objective score' });
+  $('optunaObjectiveLegend').innerHTML = `<span><b style="color:${colors.optuna}">■</b> objective score</span>`;
+  drawSeries($('optunaParamCanvas'), opt.history || [], [
+    { color: colors.alpha, value: r => r.params?.alpha },
+    { color: colors.beta, value: r => r.params?.beta },
+    { color: colors.gamma, value: r => r.params?.gamma },
+  ], { xLabel: 'trial', yLabel: 'reward weight' });
+  $('optunaParamLegend').innerHTML = ['alpha','beta','gamma'].map(k => `<span><b style="color:${colors[k]}">■</b> ${k}</span>`).join('');
 
   const ray = state.ray || {};
   $('rayBody').innerHTML = Object.entries(ray).map(([k,v]) => `<div><b>${k}</b><br>${v ?? 'n/a'}</div>`).join('');
   $('artifacts').innerHTML = (state.artifacts || []).slice().reverse().map(a => `<a><b>${a.label}</b><br><span class="muted">${a.path}</span></a>`).join('') || '<span class="muted">No artifacts yet</span>';
-  $('events').innerHTML = (events || []).slice().reverse().map(e => `<div class="event"><b>${e.time}</b> [${e.kind}] ${e.message}</div>`).join('');
+  $('events').innerHTML = (events || []).slice().reverse().map(e => `<div class="event"><b>${e.time}</b> [${e.kind}] ${safeText(e.message)}<br><span>${safeText(eventDetail(e))}</span></div>`).join('');
 }
 async function tick() {
   try {

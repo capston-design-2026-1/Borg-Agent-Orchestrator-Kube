@@ -14,6 +14,10 @@ class ExercisePhase:
     name: str
     detail: str
     manifest: str | None = None
+    operation: str = "delete"
+    deployment: str | None = None
+    cpu_request: str | None = None
+    memory_request: str | None = None
 
 
 def _deployment_manifest(namespace: str, name: str, *, cpu: str, memory: str) -> str:
@@ -79,11 +83,19 @@ def exercise_phases(namespace: str) -> list[ExercisePhase]:
             name="moderate-demand",
             detail="create moderate requested load so AgentC admission/referee path has a non-efficiency decision opportunity",
             manifest=_deployment_manifest(namespace, "moderate-demand", cpu="8500m", memory="128Mi"),
+            operation="apply",
+            deployment="moderate-demand",
+            cpu_request="8500m",
+            memory_request="128Mi",
         ),
         ExercisePhase(
             name="high-risk",
             detail="create high requested load so AgentA risk mitigation path has a safety decision opportunity",
             manifest=_deployment_manifest(namespace, "high-risk", cpu="8800m", memory="3Gi"),
+            operation="apply",
+            deployment="high-risk",
+            cpu_request="8800m",
+            memory_request="3Gi",
         ),
     ]
 
@@ -107,6 +119,10 @@ def _randomized_phase(namespace: str, phase_index: int, *, seed: int | None = No
             name=phase_name,
             detail=f"randomized moderate demand: cpu={cpu_milli}m memory={mem_mi}Mi",
             manifest=_deployment_manifest(namespace, phase_name, cpu=f"{cpu_milli}m", memory=f"{mem_mi}Mi"),
+            operation="apply",
+            deployment=phase_name,
+            cpu_request=f"{cpu_milli}m",
+            memory_request=f"{mem_mi}Mi",
         )
     if phase_name == "high-risk":
         cpu_milli = rng.randint(8600, 9900)
@@ -115,6 +131,10 @@ def _randomized_phase(namespace: str, phase_index: int, *, seed: int | None = No
             name=phase_name,
             detail=f"randomized high risk: cpu={cpu_milli}m memory={mem_mi}Mi",
             manifest=_deployment_manifest(namespace, phase_name, cpu=f"{cpu_milli}m", memory=f"{mem_mi}Mi"),
+            operation="apply",
+            deployment=phase_name,
+            cpu_request=f"{cpu_milli}m",
+            memory_request=f"{mem_mi}Mi",
         )
     if phase_name == "bursty-safety":
         cpu_milli = rng.randint(9000, 10000)
@@ -123,6 +143,10 @@ def _randomized_phase(namespace: str, phase_index: int, *, seed: int | None = No
             name=phase_name,
             detail=f"randomized burst: cpu={cpu_milli}m memory={mem_mi}Mi",
             manifest=_deployment_manifest(namespace, phase_name, cpu=f"{cpu_milli}m", memory=f"{mem_mi}Mi"),
+            operation="apply",
+            deployment=phase_name,
+            cpu_request=f"{cpu_milli}m",
+            memory_request=f"{mem_mi}Mi",
         )
     cpu_milli = rng.randint(4000, 7200)
     mem_mi = rng.randint(2048, 5120)
@@ -130,6 +154,10 @@ def _randomized_phase(namespace: str, phase_index: int, *, seed: int | None = No
         name=phase_name,
         detail=f"randomized memory pressure: cpu={cpu_milli}m memory={mem_mi}Mi",
         manifest=_deployment_manifest(namespace, phase_name, cpu=f"{cpu_milli}m", memory=f"{mem_mi}Mi"),
+        operation="apply",
+        deployment=phase_name,
+        cpu_request=f"{cpu_milli}m",
+        memory_request=f"{mem_mi}Mi",
     )
 
 
@@ -178,6 +206,12 @@ def apply_exercise_phase(
         "phase": phase.name,
         "detail": phase.detail,
         "namespace": namespace,
+        "operation": phase.operation,
+        "deployment": phase.deployment,
+        "resources": {
+            "cpu_request": phase.cpu_request,
+            "memory_request": phase.memory_request,
+        },
         "cleanup": cleanup,
         "applied": None,
         "randomized": randomize,

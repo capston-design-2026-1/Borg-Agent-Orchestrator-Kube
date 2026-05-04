@@ -6,7 +6,11 @@ def test_exercise_phases_cover_idle_moderate_and_high_risk():
 
     assert [phase.name for phase in phases] == ["idle-efficiency", "moderate-demand", "high-risk"]
     assert phases[0].manifest is None
+    assert phases[0].operation == "delete"
     assert "8500m" in phases[1].manifest
+    assert phases[1].operation == "apply"
+    assert phases[1].deployment == "moderate-demand"
+    assert phases[1].cpu_request == "8500m"
     assert "8800m" in phases[2].manifest
     assert "3Gi" in phases[2].manifest
     assert "namespace: demo" in phases[2].manifest
@@ -30,6 +34,9 @@ def test_apply_exercise_phase_deletes_before_apply(monkeypatch):
     result = kubernetes_exerciser.apply_exercise_phase("/tmp/kubeconfig", "demo", 1)
 
     assert result["phase"] == "moderate-demand"
+    assert result["operation"] == "apply"
+    assert result["deployment"] == "moderate-demand"
+    assert result["resources"] == {"cpu_request": "8500m", "memory_request": "128Mi"}
     assert calls[0]["args"] == ["apply", "-f", "-"]
     assert "name: demo" in calls[0]["stdin"]
     assert calls[1]["args"] == ["-n", "demo", "delete", "deployment", "-l", kubernetes_exerciser.LABEL, "--ignore-not-found"]
