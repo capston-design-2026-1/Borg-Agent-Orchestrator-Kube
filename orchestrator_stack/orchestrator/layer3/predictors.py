@@ -75,8 +75,19 @@ def enrich_observation_with_predictions(
     risk_model: ObservationPredictor,
     demand_model: ObservationPredictor,
 ) -> Observation:
-    obs.p_fail_scores = risk_model.predict(obs)
-    obs.demand_projection = demand_model.predict(obs)
+    predicted_risk = risk_model.predict(obs)
+    predicted_demand = demand_model.predict(obs)
+    # Predictor output should enrich live telemetry, not suppress direct cluster
+    # evidence. Taking the maximum preserves high observed risk/load that should
+    # trigger AgentA/AgentC even when a bootstrap model is under-confident.
+    obs.p_fail_scores = {
+        node.node_id: max(float(obs.p_fail_scores.get(node.node_id, 0.0)), float(predicted_risk.get(node.node_id, 0.0)))
+        for node in obs.nodes
+    }
+    obs.demand_projection = {
+        node.node_id: max(float(obs.demand_projection.get(node.node_id, 0.0)), float(predicted_demand.get(node.node_id, 0.0)))
+        for node in obs.nodes
+    }
     return obs
 
 
