@@ -121,6 +121,8 @@ def _pod_restart_count(pod: dict[str, Any]) -> int:
 
 
 def _pod_ready(pod: dict[str, Any]) -> bool:
+    if pod.get("status", {}).get("phase") == "Succeeded":
+        return True
     statuses = pod.get("status", {}).get("containerStatuses", [])
     if not statuses:
         return pod.get("status", {}).get("phase") == "Succeeded"
@@ -135,12 +137,13 @@ def _pod_task(pod: dict[str, Any]) -> dict[str, Any]:
     phase = status.get("phase", "Unknown")
     restarts = _pod_restart_count(pod)
     ready = _pod_ready(pod)
+    completed = phase == "Succeeded"
     return {
         "task_id": f"{namespace}/{name}",
         "node_id": pod.get("spec", {}).get("nodeName") or "unscheduled",
-        "urgency": 1.0 if phase in {"Failed", "Pending"} or restarts > 0 or not ready else 0.2,
+        "urgency": 0.0 if completed else (1.0 if phase in {"Failed", "Pending"} or restarts > 0 or not ready else 0.2),
         "queue_priority": restarts,
-        "alive": phase not in {"Failed", "Unknown"} and metadata.get("deletionTimestamp") is None,
+        "alive": completed or (phase not in {"Failed", "Unknown"} and metadata.get("deletionTimestamp") is None),
     }
 
 
@@ -262,10 +265,11 @@ def kubernetes_snapshot_to_trace_row(
         for pod in pods
         if pod.get("metadata", {}).get("namespace", "").startswith(namespace_prefixes)
     ]
-    tasks = [_pod_task(pod) for pod in target_pods]
+    active_target_pods = [pod for pod in target_pods if pod.get("status", {}).get("phase") != "Succeeded"]
+    tasks = [_pod_task(pod) for pod in active_target_pods]
     sla_violations = sum(
         1
-        for pod in target_pods
+        for pod in active_target_pods
         if pod.get("status", {}).get("phase") in {"Failed", "Pending", "Unknown"} or not _pod_ready(pod)
     )
     completed_tasks = sum(1 for pod in target_pods if pod.get("status", {}).get("phase") == "Succeeded")
