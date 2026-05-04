@@ -213,6 +213,30 @@ def cmd_visualized_run(args: argparse.Namespace) -> None:
     print(json.dumps(result, indent=2))
 
 
+def cmd_live_kubernetes_run(args: argparse.Namespace) -> None:
+    try:
+        from orchestrator.visualization import run_live_kubernetes_orchestration
+    except ModuleNotFoundError as exc:
+        raise _missing_dependency(exc, "loading live Kubernetes visualization runtime") from exc
+
+    prefixes = tuple(prefix.strip() for prefix in args.namespace_prefixes.split(",") if prefix.strip())
+    result = run_live_kubernetes_orchestration(
+        args.config,
+        event_dir=args.event_dir,
+        kubeconfig=args.kubeconfig,
+        interval_seconds=args.interval_seconds,
+        max_iterations=args.max_iterations,
+        namespace_prefixes=prefixes,
+        prometheus_base_url=args.prometheus_base_url,
+        power_calibration_path=args.power_calibration,
+        trace_out=args.trace_out,
+        train_policy=not args.no_policy,
+        tune_rewards=not args.no_tune,
+        trials=args.trials,
+    )
+    print(json.dumps(result, indent=2))
+
+
 def cmd_architecture_status(args: argparse.Namespace) -> None:
     from orchestrator.layer6.architecture_report import write_architecture_status_report
 
@@ -360,6 +384,21 @@ def build_parser() -> argparse.ArgumentParser:
     p_visualized.add_argument("--no-policy", action="store_true", help="Skip Ray/RLlib PPO training")
     p_visualized.add_argument("--no-tune", action="store_true", help="Skip Optuna reward tuning")
     p_visualized.set_defaults(func=cmd_visualized_run)
+
+    p_live = sub.add_parser("live-kubernetes-run")
+    p_live.add_argument("--config", default="orchestrator_stack/config/orchestrator.example.json")
+    p_live.add_argument("--event-dir", default="orchestrator_stack/runtime/visualization")
+    p_live.add_argument("--kubeconfig", default="~/.kube/config")
+    p_live.add_argument("--interval-seconds", type=float, default=10.0)
+    p_live.add_argument("--max-iterations", type=int)
+    p_live.add_argument("--namespace-prefixes", default="test-,default")
+    p_live.add_argument("--prometheus-base-url")
+    p_live.add_argument("--power-calibration")
+    p_live.add_argument("--trace-out", default="orchestrator_stack/runtime/visualization/live_kubernetes_trace.json")
+    p_live.add_argument("--trials", type=int, default=3)
+    p_live.add_argument("--no-policy", action="store_true", help="Skip Ray/RLlib PPO bootstrap")
+    p_live.add_argument("--no-tune", action="store_true", help="Skip Optuna reward bootstrap")
+    p_live.set_defaults(func=cmd_live_kubernetes_run)
 
     p_arch = sub.add_parser("architecture-status")
     p_arch.add_argument("--out")

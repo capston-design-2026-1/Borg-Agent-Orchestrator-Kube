@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import json
+import time
 from pathlib import Path
 from typing import Any
 
 from orchestrator.config import OrchestratorConfig
+from orchestrator.layer1.kubernetes_trace import capture_kubernetes_trace_row, load_power_calibration, write_kubernetes_trace
 from orchestrator.layer1.trace_ingestor import load_trace_rows
 from orchestrator.layer2.simulator import AIOpsLabBackend, TraceDrivenTwinBackend
 from orchestrator.layer3.predictors import PredictorBackedBackend, ResourceDemandForecast, SafetyRiskForecast
@@ -162,6 +164,140 @@ def run_visualized_orchestration(
         state.state["summary"].update(summary)
         state.set_status("complete", stage="complete")
         state.emit("complete", "orchestration run complete")
+        return summary
+    except Exception as exc:
+        state.error(str(exc))
+        raise
+
+
+def run_live_kubernetes_orchestration(
+    config_path: str | Path,
+    *,
+    event_dir: str | Path = "orchestrator_stack/runtime/visualization",
+    kubeconfig: str | Path = "~/.kube/config",
+    interval_seconds: float = 10.0,
+    max_iterations: int | None = None,
+    namespace_prefixes: tuple[str, ...] = ("test-", "default"),
+    prometheus_base_url: str | None = None,
+    power_calibration_path: str | Path | None = None,
+    trace_out: str | Path = "orchestrator_stack/runtime/visualization/live_kubernetes_trace.json",
+    train_policy: bool = True,
+    tune_rewards: bool = False,
+    trials: int = 3,
+) -> dict[str, Any]:
+    state = VisualizationState(event_dir)
+    config = OrchestratorConfig.load(config_path)
+    kubeconfig_path = Path(kubeconfig).expanduser()
+    calibration = load_power_calibration(power_calibration_path)
+    trace_rows: list[dict[str, Any]] = []
+    scoreboard = Scoreboard(alpha=config.alpha, beta=config.beta, gamma=config.gamma)
+    state.state["summary"].update(
+        {
+            "mode": "live_kubernetes",
+            "config": str(config_path),
+            "kubeconfig": str(kubeconfig_path),
+            "interval_seconds": interval_seconds,
+        }
+    )
+    state.set_status("running", stage="live_boot")
+
+    try:
+        state.stage("brains", "running", detail="ensure XGBoost risk and demand predictors", progress=0.2)
+        models = train_brain_models(config)
+        for label, path in models.items():
+            state.artifact(path, label)
+        state.stage("brains", "complete", detail="predictor models ready", progress=1.0)
+
+        if train_policy:
+            state.stage("ray_ppo", "running", detail="bootstrap RLlib PPO policy before live loop", progress=0.1)
+            state.ray_update("initializing", train_iters=config.rllib_train_iters)
+            ppo = run_policy_training(config, output_dir="orchestrator_stack/runtime/rllib")
+            state.ray_update(str(ppo.get("status", "complete")), reward_mean=ppo.get("episode_reward_mean"), checkpoint=ppo.get("checkpoint"))
+            state.stage("ray_ppo", "complete", detail=str(ppo.get("status", "complete")), progress=1.0)
+
+        if tune_rewards:
+            rows = load_trace_rows(ensure_trace_exists(config))
+            state.stage("optuna", "running", detail=f"bootstrap reward tuning, {trials} trials", progress=0.1)
+            tuning = _tune_rewards(config, rows, state, trials=trials)
+            state.stage("optuna", "complete", detail=f"best score {float(tuning.get('score', 0.0)):.3f}", progress=1.0)
+
+        state.stage("live_kubernetes_loop", "running", detail="capturing cluster snapshots until stopped", progress=0.0)
+        agents = [AgentARiskMitigator(), AgentBEfficiencyOptimizer(), AgentCGatekeeper()]
+        iteration = 0
+        while max_iterations is None or iteration < max_iterations:
+            row = capture_kubernetes_trace_row(
+                kubeconfig=kubeconfig_path,
+                namespace_prefixes=namespace_prefixes,
+                prometheus_base_url=prometheus_base_url,
+                power_calibration=calibration,
+            )
+            trace_rows.append(row)
+            write_kubernetes_trace(trace_rows, trace_out)
+            state.artifact(trace_out, "live Kubernetes trace")
+
+            backend = _backend([row], config)
+            obs = backend.reset()
+            proposals = [agent.act(obs) for agent in agents]
+            action = resolve(proposals)
+            result = backend.step(action)
+            score = scoreboard.update(result.reward_by_agent)
+            state.reward(
+                iteration,
+                {key: float(value) for key, value in result.reward_by_agent.items()},
+                score.total,
+                f"{action.agent_name}:{action.kind.value}",
+            )
+            state.state["summary"].update(
+                {
+                    "iterations": iteration + 1,
+                    "last_action": {"agent": action.agent_name, "kind": action.kind.value, "target": action.target},
+                    "last_cluster": {
+                        "nodes": len(obs.nodes),
+                        "tasks": len(obs.tasks),
+                        "queue_length": obs.queue_length,
+                        "sla_violations": obs.sla_violations,
+                        "energy_watts": obs.energy_watts,
+                    },
+                    "scoreboard": scoreboard.snapshot(),
+                }
+            )
+            progress = 0.0 if max_iterations is None else (iteration + 1) / max(1, max_iterations)
+            state.stage(
+                "live_kubernetes_loop",
+                "running",
+                detail=f"iteration {iteration + 1}; action {action.agent_name}:{action.kind.value}",
+                progress=progress,
+            )
+            iteration += 1
+            if max_iterations is not None and iteration >= max_iterations:
+                break
+            time.sleep(max(0.1, float(interval_seconds)))
+
+        summary = {
+            "mode": "live_kubernetes",
+            "iterations": iteration,
+            "trace_out": str(trace_out),
+            "scoreboard": scoreboard.snapshot(),
+        }
+        out = Path(event_dir) / "summary.json"
+        out.write_text(json.dumps(summary, indent=2, sort_keys=True), encoding="utf-8")
+        state.artifact(out, "live launch summary")
+        state.state["summary"].update(summary)
+        state.stage("live_kubernetes_loop", "complete", detail=f"completed {iteration} iterations", progress=1.0)
+        state.set_status("complete", stage="complete")
+        return summary
+    except KeyboardInterrupt:
+        summary = {
+            "mode": "live_kubernetes",
+            "status": "stopped",
+            "iterations": len(trace_rows),
+            "trace_out": str(trace_out),
+            "scoreboard": scoreboard.snapshot(),
+        }
+        out = Path(event_dir) / "summary.json"
+        out.write_text(json.dumps(summary, indent=2, sort_keys=True), encoding="utf-8")
+        state.artifact(out, "live launch summary")
+        state.set_status("stopped", stage="stopped")
         return summary
     except Exception as exc:
         state.error(str(exc))
