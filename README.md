@@ -31,6 +31,16 @@ An independent end-to-end orchestrator workspace now exists at `orchestrator_sta
 - `orchestrator_stack/examples/generate_synthetic_assets.py` now derives sample matrix width from Layer 2 `FEATURE_COUNT`, so synthetic assets stay aligned with simulator/feature changes
 - The latest completed reward-only Optuna artifact is `reports/tuning/202604161029_optuna_orchestrator_reward_weights.md`; the older `reports/tuning/202604142305_optuna_orchestrator_policy_and_rewards.md` predates the PPO-backed tuning rewrite and should not be treated as current validation for `tune-policy-rewards`
 
+### Launch Orchestration + Live Visualization
+
+Run the whole orchestration path and the dashboard together from the repository root:
+
+```bash
+./orchestrator_stack/scripts/launch_orchestration.sh
+```
+
+This starts the dashboard at `http://127.0.0.1:8765`, opens it on macOS, runs trace loading, XGBoost brains, multi-agent/referee rewards, Ray/RLlib PPO, and Optuna reward tuning, then streams state to `orchestrator_stack/runtime/visualization/`.
+
 ## New Isolated Track: Codex Autonomy Runner
 
 An independent local agentic supervisor now exists at `codex_autonomy/`.
