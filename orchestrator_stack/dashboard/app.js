@@ -262,35 +262,25 @@ function renderFlow(state, events) {
           <path d="M0,0 L10,5 L0,10 z"></path>
         </marker>
       </defs>
-      <path id="flow-cluster-twin" class="arrow telemetry" d="M105 145 C155 150 190 185 230 245" />
-      <path id="flow-exercise-twin" class="arrow telemetry" d="M105 390 C155 370 190 310 230 265" />
-      <path id="flow-twin-brain" class="arrow inference" d="M345 250 C390 155 425 135 470 135" />
-      <path id="flow-twin-observation" class="arrow observation" d="M345 285 C390 355 425 390 470 390" />
-      <path id="flow-brain-observation" class="arrow inference" d="M545 185 C570 255 570 315 545 375" />
-      <path id="flow-observation-policy" class="arrow policy" d="M585 360 C635 220 655 150 700 135" />
-      <path id="flow-policy-agent-a" class="arrow policy agent-a" d="M760 185 C770 230 770 255 755 285" />
-      <path id="flow-policy-agent-b" class="arrow policy agent-b" d="M760 185 C795 305 790 375 755 415" />
-      <path id="flow-policy-agent-c" class="arrow policy agent-c" d="M760 185 C815 380 795 505 755 535" />
-      <path id="flow-observation-agent-a" class="arrow observation agent-a" d="M585 390 C640 360 675 310 705 285" />
-      <path id="flow-observation-agent-b" class="arrow observation agent-b" d="M585 400 C640 430 675 430 705 415" />
-      <path id="flow-observation-agent-c" class="arrow observation agent-c" d="M585 410 C640 515 675 545 705 535" />
-      <path id="flow-agent-a-referee" class="arrow proposal agent-a" d="M815 285 C870 300 900 335 925 360" />
-      <path id="flow-agent-b-referee" class="arrow proposal agent-b" d="M815 415 C865 410 895 385 925 370" />
-      <path id="flow-agent-c-referee" class="arrow proposal agent-c" d="M815 535 C875 485 900 415 925 380" />
-      <path id="flow-referee-act" class="arrow control" d="M980 360 C1160 265 1135 85 980 75 C710 60 380 70 110 125" />
-      <path id="flow-referee-score" class="arrow reward" d="M990 350 C1040 275 1040 185 1015 145" />
-      <path id="flow-score-optuna" class="arrow feedback" d="M1015 185 C1080 285 1080 430 1015 485" />
-      <path id="flow-score-policy" class="arrow feedback" d="M1015 145 C955 75 820 75 760 120" />
-      <path id="flow-optuna-policy" class="arrow meta" d="M1000 485 C935 410 825 240 760 160" />
-      <path id="flow-optuna-score" class="arrow meta" d="M1030 485 C1095 385 1095 250 1030 165" />
+      <path id="flow-telemetry" class="arrow telemetry" d="M150 310 C215 310 235 310 300 310" />
+      <path id="flow-state" class="arrow inference" d="M330 310 C395 310 415 310 480 310" />
+      <path id="flow-predict-policy" class="arrow inference" d="M560 210 C620 170 640 155 700 155" />
+      <path id="flow-state-agents" class="arrow observation" d="M560 410 C620 410 640 410 700 410" />
+      <path id="flow-policy-agents" class="arrow policy" d="M770 195 C790 290 790 430 770 535" />
+      <path id="flow-agent-proposals" class="arrow proposal" d="M800 410 C860 410 875 410 935 410" />
+      <path id="flow-action" class="arrow control" d="M960 390 C900 220 695 80 395 105 C250 115 185 165 150 245" />
+      <path id="flow-reward" class="arrow reward" d="M985 390 C1030 335 1040 275 1065 220" />
+      <path id="flow-score-optuna" class="arrow feedback" d="M1085 250 C1120 315 1120 405 1085 470" />
+      <path id="flow-optuna-policy" class="arrow meta" d="M1065 485 C950 590 755 560 745 205" />
+      <path id="flow-score-policy" class="arrow feedback" d="M1065 205 C975 95 815 85 755 135" />
       <circle class="packet packet-one" r="7">
         <animateMotion dur="6s" repeatCount="indefinite">
-          <mpath href="#flow-cluster-twin" />
+          <mpath href="#flow-telemetry" />
         </animateMotion>
       </circle>
       <circle class="packet packet-two" r="6">
         <animateMotion dur="5s" begin=".9s" repeatCount="indefinite">
-          <mpath href="#flow-agent-b-referee" />
+          <mpath href="#flow-agent-proposals" />
         </animateMotion>
       </circle>
       <circle class="packet packet-three" r="5">
@@ -300,20 +290,25 @@ function renderFlow(state, events) {
       </circle>
       <circle class="packet packet-four" r="5">
         <animateMotion dur="5.4s" begin=".6s" repeatCount="indefinite">
-          <mpath href="#flow-policy-agent-a" />
+          <mpath href="#flow-policy-agents" />
         </animateMotion>
       </circle>
       <circle class="packet packet-five" r="5">
         <animateMotion dur="5.4s" begin="1.4s" repeatCount="indefinite">
-          <mpath href="#flow-policy-agent-b" />
+          <mpath href="#flow-reward" />
         </animateMotion>
       </circle>
       <circle class="packet packet-six" r="5">
         <animateMotion dur="5.4s" begin="2.2s" repeatCount="indefinite">
-          <mpath href="#flow-policy-agent-c" />
+          <mpath href="#flow-optuna-policy" />
         </animateMotion>
       </circle>
     </svg>
+    <div class="rail-label telemetry-rail">live telemetry</div>
+    <div class="rail-label inference-rail">feature state + prediction</div>
+    <div class="rail-label proposal-rail">A/B/C proposals</div>
+    <div class="rail-label action-rail">chosen action to cluster</div>
+    <div class="rail-label reward-rail">reward + meta feedback</div>
     <div class="diagram-grid"></div>
     <div class="diagram-legend">
       <span><b class="legend-telemetry"></b>telemetry</span>
