@@ -52,6 +52,8 @@ PYTHON_BIN=~/Documents/aiopslab_validation_env/bin/python \
 
 This keeps observing Kubernetes through `kubectl`, selecting Agent A/B/C/referee actions, computing rewards, appending a live trace, and refreshing the dashboard until stopped.
 
+In `LIVE_K8S=1` mode, Ray/RLlib and Optuna bootstrap are skipped by default for fast startup. Set `NO_POLICY=0` or `NO_TUNE=0` only when you intentionally want those bootstraps before the live loop.
+
 ## New Isolated Track: Codex Autonomy Runner
 
 An independent local agentic supervisor now exists at `codex_autonomy/`.

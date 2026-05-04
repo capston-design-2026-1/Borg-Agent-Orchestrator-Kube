@@ -23,6 +23,8 @@ PYTHON_BIN=~/Documents/aiopslab_validation_env/bin/python \
 
 `LIVE_K8S=1` keeps capturing real Kubernetes snapshots, selecting Agent A/B/C/referee actions, scoring rewards, appending `live_kubernetes_trace.json`, and refreshing the dashboard until you press `Ctrl-C`.
 
+Live mode defaults to fast observation/control-loop startup: Ray/RLlib policy bootstrap and Optuna tuning are skipped unless explicitly enabled with `NO_POLICY=0` or `NO_TUNE=0`.
+
 What it does:
 
 1. Starts the local visualization dashboard at `http://127.0.0.1:8765`.
@@ -76,6 +78,18 @@ Use more Optuna trials:
 
 ```bash
 TRIALS=10 ./orchestrator_stack/scripts/launch_orchestration.sh
+```
+
+Enable Ray/RLlib bootstrap in live Kubernetes mode:
+
+```bash
+LIVE_K8S=1 NO_POLICY=0 ./orchestrator_stack/scripts/launch_orchestration.sh
+```
+
+Enable Optuna bootstrap in live Kubernetes mode:
+
+```bash
+LIVE_K8S=1 NO_TUNE=0 ./orchestrator_stack/scripts/launch_orchestration.sh
 ```
 
 Use another port:
