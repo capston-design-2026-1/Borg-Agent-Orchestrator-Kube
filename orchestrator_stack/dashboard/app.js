@@ -120,7 +120,7 @@ function eventNode(kind) {
 function diagramNodeMarkup(node, activeKeys) {
   const active = activeKeys.has(node.id) ? 'active' : '';
   return `
-    <article class="diagram-node ${node.tone} ${active}" style="left:${node.x}%;top:${node.y}%">
+    <article class="diagram-node ${node.tone} ${active}">
       <div class="node-kicker">${safeText(node.kicker)}</div>
       <strong>${safeText(node.title)}</strong>
       <span>${safeText(node.metric)}</span>
@@ -161,119 +161,128 @@ function renderFlow(state, events) {
   };
   const nodes = [
     {
-      id: 'cluster', tone: 'cluster', x: 4, y: 18,
+      id: 'cluster', tone: 'cluster',
       kicker: 'Layer 1 source',
       title: 'Kubernetes Cluster',
       metric: `risk ${fmt(cluster.max_risk)}`,
       detail: `${cluster.nodes ?? 0} node / ${cluster.tasks ?? 0} task / sla ${cluster.sla_violations ?? 0}`,
     },
     {
-      id: 'exercise', tone: 'exercise', x: 4, y: 47,
+      id: 'exercise', tone: 'exercise',
       kicker: 'Live perturbation',
       title: 'Workload Exerciser',
       metric: latestExercise ? 'active' : 'idle',
       detail: latestExercise?.phase || 'observing cluster state',
     },
     {
-      id: 'simulator', tone: 'simulator', x: 22, y: 32,
+      id: 'simulator', tone: 'simulator',
       kicker: 'Layer 2 digital twin',
       title: 'AIOpsLab Twin',
       metric: `cpu ${fmt(cluster.avg_cpu)}`,
       detail: `mem ${fmt(cluster.avg_mem)} energy ${fmt(cluster.energy_watts)}W`,
     },
     {
-      id: 'brain', tone: 'brain', x: 39, y: 18,
+      id: 'brain', tone: 'brain',
       kicker: 'Layer 3 predictors',
       title: 'XGBoost Brains',
       metric: `risk ${fmt(cluster.max_risk)} / demand ${fmt(cluster.min_demand)}`,
       detail: `safety forecast + resource demand projection`,
     },
     {
-      id: 'observation', tone: 'observation', x: 39, y: 47,
+      id: 'observation', tone: 'observation',
       kicker: 'Observation space',
       title: 'State Vector',
       metric: `${decision.proposal_count ?? 0} proposals`,
       detail: `node map + tasks + forecasts`,
     },
     {
-      id: 'policy', tone: 'policy', x: 56, y: 18,
+      id: 'policy', tone: 'policy',
       kicker: 'Layer 4 MARL',
       title: 'Ray RLlib PPO Policy',
       metric: ray.status || 'idle',
       detail: ray.reward_mean === undefined ? 'policy network for A/B/C' : `reward mean ${fmt(ray.reward_mean)}`,
     },
     {
-      id: 'AgentA', tone: 'AgentA', x: 56, y: 41,
+      id: 'AgentA', tone: 'AgentA',
       kicker: 'Agent A safety',
       title: 'Agent A',
       metric: agentMetric('AgentA'),
       detail: agentDetail('AgentA'),
     },
     {
-      id: 'AgentB', tone: 'AgentB', x: 56, y: 60,
+      id: 'AgentB', tone: 'AgentB',
       kicker: 'Agent B efficiency',
       title: 'Agent B',
       metric: agentMetric('AgentB'),
       detail: agentDetail('AgentB'),
     },
     {
-      id: 'AgentC', tone: 'AgentC', x: 56, y: 79,
+      id: 'AgentC', tone: 'AgentC',
       kicker: 'Agent C admission',
       title: 'Agent C',
       metric: agentMetric('AgentC'),
       detail: agentDetail('AgentC'),
     },
     {
-      id: 'referee', tone: 'referee', x: 71, y: 56,
+      id: 'referee', tone: 'referee',
       kicker: 'Safety-first referee',
       title: 'Decision Gate',
       metric: `score ${fmt(decision.score)}`,
       detail: decision.reason || 'waiting for recommendation',
     },
     {
-      id: 'scoreboard', tone: 'scoreboard', x: 80, y: 24,
+      id: 'scoreboard', tone: 'scoreboard',
       kicker: 'Layer 6 feedback',
       title: 'Global Scoreboard',
       metric: fmt(lastReward.total),
       detail: `A ${fmt(byAgent.AgentA)} / B ${fmt(byAgent.AgentB)} / C ${fmt(byAgent.AgentC)}`,
     },
     {
-      id: 'optuna', tone: 'optuna', x: 80, y: 66,
+      id: 'optuna', tone: 'optuna',
       kicker: 'Layer 5 meta optimizer',
       title: 'Optuna Trial Manager',
       metric: opt.best_score === undefined ? 'n/a' : fmt(opt.best_score),
       detail: opt.study || 'tunes reward weights + PPO params',
     },
   ];
+  const nodeById = Object.fromEntries(nodes.map(node => [node.id, node]));
+  const lanes = [
+    { className: 'lane-source', title: 'Layer 1', detail: 'cluster source', ids: ['cluster', 'exercise'] },
+    { className: 'lane-twin', title: 'Layer 2', detail: 'live digital twin', ids: ['simulator'] },
+    { className: 'lane-brain', title: 'Layer 3', detail: 'prediction + state', ids: ['brain', 'observation'] },
+    { className: 'lane-marl', title: 'Layer 4', detail: 'policy and agents', ids: ['policy', 'AgentA', 'AgentB', 'AgentC'] },
+    { className: 'lane-referee', title: 'Referee', detail: 'safety gate', ids: ['referee'] },
+    { className: 'lane-feedback', title: 'Layers 5-6', detail: 'meta + reward', ids: ['scoreboard', 'optuna'] },
+  ];
 
   $('flowDiagram').innerHTML = `
-    <svg class="diagram-arrows" viewBox="0 0 1400 780" preserveAspectRatio="none" aria-hidden="true">
+    <svg class="diagram-arrows" viewBox="0 0 1200 620" preserveAspectRatio="none" aria-hidden="true">
       <defs>
         <marker id="arrowHead" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
           <path d="M0,0 L10,5 L0,10 z"></path>
         </marker>
       </defs>
-      <path id="flow-cluster-twin" class="arrow telemetry" d="M220 145 C300 165 330 235 405 260" />
-      <path id="flow-exercise-twin" class="arrow telemetry" d="M220 380 C300 360 335 300 405 275" />
-      <path id="flow-twin-brain" class="arrow inference" d="M535 250 C610 165 675 145 735 145" />
-      <path id="flow-twin-observation" class="arrow observation" d="M535 285 C610 330 675 360 735 370" />
-      <path id="flow-brain-observation" class="arrow inference" d="M790 215 C805 275 805 315 790 360" />
-      <path id="flow-observation-policy" class="arrow policy" d="M840 360 C900 240 930 175 975 145" />
-      <path id="flow-policy-agent-a" class="arrow policy agent-a" d="M1035 215 C1040 260 1035 290 1020 310" />
-      <path id="flow-policy-agent-b" class="arrow policy agent-b" d="M1035 215 C1065 340 1050 420 1020 455" />
-      <path id="flow-policy-agent-c" class="arrow policy agent-c" d="M1035 215 C1090 430 1060 570 1020 600" />
-      <path id="flow-observation-agent-a" class="arrow observation agent-a" d="M840 375 C910 365 960 335 1010 320" />
-      <path id="flow-observation-agent-b" class="arrow observation agent-b" d="M840 385 C910 425 955 445 1010 455" />
-      <path id="flow-observation-agent-c" class="arrow observation agent-c" d="M840 395 C900 545 955 600 1010 600" />
-      <path id="flow-agent-a-referee" class="arrow proposal agent-a" d="M1110 320 C1170 340 1215 380 1260 415" />
-      <path id="flow-agent-b-referee" class="arrow proposal agent-b" d="M1110 455 C1170 455 1215 435 1260 425" />
-      <path id="flow-agent-c-referee" class="arrow proposal agent-c" d="M1110 600 C1180 545 1220 470 1260 435" />
-      <path id="flow-referee-act" class="arrow control" d="M1300 410 C1370 260 1320 95 1220 95 C930 95 505 85 230 125" />
-      <path id="flow-referee-score" class="arrow reward" d="M1315 405 C1370 325 1370 235 1330 185" />
-      <path id="flow-score-optuna" class="arrow feedback" d="M1330 225 C1390 410 1380 535 1330 560" />
-      <path id="flow-score-policy" class="arrow feedback" d="M1315 190 C1240 100 1110 95 1035 130" />
-      <path id="flow-optuna-policy" class="arrow meta" d="M1270 575 C1190 500 1110 285 1035 175" />
-      <path id="flow-optuna-score" class="arrow meta" d="M1330 560 C1390 460 1390 300 1330 205" />
+      <path id="flow-cluster-twin" class="arrow telemetry" d="M105 145 C155 150 190 185 230 245" />
+      <path id="flow-exercise-twin" class="arrow telemetry" d="M105 390 C155 370 190 310 230 265" />
+      <path id="flow-twin-brain" class="arrow inference" d="M345 250 C390 155 425 135 470 135" />
+      <path id="flow-twin-observation" class="arrow observation" d="M345 285 C390 355 425 390 470 390" />
+      <path id="flow-brain-observation" class="arrow inference" d="M545 185 C570 255 570 315 545 375" />
+      <path id="flow-observation-policy" class="arrow policy" d="M585 360 C635 220 655 150 700 135" />
+      <path id="flow-policy-agent-a" class="arrow policy agent-a" d="M760 185 C770 230 770 255 755 285" />
+      <path id="flow-policy-agent-b" class="arrow policy agent-b" d="M760 185 C795 305 790 375 755 415" />
+      <path id="flow-policy-agent-c" class="arrow policy agent-c" d="M760 185 C815 380 795 505 755 535" />
+      <path id="flow-observation-agent-a" class="arrow observation agent-a" d="M585 390 C640 360 675 310 705 285" />
+      <path id="flow-observation-agent-b" class="arrow observation agent-b" d="M585 400 C640 430 675 430 705 415" />
+      <path id="flow-observation-agent-c" class="arrow observation agent-c" d="M585 410 C640 515 675 545 705 535" />
+      <path id="flow-agent-a-referee" class="arrow proposal agent-a" d="M815 285 C870 300 900 335 925 360" />
+      <path id="flow-agent-b-referee" class="arrow proposal agent-b" d="M815 415 C865 410 895 385 925 370" />
+      <path id="flow-agent-c-referee" class="arrow proposal agent-c" d="M815 535 C875 485 900 415 925 380" />
+      <path id="flow-referee-act" class="arrow control" d="M980 360 C1160 265 1135 85 980 75 C710 60 380 70 110 125" />
+      <path id="flow-referee-score" class="arrow reward" d="M990 350 C1040 275 1040 185 1015 145" />
+      <path id="flow-score-optuna" class="arrow feedback" d="M1015 185 C1080 285 1080 430 1015 485" />
+      <path id="flow-score-policy" class="arrow feedback" d="M1015 145 C955 75 820 75 760 120" />
+      <path id="flow-optuna-policy" class="arrow meta" d="M1000 485 C935 410 825 240 760 160" />
+      <path id="flow-optuna-score" class="arrow meta" d="M1030 485 C1095 385 1095 250 1030 165" />
       <circle class="packet packet-one" r="7">
         <animateMotion dur="6s" repeatCount="indefinite">
           <mpath href="#flow-cluster-twin" />
@@ -312,7 +321,17 @@ function renderFlow(state, events) {
       <span><b class="legend-policy"></b>policy</span>
       <span><b class="legend-reward"></b>reward/meta loop</span>
     </div>
-    ${nodes.map(node => diagramNodeMarkup(node, activeKeys)).join('')}
+    <div class="diagram-lanes">
+      ${lanes.map(lane => `
+        <section class="diagram-lane ${lane.className}">
+          <header>
+            <strong>${safeText(lane.title)}</strong>
+            <span>${safeText(lane.detail)}</span>
+          </header>
+          ${lane.ids.map(id => diagramNodeMarkup(nodeById[id], activeKeys)).join('')}
+        </section>
+      `).join('')}
+    </div>
   `;
   $('flowEvents').innerHTML = recentEvents.map(diagramEventMarkup).join('');
 }
