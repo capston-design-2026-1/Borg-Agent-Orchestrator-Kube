@@ -89,7 +89,8 @@ def _decision_reason(snapshot: dict[str, Any], action_agent: str, action_kind: s
     if action_agent == "AgentA":
         return f"risk={snapshot['max_risk']} on {snapshot['max_risk_node']}; sla={snapshot['sla_violations']}"
     if action_agent == "AgentB":
-        return f"low demand={snapshot['min_demand']} on {snapshot['min_demand_node']}; energy={snapshot['energy_watts']:.3f}W"
+        source = snapshot.get("power_calibration_source", "calibrated")
+        return f"low demand={snapshot['min_demand']} on {snapshot['min_demand_node']}; est_power={snapshot['energy_watts']:.3f}W ({source})"
     if action_agent == "AgentC":
         return f"queue={snapshot['queue_length']}; avg_cpu={snapshot['avg_cpu']}; avg_mem={snapshot['avg_mem']}"
     return "no-op or unknown action"
@@ -345,6 +346,10 @@ def run_live_kubernetes_orchestration(
             backend = _backend([row], config)
             obs = backend.reset()
             snapshot = _cluster_snapshot(obs)
+            power_calibration = row.get("power_calibration") if isinstance(row, dict) else None
+            if isinstance(power_calibration, dict):
+                snapshot["power_metric_kind"] = "estimated"
+                snapshot["power_calibration_source"] = str(power_calibration.get("source", "calibrated"))
             state.cluster_snapshot(snapshot)
             proposals = [agent.act(obs) for agent in agents]
             action = resolve(proposals)

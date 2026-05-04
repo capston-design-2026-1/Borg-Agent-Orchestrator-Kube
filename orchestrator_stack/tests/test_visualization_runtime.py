@@ -180,6 +180,7 @@ def test_live_kubernetes_orchestration_loop_uses_cluster_snapshots(monkeypatch, 
         "sla_violations": 0,
         "completed_tasks": 0,
         "energy_watts": 210.0,
+        "power_calibration": {"source": "default_utilization_model"},
     }
     monkeypatch.setattr(visualization, "capture_kubernetes_trace_row", lambda **kwargs: dict(live_row))
     monkeypatch.setattr(
@@ -213,6 +214,8 @@ def test_live_kubernetes_orchestration_loop_uses_cluster_snapshots(monkeypatch, 
     assert state["summary"]["last_action"]["proposals"][0]["agent"] == "AgentA"
     assert state["decision"]["repeat_count"] == 2
     assert state["cluster"]["sla_violations"] == 0
+    assert state["cluster"]["power_metric_kind"] == "estimated"
+    assert state["cluster"]["power_calibration_source"] == "default_utilization_model"
 
 
 def test_live_kubernetes_loop_continues_without_xgboost(monkeypatch, tmp_path: Path):

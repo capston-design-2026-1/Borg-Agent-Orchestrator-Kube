@@ -334,6 +334,7 @@ function renderFlow(state, events) {
     if (decision.agent === agent) return `${decision.target || 'cluster'} / score ${fmt(decision.score)}`;
     return `last reward ${fmt(reward)} / observing`;
   };
+  const powerSource = cluster.power_calibration_source ? ` (${cluster.power_calibration_source})` : '';
   const nodes = [
     {
       id: 'cluster', tone: 'cluster',
@@ -354,7 +355,7 @@ function renderFlow(state, events) {
       kicker: 'Layer 2 digital twin',
       title: 'AIOpsLab Twin',
       metric: `cpu ${fmt(cluster.avg_cpu)}`,
-      detail: `mem ${fmt(cluster.avg_mem)} energy ${fmt(cluster.energy_watts)}W`,
+      detail: `mem ${fmt(cluster.avg_mem)} est power ${fmt(cluster.energy_watts)}W${powerSource}`,
     },
     {
       id: 'brain', tone: 'brain',
