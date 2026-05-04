@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import time
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -203,10 +204,21 @@ def run_live_kubernetes_orchestration(
 
     try:
         state.stage("brains", "running", detail="ensure XGBoost risk and demand predictors", progress=0.2)
-        models = train_brain_models(config)
-        for label, path in models.items():
-            state.artifact(path, label)
-        state.stage("brains", "complete", detail="predictor models ready", progress=1.0)
+        try:
+            models = train_brain_models(config)
+            for label, path in models.items():
+                state.artifact(path, label)
+            state.stage("brains", "complete", detail="predictor models ready", progress=1.0)
+        except ModuleNotFoundError as exc:
+            if exc.name != "xgboost":
+                raise
+            config = replace(config, use_predictor_runtime=False)
+            state.stage(
+                "brains",
+                "skipped",
+                detail="xgboost missing; live kube risk/demand telemetry drives decisions",
+                progress=1.0,
+            )
 
         if train_policy:
             state.stage("ray_ppo", "running", detail="bootstrap RLlib PPO policy before live loop", progress=0.1)
