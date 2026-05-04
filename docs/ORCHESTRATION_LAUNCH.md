@@ -10,6 +10,19 @@ From repository root:
 ./orchestrator_stack/scripts/launch_orchestration.sh
 ```
 
+This is the finite thesis demo mode. It runs one full pass over the configured trace plus Ray/RLlib and Optuna bootstrap work.
+
+For the intended continuously running Kubernetes control-loop visualization, use:
+
+```bash
+LIVE_K8S=1 \
+KUBECONFIG=~/Documents/aiopslab_validation_env/kubeconfig \
+PYTHON_BIN=~/Documents/aiopslab_validation_env/bin/python \
+./orchestrator_stack/scripts/launch_orchestration.sh
+```
+
+`LIVE_K8S=1` keeps capturing real Kubernetes snapshots, selecting Agent A/B/C/referee actions, scoring rewards, appending `live_kubernetes_trace.json`, and refreshing the dashboard until you press `Ctrl-C`.
+
 What it does:
 
 1. Starts the local visualization dashboard at `http://127.0.0.1:8765`.
@@ -71,6 +84,24 @@ Use another port:
 PORT=8899 ./orchestrator_stack/scripts/launch_orchestration.sh
 ```
 
+Run live Kubernetes loop every 5 seconds:
+
+```bash
+LIVE_K8S=1 INTERVAL_SECONDS=5 ./orchestrator_stack/scripts/launch_orchestration.sh
+```
+
+Run only 20 live Kubernetes iterations:
+
+```bash
+LIVE_K8S=1 LIVE_MAX_ITERATIONS=20 ./orchestrator_stack/scripts/launch_orchestration.sh
+```
+
+Use Prometheus enrichment in live Kubernetes loop:
+
+```bash
+LIVE_K8S=1 PROMETHEUS_BASE_URL=http://127.0.0.1:19090 ./orchestrator_stack/scripts/launch_orchestration.sh
+```
+
 Do not open browser automatically:
 
 ```bash
@@ -98,14 +129,17 @@ PYTHON_BIN=~/Documents/aiopslab_validation_env/bin/python \
 
 ## Live Kubernetes / AIOpsLab Mode
 
-For live cluster evidence mode, point `CONFIG` to a config backed by traces collected from the Kind/AIOpsLab run and use your kube context for preflight/collection commands. The launch shell itself stays the same:
+For live cluster evidence mode, point `CONFIG` to a config backed by traces collected from the Kind/AIOpsLab run and use your kube context for preflight/collection commands. Add `LIVE_K8S=1` when you want the dashboard to keep evaluating the live cluster instead of ending after one finite demo pass:
 
 ```bash
+LIVE_K8S=1 \
 KUBECONFIG=~/Documents/aiopslab_validation_env/kubeconfig \
 CONFIG=orchestrator_stack/config/aiopslab_prometheus_mitigation_kind.json \
 PYTHON_BIN=~/Documents/aiopslab_validation_env/bin/python \
 ./orchestrator_stack/scripts/launch_orchestration.sh
 ```
+
+Important: upstream AIOpsLab problem sessions are bounded tasks, so the infinite part is the repository control loop over the live Kubernetes cluster state. The loop continuously observes Kubernetes/AIOpsLab-deployed workloads, chooses orchestration actions, computes rewards, and updates the dashboard. Fault injection and individual AIOpsLab task sessions remain finite unless a separate scenario runner restarts them.
 
 Before live mode, verify the cluster once:
 

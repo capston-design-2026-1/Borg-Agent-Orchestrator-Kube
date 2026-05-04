@@ -41,6 +41,17 @@ Run the whole orchestration path and the dashboard together from the repository 
 
 This starts the dashboard at `http://127.0.0.1:8765`, opens it on macOS, runs trace loading, XGBoost brains, multi-agent/referee rewards, Ray/RLlib PPO, and Optuna reward tuning, then streams state to `orchestrator_stack/runtime/visualization/`.
 
+For the continuous Kubernetes/AIOpsLab-style control loop, launch live mode:
+
+```bash
+LIVE_K8S=1 \
+KUBECONFIG=~/Documents/aiopslab_validation_env/kubeconfig \
+PYTHON_BIN=~/Documents/aiopslab_validation_env/bin/python \
+./orchestrator_stack/scripts/launch_orchestration.sh
+```
+
+This keeps observing Kubernetes through `kubectl`, selecting Agent A/B/C/referee actions, computing rewards, appending a live trace, and refreshing the dashboard until stopped.
+
 ## New Isolated Track: Codex Autonomy Runner
 
 An independent local agentic supervisor now exists at `codex_autonomy/`.
