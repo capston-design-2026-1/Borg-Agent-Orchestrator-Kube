@@ -120,12 +120,87 @@ function eventNode(kind) {
 function diagramNodeMarkup(node, activeKeys) {
   const active = activeKeys.has(node.id) ? 'active' : '';
   return `
-    <article class="diagram-node ${node.tone} ${active}">
+    <article class="diagram-node ${node.tone} ${active}" data-node="${safeText(node.id)}">
       <div class="node-kicker">${safeText(node.kicker)}</div>
       <strong>${safeText(node.title)}</strong>
       <span>${safeText(node.metric)}</span>
       <p>${safeText(node.detail)}</p>
     </article>
+  `;
+}
+const diagramConnectors = [
+  ['cluster', 'simulator', 'telemetry', 'flow-cluster-simulator'],
+  ['exercise', 'simulator', 'telemetry', 'flow-exercise-simulator'],
+  ['simulator', 'brain', 'inference', 'flow-simulator-brain'],
+  ['simulator', 'observation', 'observation', 'flow-simulator-observation'],
+  ['brain', 'policy', 'inference', 'flow-brain-policy'],
+  ['observation', 'policy', 'policy', 'flow-observation-policy'],
+  ['policy', 'AgentA', 'policy agent-a', 'flow-policy-agent-a'],
+  ['policy', 'AgentB', 'policy agent-b', 'flow-policy-agent-b'],
+  ['policy', 'AgentC', 'policy agent-c', 'flow-policy-agent-c'],
+  ['AgentA', 'referee', 'proposal agent-a', 'flow-agent-a-referee'],
+  ['AgentB', 'referee', 'proposal agent-b', 'flow-agent-b-referee'],
+  ['AgentC', 'referee', 'proposal agent-c', 'flow-agent-c-referee'],
+  ['referee', 'cluster', 'control', 'flow-referee-cluster'],
+  ['referee', 'scoreboard', 'reward', 'flow-referee-scoreboard'],
+  ['scoreboard', 'optuna', 'feedback', 'flow-scoreboard-optuna'],
+  ['scoreboard', 'policy', 'feedback', 'flow-scoreboard-policy'],
+  ['optuna', 'policy', 'meta', 'flow-optuna-policy'],
+];
+const animatedConnectorIds = [
+  'flow-cluster-simulator',
+  'flow-agent-b-referee',
+  'flow-scoreboard-optuna',
+  'flow-policy-agent-a',
+  'flow-referee-scoreboard',
+  'flow-optuna-policy',
+];
+function connectorAnchor(rect, side, rootRect) {
+  const x = side === 'left' ? rect.left : side === 'right' ? rect.right : rect.left + rect.width / 2;
+  const y = side === 'top' ? rect.top : side === 'bottom' ? rect.bottom : rect.top + rect.height / 2;
+  return { x: x - rootRect.left, y: y - rootRect.top };
+}
+function connectorPath(source, target, mode) {
+  const dx = Math.max(48, Math.abs(target.x - source.x) * 0.45);
+  if (mode === 'return') {
+    const lift = Math.min(source.y, target.y) - 72;
+    return `M${source.x},${source.y} C${source.x - dx},${lift} ${target.x + dx},${lift} ${target.x},${target.y}`;
+  }
+  return `M${source.x},${source.y} C${source.x + dx},${source.y} ${target.x - dx},${target.y} ${target.x},${target.y}`;
+}
+function drawDiagramConnectors() {
+  const diagram = $('flowDiagram');
+  const svg = $('diagramArrows');
+  if (!diagram || !svg) return;
+  const rootRect = diagram.getBoundingClientRect();
+  svg.setAttribute('viewBox', `0 0 ${Math.round(rootRect.width)} ${Math.round(rootRect.height)}`);
+  const nodes = Object.fromEntries(
+    [...diagram.querySelectorAll('[data-node]')].map(el => [el.dataset.node, el.getBoundingClientRect()])
+  );
+  const paths = diagramConnectors.map(([from, to, classes, id]) => {
+    const sourceRect = nodes[from];
+    const targetRect = nodes[to];
+    if (!sourceRect || !targetRect) return '';
+    const returnsToLeft = to === 'cluster' || to === 'policy' && (from === 'scoreboard' || from === 'optuna');
+    const source = connectorAnchor(sourceRect, returnsToLeft ? 'left' : 'right', rootRect);
+    const target = connectorAnchor(targetRect, returnsToLeft ? 'right' : 'left', rootRect);
+    return `<path id="${id}" class="arrow ${classes}" d="${connectorPath(source, target, returnsToLeft ? 'return' : 'forward')}" />`;
+  }).join('');
+  const packets = animatedConnectorIds.map((id, index) => `
+    <circle class="packet packet-${index + 1}" r="${index === 0 ? 7 : 5}">
+      <animateMotion dur="${5 + index * 0.25}s" begin="${index * 0.45}s" repeatCount="indefinite">
+        <mpath href="#${id}" />
+      </animateMotion>
+    </circle>
+  `).join('');
+  svg.innerHTML = `
+    <defs>
+      <marker id="arrowHead" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+        <path d="M0,0 L10,5 L0,10 z"></path>
+      </marker>
+    </defs>
+    ${paths}
+    ${packets}
   `;
 }
 function diagramEventMarkup(event, index) {
@@ -256,59 +331,7 @@ function renderFlow(state, events) {
   ];
 
   $('flowDiagram').innerHTML = `
-    <svg class="diagram-arrows" viewBox="0 0 1200 620" preserveAspectRatio="none" aria-hidden="true">
-      <defs>
-        <marker id="arrowHead" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-          <path d="M0,0 L10,5 L0,10 z"></path>
-        </marker>
-      </defs>
-      <path id="flow-telemetry" class="arrow telemetry" d="M150 310 C215 310 235 310 300 310" />
-      <path id="flow-state" class="arrow inference" d="M330 310 C395 310 415 310 480 310" />
-      <path id="flow-predict-policy" class="arrow inference" d="M560 210 C620 170 640 155 700 155" />
-      <path id="flow-state-agents" class="arrow observation" d="M560 410 C620 410 640 410 700 410" />
-      <path id="flow-policy-agents" class="arrow policy" d="M770 195 C790 290 790 430 770 535" />
-      <path id="flow-agent-proposals" class="arrow proposal" d="M800 410 C860 410 875 410 935 410" />
-      <path id="flow-action" class="arrow control" d="M960 390 C900 220 695 80 395 105 C250 115 185 165 150 245" />
-      <path id="flow-reward" class="arrow reward" d="M985 390 C1030 335 1040 275 1065 220" />
-      <path id="flow-score-optuna" class="arrow feedback" d="M1085 250 C1120 315 1120 405 1085 470" />
-      <path id="flow-optuna-policy" class="arrow meta" d="M1065 485 C950 590 755 560 745 205" />
-      <path id="flow-score-policy" class="arrow feedback" d="M1065 205 C975 95 815 85 755 135" />
-      <circle class="packet packet-one" r="7">
-        <animateMotion dur="6s" repeatCount="indefinite">
-          <mpath href="#flow-telemetry" />
-        </animateMotion>
-      </circle>
-      <circle class="packet packet-two" r="6">
-        <animateMotion dur="5s" begin=".9s" repeatCount="indefinite">
-          <mpath href="#flow-agent-proposals" />
-        </animateMotion>
-      </circle>
-      <circle class="packet packet-three" r="5">
-        <animateMotion dur="4.8s" begin=".3s" repeatCount="indefinite">
-          <mpath href="#flow-score-optuna" />
-        </animateMotion>
-      </circle>
-      <circle class="packet packet-four" r="5">
-        <animateMotion dur="5.4s" begin=".6s" repeatCount="indefinite">
-          <mpath href="#flow-policy-agents" />
-        </animateMotion>
-      </circle>
-      <circle class="packet packet-five" r="5">
-        <animateMotion dur="5.4s" begin="1.4s" repeatCount="indefinite">
-          <mpath href="#flow-reward" />
-        </animateMotion>
-      </circle>
-      <circle class="packet packet-six" r="5">
-        <animateMotion dur="5.4s" begin="2.2s" repeatCount="indefinite">
-          <mpath href="#flow-optuna-policy" />
-        </animateMotion>
-      </circle>
-    </svg>
-    <div class="rail-label telemetry-rail">live telemetry</div>
-    <div class="rail-label inference-rail">feature state + prediction</div>
-    <div class="rail-label proposal-rail">A/B/C proposals</div>
-    <div class="rail-label action-rail">chosen action to cluster</div>
-    <div class="rail-label reward-rail">reward + meta feedback</div>
+    <svg id="diagramArrows" class="diagram-arrows" preserveAspectRatio="none" aria-hidden="true"></svg>
     <div class="diagram-grid"></div>
     <div class="diagram-legend">
       <span><b class="legend-telemetry"></b>telemetry</span>
@@ -329,7 +352,9 @@ function renderFlow(state, events) {
     </div>
   `;
   $('flowEvents').innerHTML = recentEvents.map(diagramEventMarkup).join('');
+  requestAnimationFrame(drawDiagramConnectors);
 }
+window.addEventListener('resize', () => requestAnimationFrame(drawDiagramConnectors));
 function renderState(state, events) {
   $('statusText').textContent = state.status || 'waiting';
   $('updatedAt').textContent = `updated ${state.updated_at || 'never'}`;

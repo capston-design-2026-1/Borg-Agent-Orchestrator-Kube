@@ -17,7 +17,7 @@ def test_visualized_run_cli_defaults():
     assert args.no_tune is True
 
 
-def test_dashboard_flow_diagram_uses_lane_anchored_rails():
+def test_dashboard_flow_diagram_uses_measured_card_connectors():
     app_js = Path("orchestrator_stack/dashboard/app.js").read_text(encoding="utf-8")
     styles = Path("orchestrator_stack/dashboard/styles.css").read_text(encoding="utf-8")
 
@@ -32,25 +32,34 @@ def test_dashboard_flow_diagram_uses_lane_anchored_rails():
     for lane in required_lanes:
         assert lane in app_js
 
-    path_ids = set(re.findall(r'<path id="([^"]+)"', app_js))
-    mpath_ids = set(re.findall(r'<mpath href="#([^"]+)"', app_js))
-    assert mpath_ids <= path_ids
-    assert path_ids == {
-        "flow-telemetry",
-        "flow-state",
-        "flow-predict-policy",
-        "flow-state-agents",
-        "flow-policy-agents",
-        "flow-agent-proposals",
-        "flow-action",
-        "flow-reward",
-        "flow-score-optuna",
+    connector_ids = set(re.findall(r"\['[^']+', '[^']+', '[^']+', '(flow-[^']+)'\]", app_js))
+    assert connector_ids == {
+        "flow-cluster-simulator",
+        "flow-exercise-simulator",
+        "flow-simulator-brain",
+        "flow-simulator-observation",
+        "flow-brain-policy",
+        "flow-observation-policy",
+        "flow-policy-agent-a",
+        "flow-policy-agent-b",
+        "flow-policy-agent-c",
+        "flow-agent-a-referee",
+        "flow-agent-b-referee",
+        "flow-agent-c-referee",
+        "flow-referee-cluster",
+        "flow-referee-scoreboard",
+        "flow-scoreboard-optuna",
+        "flow-scoreboard-policy",
         "flow-optuna-policy",
-        "flow-score-policy",
     }
+    animated_ids = set(re.findall(r"'(flow-[^']+)'", app_js.split("const animatedConnectorIds = [", 1)[1].split("];", 1)[0]))
+    assert animated_ids <= connector_ids
 
-    assert "flow-agent-a-referee" not in app_js
-    assert "flow-policy-agent-a" not in app_js
+    assert "getBoundingClientRect" in app_js
+    assert "data-node=" in app_js
+    assert "<path id=\"flow-" not in app_js
+    assert "rail-label" not in app_js
+    assert ".rail-label" not in styles
     assert "style=\"left:" not in app_js
     assert "translateY(-50%)" not in styles
 

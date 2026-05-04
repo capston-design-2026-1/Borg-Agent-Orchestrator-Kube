@@ -105,8 +105,8 @@ h2 { margin: 0; font-size: 21px; letter-spacing: -.02em; }
   grid-template-rows: minmax(0, 1fr) auto;
 }
 .flow-diagram { position: relative; width: 100%; height: 100%; min-height: 0; padding: 64px 26px 22px; }
-.diagram-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(18,32,26,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(18,32,26,.045) 1px, transparent 1px); background-size: 44px 44px; mask-image: radial-gradient(circle at center, black 24%, transparent 88%); }
-.diagram-arrows { position: absolute; inset: 64px 26px 22px; width: calc(100% - 52px); height: calc(100% - 86px); z-index: 1; overflow: visible; pointer-events: none; opacity: .62; }
+.diagram-grid { position: absolute; inset: 0; z-index: 0; background-image: linear-gradient(rgba(18,32,26,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(18,32,26,.045) 1px, transparent 1px); background-size: 44px 44px; mask-image: radial-gradient(circle at center, black 24%, transparent 88%); }
+.diagram-arrows { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; overflow: visible; pointer-events: none; opacity: .72; }
 .diagram-arrows marker path { fill: rgba(18,32,26,.50); }
 .arrow { fill: none; stroke: rgba(18,32,26,.42); stroke-width: 2.5; marker-end: url(#arrowHead); stroke-linecap: round; }
 .arrow.telemetry, .arrow.inference, .arrow.observation, .arrow.proposal { stroke-dasharray: 8 9; animation: dashMove 2.8s linear infinite; }
@@ -123,29 +123,9 @@ h2 { margin: 0; font-size: 21px; letter-spacing: -.02em; }
 .arrow.meta { stroke: rgba(212,138,32,.70); stroke-dasharray: 12 8; animation: dashMove 3s linear infinite; }
 .arrow.policy { stroke-dasharray: 14 8; animation: dashMove 3.6s linear infinite reverse; stroke-width: 3; opacity: .86; }
 .packet { z-index: 2; fill: var(--green); filter: drop-shadow(0 0 10px rgba(22,131,95,.8)); opacity: .84; }
-.packet-two { fill: var(--red); }
-.packet-three { fill: var(--green); }
-.packet-four, .packet-five, .packet-six { fill: var(--amber); }
-.rail-label {
-  position: absolute;
-  z-index: 2;
-  padding: 5px 8px;
-  border-radius: 999px;
-  background: rgba(255,252,244,.72);
-  border: 1px solid var(--line);
-  color: var(--muted);
-  font-size: 9px;
-  font-weight: 900;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  pointer-events: none;
-  backdrop-filter: blur(10px);
-}
-.telemetry-rail { left: 15.5%; top: 47%; }
-.inference-rail { left: 34%; top: 36%; }
-.proposal-rail { left: 70%; top: 55%; }
-.action-rail { left: 28%; top: 13%; }
-.reward-rail { right: 9%; top: 38%; }
+.packet-2 { fill: var(--red); }
+.packet-3 { fill: var(--green); }
+.packet-4, .packet-5, .packet-6 { fill: var(--amber); }
 .diagram-lanes {
   position: relative;
   z-index: 3;
