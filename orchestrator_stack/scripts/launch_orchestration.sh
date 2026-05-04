@@ -34,6 +34,8 @@ else
 fi
 EXERCISE_NAMESPACE="${EXERCISE_NAMESPACE:-borg-orchestrator-exercise}"
 EXERCISE_INTERVAL_ITERATIONS="${EXERCISE_INTERVAL_ITERATIONS:-3}"
+EXERCISE_RANDOMIZE="${EXERCISE_RANDOMIZE:-1}"
+EXERCISE_SEED="${EXERCISE_SEED:-}"
 
 if [[ ! -x "$PYTHON_BIN" ]]; then
   PYTHON_BIN="$(command -v python3)"
@@ -113,6 +115,8 @@ if [[ "$LIVE_K8S" == "1" ]]; then
   if [[ -n "$POWER_CALIBRATION" ]]; then ARGS+=(--power-calibration "$POWER_CALIBRATION"); fi
   if [[ "$EXERCISE_CLUSTER" == "1" ]]; then
     ARGS+=(--exercise-cluster --exercise-namespace "$EXERCISE_NAMESPACE" --exercise-interval-iterations "$EXERCISE_INTERVAL_ITERATIONS")
+    if [[ "$EXERCISE_RANDOMIZE" == "1" ]]; then ARGS+=(--exercise-randomize); fi
+    if [[ -n "$EXERCISE_SEED" ]]; then ARGS+=(--exercise-seed "$EXERCISE_SEED"); fi
   fi
 else
   ARGS=(orchestrator_stack/run.py visualized-run --config "$CONFIG" --trials "$TRIALS" --event-dir "$EVENT_DIR")
