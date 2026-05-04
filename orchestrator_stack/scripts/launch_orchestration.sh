@@ -42,15 +42,56 @@ fi
 mkdir -p "$EVENT_DIR" orchestrator_stack/runtime/dashboard
 SERVER_LOG="orchestrator_stack/runtime/dashboard/server.log"
 RUN_LOG="orchestrator_stack/runtime/dashboard/run.log"
+RUN_ID="$(date +%Y%m%d%H%M%S)"
+GIT_REV="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
+
+EXISTING_WRITERS="$(
+  pgrep -f "orchestrator_stack/run.py .*--event-dir $EVENT_DIR" 2>/dev/null | while read -r pid; do
+    [[ "$pid" != "$$" ]] && echo "$pid"
+  done || true
+)"
+if [[ -n "$EXISTING_WRITERS" ]]; then
+  echo "error: another orchestration writer is already using $EVENT_DIR" >&2
+  echo "pids: $EXISTING_WRITERS" >&2
+  echo "stop the old process first, or set EVENT_DIR to a separate runtime directory" >&2
+  exit 2
+fi
+
+LOCK_DIR="$EVENT_DIR/.launch.lock"
+if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+  LOCK_PID="$(cat "$LOCK_DIR/pid" 2>/dev/null || true)"
+  if [[ -n "$LOCK_PID" ]] && kill -0 "$LOCK_PID" 2>/dev/null; then
+    echo "error: launcher lock is active for $EVENT_DIR by pid $LOCK_PID" >&2
+    exit 2
+  fi
+  rmdir "$LOCK_DIR" 2>/dev/null || true
+  mkdir "$LOCK_DIR"
+fi
+echo "$$" > "$LOCK_DIR/pid"
+trap 'kill "${SERVER_PID:-}" >/dev/null 2>&1 || true; rm -f "$LOCK_DIR/pid" >/dev/null 2>&1 || true; rmdir "$LOCK_DIR" >/dev/null 2>&1 || true' EXIT
+cat > "$EVENT_DIR/run_manifest.json" <<EOF
+{
+  "run_id": "$RUN_ID",
+  "git_rev": "$GIT_REV",
+  "live_k8s": "$LIVE_K8S",
+  "mode": "$MODE",
+  "config": "$CONFIG",
+  "event_dir": "$EVENT_DIR",
+  "python": "$PYTHON_BIN"
+}
+EOF
 
 PYTHONPATH="orchestrator_stack${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON_BIN" -m orchestrator.dashboard_server --port "$PORT" --event-dir "$EVENT_DIR" > "$SERVER_LOG" 2>&1 &
 SERVER_PID=$!
-trap 'kill "$SERVER_PID" >/dev/null 2>&1 || true' EXIT
 
 URL="http://127.0.0.1:$PORT"
 echo "dashboard: $URL"
 echo "state: $EVENT_DIR/state.json"
 echo "events: $EVENT_DIR/events.jsonl"
+echo "run id: $RUN_ID"
+echo "git rev: $GIT_REV"
+echo "live k8s: $LIVE_K8S"
+echo "mode: $MODE"
 
 if [[ "$OPEN_BROWSER" == "1" && "$(uname -s)" == "Darwin" ]]; then
   open "$URL" >/dev/null 2>&1 || true
