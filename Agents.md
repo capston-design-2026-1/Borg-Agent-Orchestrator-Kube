@@ -29,6 +29,7 @@ These instructions apply to work performed in this repository.
 - When a session establishes a new durable working convention, store it in `Agents.md`, `NEXT_STEPS.md`, `README.md`, or another appropriate tracked file before ending the work.
 - Keep `NEXT_STEPS.md` current enough that a new Codex session can resume with the same operational assumptions and current priorities.
 - Keep user-facing workflow changes in `README.md` when they affect how the repository should be used.
+- Keep copy-paste-safe launch commands in `README.md` and `docs/ORCHESTRATION_LAUNCH.md` when launcher behavior changes; include a one-line command when multiline shell continuations could be mistyped.
 - Use timestamp-prefixed report filenames in KST format `YYYYMMDDHHMM_*` for report artifacts stored in the repository.
 - If the user types `milestone`, treat that as an instruction to record the current state for the next Codex context.
 - On `milestone`, update the relevant tracked memory files for the work that was completed, especially `NEXT_STEPS.md`, `README.md`, `Agents.md`, and report files when applicable.
