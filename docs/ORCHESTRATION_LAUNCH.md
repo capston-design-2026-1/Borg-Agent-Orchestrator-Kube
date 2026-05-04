@@ -12,13 +12,25 @@ From repository root:
 
 This is the finite thesis demo mode. It runs one full pass over the configured trace plus Ray/RLlib and Optuna bootstrap work.
 
-For the intended continuously running Kubernetes control-loop visualization, use:
+## Copy-Paste Live Kubernetes Launch
+
+Use this exact block from any terminal. It includes `cd`, so it does not depend on your current directory:
 
 ```bash
+cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator
+
 LIVE_K8S=1 \
 KUBECONFIG=~/Documents/aiopslab_validation_env/kubeconfig \
 ./orchestrator_stack/scripts/launch_orchestration.sh
 ```
+
+One-line version:
+
+```bash
+cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && LIVE_K8S=1 KUBECONFIG=~/Documents/aiopslab_validation_env/kubeconfig ./orchestrator_stack/scripts/launch_orchestration.sh
+```
+
+Do not write `\./orchestrator_stack/...`; the backslash must end the previous line, not touch the command path.
 
 `LIVE_K8S=1` keeps capturing real Kubernetes snapshots, selecting Agent A/B/C/referee actions, scoring rewards, appending `live_kubernetes_trace.json`, and refreshing the dashboard until you press `Ctrl-C`.
 

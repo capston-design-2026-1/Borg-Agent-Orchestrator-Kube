@@ -44,10 +44,20 @@ This starts the dashboard at `http://127.0.0.1:8765`, opens it on macOS, runs tr
 For the continuous Kubernetes/AIOpsLab-style control loop, launch live mode:
 
 ```bash
+cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator
+
 LIVE_K8S=1 \
 KUBECONFIG=~/Documents/aiopslab_validation_env/kubeconfig \
 ./orchestrator_stack/scripts/launch_orchestration.sh
 ```
+
+One-line copy-paste version:
+
+```bash
+cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && LIVE_K8S=1 KUBECONFIG=~/Documents/aiopslab_validation_env/kubeconfig ./orchestrator_stack/scripts/launch_orchestration.sh
+```
+
+Do not type `\./orchestrator_stack/...`; the `\` is only a line-continuation marker and must be separated from the next command path by a newline.
 
 This keeps observing Kubernetes through `kubectl`, selecting Agent A/B/C/referee actions, computing rewards, appending a live trace, and refreshing the dashboard until stopped.
 
