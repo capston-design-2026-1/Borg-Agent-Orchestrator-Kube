@@ -39,8 +39,10 @@ function renderState(state, events) {
   $('statusDot').className = `dot ${state.status === 'complete' ? 'complete' : state.status === 'failed' ? 'failed' : ''}`;
   const rewards = state.rewards || [];
   const last = rewards[rewards.length - 1];
+  const rewardSummary = state.reward_summary || {};
   $('lastReward').textContent = fmt(last?.total);
-  $('optunaBest').textContent = fmt(state.optuna?.best_score);
+  $('rewardSteps').textContent = rewardSummary.count ?? rewards.length;
+  $('optunaBest').textContent = state.optuna?.status === 'disabled' ? 'disabled' : fmt(state.optuna?.best_score);
   $('rayStatus').textContent = state.ray?.status || 'idle';
   $('maxRisk').textContent = fmt(state.cluster?.max_risk);
   $('repeatCount').textContent = state.decision?.repeat_count ?? 0;
@@ -56,10 +58,18 @@ function renderState(state, events) {
     { color: colors.AgentB, value: r => r.rewards?.AgentB },
     { color: colors.AgentC, value: r => r.rewards?.AgentC },
   ]);
+  const byAgent = rewardSummary.last_by_agent || {};
+  $('rewardStats').innerHTML = [
+    ['count', rewardSummary.count],
+    ['avg total', fmt(rewardSummary.average_total)],
+    ['AgentA', fmt(byAgent.AgentA)],
+    ['AgentB', fmt(byAgent.AgentB)],
+    ['AgentC', fmt(byAgent.AgentC)],
+  ].map(([k, v]) => `<div><b>${k}</b><br>${v ?? 'n/a'}</div>`).join('');
   $('rewardLegend').innerHTML = ['total','AgentA','AgentB','AgentC'].map(k => `<span><b style="color:${colors[k]}">■</b> ${k}</span>`).join('');
 
   const opt = state.optuna || {};
-  $('optunaStudy').textContent = opt.study || 'study waiting';
+  $('optunaStudy').textContent = opt.status === 'disabled' ? (opt.reason || 'disabled') : (opt.study || 'study waiting');
   const params = opt.best_params || {};
   $('optunaParams').innerHTML = Object.keys(params).length ? Object.entries(params).map(([k,v]) => `<div><b>${k}</b><br>${fmt(v)}</div>`).join('') : '<div>no completed trial yet</div>';
   drawSeries($('optunaCanvas'), opt.history || [], [{ color: colors.optuna, value: r => r.value }]);

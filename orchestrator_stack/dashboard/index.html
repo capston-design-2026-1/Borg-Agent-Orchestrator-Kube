@@ -26,7 +26,8 @@
     <section class="grid metrics">
       <article><span>Active Stage</span><strong id="activeStage">boot</strong></article>
       <article><span>Last Reward</span><strong id="lastReward">0.000</strong></article>
-      <article><span>Optuna Best</span><strong id="optunaBest">n/a</strong></article>
+      <article><span>Reward Steps</span><strong id="rewardSteps">0</strong></article>
+      <article><span>Optuna</span><strong id="optunaBest">n/a</strong></article>
       <article><span>Ray Status</span><strong id="rayStatus">idle</strong></article>
       <article><span>Max Risk</span><strong id="maxRisk">n/a</strong></article>
       <article><span>Repeat</span><strong id="repeatCount">0</strong></article>
@@ -55,6 +56,7 @@
     <section class="grid two">
       <article class="panel">
         <div class="panel-head"><h2>Reward Stream</h2><span class="muted">AgentA / AgentB / AgentC</span></div>
+        <div id="rewardStats" class="params"></div>
         <canvas id="rewardCanvas" width="900" height="320"></canvas>
         <div id="rewardLegend" class="legend"></div>
       </article>
@@ -81,7 +83,7 @@
       <div id="events" class="events"></div>
     </section>
   </main>
-  <script>window.DASHBOARD_VERSION = "202605042135";</script>
-  <script src="app.js?v=202605042135"></script>
+  <script>window.DASHBOARD_VERSION = "202605050055";</script>
+  <script src="app.js?v=202605050055"></script>
 </body>
 </html>
