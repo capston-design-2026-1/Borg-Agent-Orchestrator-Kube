@@ -123,6 +123,18 @@ Change exercise cadence:
 LIVE_K8S=1 EXERCISE_INTERVAL_ITERATIONS=2 ./orchestrator_stack/scripts/launch_orchestration.sh
 ```
 
+Use deterministic old-style exercise phases for debugging:
+
+```bash
+LIVE_K8S=1 EXERCISE_RANDOMIZE=0 ./orchestrator_stack/scripts/launch_orchestration.sh
+```
+
+Use reproducible randomized exercise phases:
+
+```bash
+LIVE_K8S=1 EXERCISE_SEED=42 ./orchestrator_stack/scripts/launch_orchestration.sh
+```
+
 Use another port:
 
 ```bash
