@@ -124,10 +124,9 @@ function diagramNodeMarkup(node, activeKeys) {
     </article>
   `;
 }
-function diagramCalloutMarkup(event, index) {
-  const node = event.kind === 'decision' && event.agent ? event.agent : eventNode(event.kind);
+function diagramEventMarkup(event, index) {
   return `
-    <article class="diagram-callout ${eventTone(event.kind)} node-${node}" style="--delay:${index * 75}ms">
+    <article class="diagram-event ${eventTone(event.kind)}" style="--delay:${index * 75}ms">
       <span>${safeText(shortTime(event.time))} · ${safeText(event.kind)}</span>
       <strong>${safeText(event.action || event.phase || event.agent || event.name || 'runtime')}</strong>
       <p>${safeText(event.message)}</p>
@@ -143,7 +142,7 @@ function renderFlow(state, events) {
   const opt = state.optuna || {};
   const ray = state.ray || {};
   const latestExercise = (events || []).slice().reverse().find(e => e.kind === 'exercise');
-  const recentEvents = (events || []).slice(-8).reverse();
+  const recentEvents = (events || []).slice(-5).reverse();
   const activeKeys = new Set(recentEvents.map(e => e.kind === 'decision' && e.agent ? e.agent : eventNode(e.kind)));
   if (decision.agent) activeKeys.add(decision.agent);
 
@@ -163,14 +162,14 @@ function renderFlow(state, events) {
       detail: `${cluster.nodes ?? 0} node / ${cluster.tasks ?? 0} task / sla ${cluster.sla_violations ?? 0}`,
     },
     {
-      id: 'exercise', tone: 'exercise', x: 5, y: 54,
+      id: 'exercise', tone: 'exercise', x: 5, y: 49,
       kicker: 'Perturbation',
       title: 'Workload pulse',
       metric: latestExercise ? 'active' : 'idle',
       detail: latestExercise?.phase || 'observing cluster state',
     },
     {
-      id: 'simulator', tone: 'simulator', x: 24, y: 35,
+      id: 'simulator', tone: 'simulator', x: 24, y: 38,
       kicker: 'Layer 2',
       title: 'AIOps Twin',
       metric: `cpu ${fmt(cluster.avg_cpu)}`,
@@ -184,28 +183,28 @@ function renderFlow(state, events) {
       detail: `risk node ${cluster.max_risk_node || 'n/a'}`,
     },
     {
-      id: 'AgentA', tone: 'AgentA', x: 43, y: 43,
+      id: 'AgentA', tone: 'AgentA', x: 43, y: 38,
       kicker: 'Layer 4 Safety',
       title: 'Agent A',
       metric: agentMetric('AgentA'),
       detail: agentDetail('AgentA'),
     },
     {
-      id: 'AgentB', tone: 'AgentB', x: 43, y: 64,
+      id: 'AgentB', tone: 'AgentB', x: 43, y: 57,
       kicker: 'Layer 4 Efficiency',
       title: 'Agent B',
       metric: agentMetric('AgentB'),
       detail: agentDetail('AgentB'),
     },
     {
-      id: 'AgentC', tone: 'AgentC', x: 43, y: 85,
+      id: 'AgentC', tone: 'AgentC', x: 43, y: 76,
       kicker: 'Layer 4 Admission',
       title: 'Agent C',
       metric: agentMetric('AgentC'),
       detail: agentDetail('AgentC'),
     },
     {
-      id: 'referee', tone: 'referee', x: 62, y: 54,
+      id: 'referee', tone: 'referee', x: 62, y: 49,
       kicker: 'Referee',
       title: 'Decision Gate',
       metric: `score ${fmt(decision.score)}`,
@@ -219,14 +218,14 @@ function renderFlow(state, events) {
       detail: `A ${fmt(byAgent.AgentA)} / B ${fmt(byAgent.AgentB)} / C ${fmt(byAgent.AgentC)}`,
     },
     {
-      id: 'rllib', tone: 'rllib', x: 80, y: 58,
+      id: 'rllib', tone: 'rllib', x: 80, y: 51,
       kicker: 'Ray RLlib',
       title: 'PPO Trainer',
       metric: ray.status || 'idle',
       detail: ray.reward_mean === undefined ? 'policy loop' : `reward mean ${fmt(ray.reward_mean)}`,
     },
     {
-      id: 'optuna', tone: 'optuna', x: 62, y: 82,
+      id: 'optuna', tone: 'optuna', x: 62, y: 76,
       kicker: 'Layer 5',
       title: 'Ray + Optuna',
       metric: opt.best_score === undefined ? 'n/a' : fmt(opt.best_score),
@@ -244,23 +243,23 @@ function renderFlow(state, events) {
       <path id="flow-cluster-twin" class="arrow telemetry" d="M170 105 C250 110 270 205 330 225" />
       <path id="flow-exercise-twin" class="arrow telemetry" d="M170 345 C245 335 275 250 330 238" />
       <path id="flow-twin-brain" class="arrow inference" d="M405 225 C455 140 500 110 545 105" />
-      <path id="flow-brain-agent-a" class="arrow inference agent-a" d="M585 145 C570 215 560 245 545 274" />
-      <path id="flow-brain-agent-b" class="arrow inference agent-b" d="M585 145 C600 280 585 365 545 408" />
-      <path id="flow-brain-agent-c" class="arrow inference agent-c" d="M585 145 C625 360 605 500 545 542" />
-      <path id="flow-twin-agent-a" class="arrow observation agent-a" d="M405 245 C435 260 475 270 505 276" />
-      <path id="flow-twin-agent-b" class="arrow observation agent-b" d="M405 250 C455 350 475 392 505 408" />
-      <path id="flow-twin-agent-c" class="arrow observation agent-c" d="M405 260 C440 470 470 535 505 542" />
-      <path id="flow-agent-a-referee" class="arrow proposal agent-a" d="M595 276 C645 285 690 315 735 345" />
-      <path id="flow-agent-b-referee" class="arrow proposal agent-b" d="M595 408 C655 395 695 370 735 350" />
-      <path id="flow-agent-c-referee" class="arrow proposal agent-c" d="M595 542 C665 485 705 400 735 360" />
-      <path id="flow-referee-cluster" class="arrow control" d="M805 345 C900 330 925 125 875 105" />
-      <path id="flow-referee-score" class="arrow reward" d="M805 335 C850 265 860 155 875 115" />
-      <path id="flow-score-optuna" class="arrow feedback" d="M875 160 C830 610 690 600 690 525" />
-      <path id="flow-score-rllib" class="arrow feedback" d="M900 160 C940 275 925 365 875 375" />
-      <path id="flow-optuna-rllib" class="arrow meta" d="M710 525 C760 500 795 455 830 405" />
-      <path id="flow-rllib-agent-a" class="arrow policy agent-a" d="M830 390 C760 265 660 250 595 276" />
-      <path id="flow-rllib-agent-b" class="arrow policy agent-b" d="M830 390 C750 390 665 402 595 408" />
-      <path id="flow-rllib-agent-c" class="arrow policy agent-c" d="M830 390 C750 510 660 540 595 542" />
+      <path id="flow-brain-agent-a" class="arrow inference agent-a" d="M585 145 C570 200 560 225 545 245" />
+      <path id="flow-brain-agent-b" class="arrow inference agent-b" d="M585 145 C600 270 585 335 545 365" />
+      <path id="flow-brain-agent-c" class="arrow inference agent-c" d="M585 145 C625 330 605 455 545 485" />
+      <path id="flow-twin-agent-a" class="arrow observation agent-a" d="M405 245 C435 250 475 245 505 245" />
+      <path id="flow-twin-agent-b" class="arrow observation agent-b" d="M405 250 C455 330 475 355 505 365" />
+      <path id="flow-twin-agent-c" class="arrow observation agent-c" d="M405 260 C440 430 470 478 505 485" />
+      <path id="flow-agent-a-referee" class="arrow proposal agent-a" d="M595 245 C645 255 700 300 735 315" />
+      <path id="flow-agent-b-referee" class="arrow proposal agent-b" d="M595 365 C655 360 695 332 735 320" />
+      <path id="flow-agent-c-referee" class="arrow proposal agent-c" d="M595 485 C665 430 705 355 735 330" />
+      <path id="flow-referee-cluster" class="arrow control" d="M805 315 C900 300 925 125 875 105" />
+      <path id="flow-referee-score" class="arrow reward" d="M805 305 C850 250 860 155 875 115" />
+      <path id="flow-score-optuna" class="arrow feedback" d="M875 160 C830 570 710 575 690 485" />
+      <path id="flow-score-rllib" class="arrow feedback" d="M900 160 C940 260 925 335 875 335" />
+      <path id="flow-optuna-rllib" class="arrow meta" d="M710 485 C760 460 795 420 830 370" />
+      <path id="flow-rllib-agent-a" class="arrow policy agent-a" d="M830 370 C760 245 660 230 595 245" />
+      <path id="flow-rllib-agent-b" class="arrow policy agent-b" d="M830 370 C750 365 665 362 595 365" />
+      <path id="flow-rllib-agent-c" class="arrow policy agent-c" d="M830 370 C750 470 660 490 595 485" />
       <circle class="packet packet-one" r="7">
         <animateMotion dur="6s" repeatCount="indefinite">
           <mpath href="#flow-cluster-twin" />
@@ -293,8 +292,14 @@ function renderFlow(state, events) {
       </circle>
     </svg>
     <div class="diagram-grid"></div>
+    <div class="diagram-legend">
+      <span><b class="legend-telemetry"></b>telemetry</span>
+      <span><b class="legend-inference"></b>inference</span>
+      <span><b class="legend-policy"></b>policy</span>
+      <span><b class="legend-reward"></b>reward loop</span>
+    </div>
     ${nodes.map(node => diagramNodeMarkup(node, activeKeys)).join('')}
-    <div class="diagram-callouts">${recentEvents.map(diagramCalloutMarkup).join('')}</div>
+    <div class="diagram-event-rail">${recentEvents.map(diagramEventMarkup).join('')}</div>
   `;
 }
 function renderState(state, events) {
