@@ -200,6 +200,7 @@ def test_live_kubernetes_orchestration_loop_uses_cluster_snapshots(monkeypatch, 
     assert state["reward_summary"]["count"] == 2
     assert state["summary"]["last_action"]["kind"] == "replicate"
     assert state["summary"]["last_action"]["reason"].startswith("risk=0.96")
+    assert state["summary"]["last_action"]["proposals"][0]["agent"] == "AgentA"
     assert state["decision"]["repeat_count"] == 2
     assert state["cluster"]["sla_violations"] == 0
 

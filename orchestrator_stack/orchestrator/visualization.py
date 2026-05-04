@@ -359,6 +359,16 @@ def run_live_kubernetes_orchestration(
                 "repeat_count": repeat_count,
                 "reason": reason,
                 "proposal_count": len(proposals),
+                "proposals": [
+                    {
+                        "agent": proposal.agent_name,
+                        "kind": proposal.kind.value,
+                        "target": proposal.target,
+                        "score": float(proposal.score),
+                        "priority": int(proposal.priority),
+                    }
+                    for proposal in proposals
+                ],
             }
             state.decision(decision_payload)
             result = backend.step(action)
