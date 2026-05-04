@@ -34,6 +34,11 @@ def test_live_kubernetes_run_cli_accepts_continuous_options():
             "http://127.0.0.1:19090",
             "--no-policy",
             "--no-tune",
+            "--exercise-cluster",
+            "--exercise-namespace",
+            "demo-exercise",
+            "--exercise-interval-iterations",
+            "4",
         ]
     )
 
@@ -44,6 +49,9 @@ def test_live_kubernetes_run_cli_accepts_continuous_options():
     assert args.prometheus_base_url == "http://127.0.0.1:19090"
     assert args.no_policy is True
     assert args.no_tune is True
+    assert args.exercise_cluster is True
+    assert args.exercise_namespace == "demo-exercise"
+    assert args.exercise_interval_iterations == 4
 
 
 def test_visualization_state_writes_state_and_events(tmp_path: Path):
