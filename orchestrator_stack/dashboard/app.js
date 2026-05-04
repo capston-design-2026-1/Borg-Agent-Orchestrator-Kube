@@ -11,6 +11,14 @@ async function reloadIfDashboardChanged() {
   }
 }
 function fmt(x) { return x === null || x === undefined || Number.isNaN(Number(x)) ? 'n/a' : Number(x).toFixed(3); }
+function safeText(value) {
+  return String(value ?? 'n/a').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+}
+function shortTime(value) {
+  if (!value) return 'waiting';
+  const match = String(value).match(/T(\d\d:\d\d:\d\d)/);
+  return match ? match[1] : String(value);
+}
 function niceTick(value) {
   if (!Number.isFinite(value)) return 'n/a';
   const abs = Math.abs(value);
@@ -89,6 +97,90 @@ function drawSeries(canvas, rows, series, options = {}) {
     ctx.stroke();
   });
 }
+function eventTone(kind) {
+  if (kind === 'decision') return 'agent';
+  if (kind === 'reward') return 'reward';
+  if (kind === 'cluster' || kind === 'exercise') return 'cluster';
+  if (kind === 'ray') return 'ray';
+  if (kind === 'optuna') return 'optuna';
+  if (kind === 'stage') return 'stage';
+  return 'neutral';
+}
+function flowLaneMarkup({ key, title, subtitle, metric, detail, tone }) {
+  return `
+    <article class="flow-lane ${tone || key}">
+      <div class="lane-cap">${safeText(title)}</div>
+      <strong>${safeText(metric)}</strong>
+      <span>${safeText(subtitle)}</span>
+      <p>${safeText(detail)}</p>
+    </article>
+  `;
+}
+function renderFlow(state, events) {
+  const cluster = state.cluster || {};
+  const decision = state.decision || {};
+  const rewards = state.rewards || [];
+  const lastReward = rewards[rewards.length - 1] || {};
+  const byAgent = lastReward.rewards || {};
+  const opt = state.optuna || {};
+  const ray = state.ray || {};
+  const latestExercise = (events || []).slice().reverse().find(e => e.kind === 'exercise');
+
+  $('flowClock').textContent = shortTime(state.updated_at || decision.time || cluster.time);
+  $('flowLanes').innerHTML = [
+    flowLaneMarkup({
+      key: 'cluster',
+      title: 'Kubernetes',
+      subtitle: `${cluster.nodes ?? 0} node / ${cluster.tasks ?? 0} active task`,
+      metric: `risk ${fmt(cluster.max_risk)}`,
+      detail: `cpu ${fmt(cluster.avg_cpu)} mem ${fmt(cluster.avg_mem)} sla ${cluster.sla_violations ?? 0}`,
+    }),
+    flowLaneMarkup({
+      key: 'exercise',
+      title: 'Workload pulse',
+      subtitle: latestExercise?.phase || 'observing',
+      metric: latestExercise ? 'active' : 'idle',
+      detail: latestExercise?.message || 'waiting for cluster perturbation',
+    }),
+    flowLaneMarkup({
+      key: 'brain',
+      title: 'Brain / Referee',
+      subtitle: `${decision.proposal_count ?? 0} proposals scored`,
+      metric: `score ${fmt(decision.score)}`,
+      detail: decision.reason || 'waiting for recommendation',
+    }),
+    flowLaneMarkup({
+      key: 'agent',
+      title: 'Agent Decision',
+      subtitle: decision.target || 'no target yet',
+      metric: decision.agent ? `${decision.agent}:${decision.kind}` : 'waiting',
+      detail: `priority ${decision.priority ?? 'n/a'} repeat ${decision.repeat_count ?? 0}`,
+      tone: decision.agent || 'agent',
+    }),
+    flowLaneMarkup({
+      key: 'reward',
+      title: 'Reward Feedback',
+      subtitle: lastReward.action || 'no reward yet',
+      metric: fmt(lastReward.total),
+      detail: `A ${fmt(byAgent.AgentA)} / B ${fmt(byAgent.AgentB)} / C ${fmt(byAgent.AgentC)}`,
+    }),
+    flowLaneMarkup({
+      key: 'meta',
+      title: 'Ray + Optuna',
+      subtitle: `Ray ${ray.status || 'idle'} / Optuna ${opt.status || 'waiting'}`,
+      metric: opt.best_score === undefined ? 'n/a' : fmt(opt.best_score),
+      detail: opt.study || ray.checkpoint || 'meta-loop awaiting update',
+    }),
+  ].join('');
+
+  $('flowPopups').innerHTML = (events || []).slice(-9).reverse().map((event, index) => `
+    <article class="flow-popup ${eventTone(event.kind)}" style="--delay:${index * 80}ms">
+      <span>${safeText(shortTime(event.time))} · ${safeText(event.kind)}</span>
+      <strong>${safeText(event.action || event.phase || event.agent || event.name || 'runtime')}</strong>
+      <p>${safeText(event.message)}</p>
+    </article>
+  `).join('');
+}
 function renderState(state, events) {
   $('statusText').textContent = state.status || 'waiting';
   $('updatedAt').textContent = `updated ${state.updated_at || 'never'}`;
@@ -110,6 +202,7 @@ function renderState(state, events) {
   $('decisionReason').textContent = state.decision?.reason || 'n/a';
 
   $('stages').innerHTML = (state.stages || []).map(s => `<article class="stage ${s.status}" style="--progress:${s.progress ?? (s.status === 'complete' ? 1 : .08)}"><h3>${s.name}</h3><p>${s.status}</p><p>${s.detail || ''}</p></article>`).join('');
+  renderFlow(state, events || []);
   drawSeries($('rewardCanvas'), rewards, [
     { color: colors.total, value: r => r.total },
     { color: colors.AgentA, value: r => r.rewards?.AgentA },

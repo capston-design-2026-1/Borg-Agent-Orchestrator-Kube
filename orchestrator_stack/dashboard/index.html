@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Borg Orchestrator Live</title>
-  <link rel="stylesheet" href="styles.css?v=202605042130" />
+  <link rel="stylesheet" href="styles.css?v=202605050134" />
 </head>
 <body>
   <main class="shell">
@@ -53,6 +53,20 @@
       <div id="stages" class="stages"></div>
     </section>
 
+    <section class="panel flow-panel">
+      <div class="panel-head">
+        <div>
+          <h2>Live Orchestration Flow</h2>
+          <span class="muted">cluster signals -> brain/referee -> agent decision -> reward feedback</span>
+        </div>
+        <span id="flowClock" class="muted">waiting</span>
+      </div>
+      <div class="flow-shell">
+        <div id="flowLanes" class="flow-lanes"></div>
+        <div id="flowPopups" class="flow-popups"></div>
+      </div>
+    </section>
+
     <section class="grid two">
       <article class="panel">
         <div class="panel-head"><h2>Reward Stream</h2><span class="muted">AgentA / AgentB / AgentC</span></div>
@@ -83,7 +97,7 @@
       <div id="events" class="events"></div>
     </section>
   </main>
-  <script>window.DASHBOARD_VERSION = "202605050116";</script>
-  <script src="app.js?v=202605050116"></script>
+  <script>window.DASHBOARD_VERSION = "202605050134";</script>
+  <script src="app.js?v=202605050134"></script>
 </body>
 </html>
