@@ -1,6 +1,15 @@
 const $ = (id) => document.getElementById(id);
 const colors = { total: '#14211b', AgentA: '#b44634', AgentB: '#16835f', AgentC: '#2f6f9f', optuna: '#d48a20' };
 async function getJSON(path) { const res = await fetch(path, { cache: 'no-store' }); return res.json(); }
+let reloadingForVersion = false;
+async function reloadIfDashboardChanged() {
+  if (reloadingForVersion) return;
+  const payload = await getJSON('/api/dashboard-version');
+  if (payload.version && window.DASHBOARD_VERSION && payload.version !== window.DASHBOARD_VERSION) {
+    reloadingForVersion = true;
+    window.location.reload();
+  }
+}
 function fmt(x) { return x === null || x === undefined || Number.isNaN(Number(x)) ? 'n/a' : Number(x).toFixed(3); }
 function drawSeries(canvas, rows, series) {
   const ctx = canvas.getContext('2d');
@@ -61,6 +70,9 @@ function renderState(state, events) {
   $('events').innerHTML = (events || []).slice().reverse().map(e => `<div class="event"><b>${e.time}</b> [${e.kind}] ${e.message}</div>`).join('');
 }
 async function tick() {
-  try { renderState(await getJSON('/api/state'), await getJSON('/api/events')); } catch (err) { console.error(err); }
+  try {
+    await reloadIfDashboardChanged();
+    renderState(await getJSON('/api/state'), await getJSON('/api/events'));
+  } catch (err) { console.error(err); }
 }
 tick(); setInterval(tick, 1200);

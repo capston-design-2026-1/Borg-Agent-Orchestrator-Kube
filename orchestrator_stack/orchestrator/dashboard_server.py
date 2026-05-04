@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
@@ -21,6 +22,14 @@ class DashboardHandler(SimpleHTTPRequestHandler):
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
+
+    def _dashboard_version(self) -> str:
+        index_path = self.dashboard_dir / "index.html"
+        if index_path.exists():
+            match = re.search(r'window\.DASHBOARD_VERSION\s*=\s*"([^"]+)"', index_path.read_text(encoding="utf-8"))
+            if match:
+                return match.group(1)
+        return "0"
 
     def end_headers(self) -> None:
         self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
@@ -47,6 +56,9 @@ class DashboardHandler(SimpleHTTPRequestHandler):
         if path == "/api/architecture":
             arch_path = Path("docs/repository_architecture.mmd")
             self._json({"path": str(arch_path), "text": arch_path.read_text(encoding="utf-8") if arch_path.exists() else ""})
+            return
+        if path == "/api/dashboard-version":
+            self._json({"version": self._dashboard_version()})
             return
         return super().do_GET()
 
