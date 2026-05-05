@@ -71,7 +71,8 @@ Read Agents.md, NEXT_STEPS.md, MAS_ARCHITECTURE.md, and README.md, inspect the l
 - Follow-up reporting on 2026-05-03 KST: latest descriptive 95% Student-t interval report is `reports/evaluations/202605030510_evaluation_statistics.md`.
 - Follow-up reporting on 2026-05-03 KST: node-power exporter availability check is recorded at `reports/evaluations/202605030520_node_power_exporter_availability.md`; no direct measured power source is present in the current Kind cluster.
 - Follow-up implementation on 2026-05-05 KST: live orchestration now bootstraps in-cluster Metrics Server, Prometheus, and Node Exporter from repository-owned assets; `LIVE_K8S=1` starts a Prometheus port-forward automatically and trace rows now validate `telemetry_sources=["kubernetes_api","prometheus_node_exporter"]` with no Prometheus error. Report: `reports/evaluations/202605051339_observability_bootstrap_report.md`.
-- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `108 passed`.
+- Follow-up implementation on 2026-05-05 KST: live SLA pressure reward now uses bounded log scaling, so intentional Agent C backlog phases remain visible without driving Agent A to thousands of negative reward points; Optuna charts now use filled/point-highlighted traces with end labels.
+- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `109 passed`.
 
 ## Pipeline Status
 

@@ -257,8 +257,10 @@ Live telemetry effects that can always affect Agent A:
 
 | Condition | Reward change | Meaning |
 |---|---:|---|
-| `sla_violations > 0` | `-50.0 * sla_violations` | SLA violations are treated as safety failures. |
+| `sla_violations > 0` | bounded log-scaled pressure: `-min(180, 35 + 25*log1p(sla_violations))` | SLA violations are treated as safety pressure, but intentional backlog phases no longer create thousands of negative reward points. |
 | Any dead task | `-100.0` | Task survival failure penalty. |
+
+This scaling is important in live fault-injection mode. Agent C phases such as `admission-cap` intentionally create many unschedulable pods to test admission control. Those pods should create visible safety pressure, but they should not make Agent A show values like `-6499` just because `130` controlled pending pods were injected.
 
 ### Agent B: Efficiency Optimizer / Energy Agent
 
@@ -338,7 +340,7 @@ Optuna is the Layer 5 meta-optimizer. The dashboard separates objective score fr
 | Study name | Usually `visualized_orchestrator_reward_weights`. |
 | `alpha`, `beta`, `gamma` cards | Best trial's reward weights. |
 | Objective score graph | The single scalar objective Optuna maximizes. It has one line because there is one objective value. |
-| Weight graph | Trial-by-trial sampled `alpha`, `beta`, and `gamma` values. |
+| Weight graph | Trial-by-trial sampled `alpha`, `beta`, and `gamma` values, drawn with points and end labels so each sampled parameter remains readable. |
 | Optuna graph x-axis | Current-launch trial sequence, such as `#1`, `#2`, `#3`. |
 | Optuna window note | Maps the current-launch sequence to persisted Optuna study IDs, such as `T18` through `T20`. |
 

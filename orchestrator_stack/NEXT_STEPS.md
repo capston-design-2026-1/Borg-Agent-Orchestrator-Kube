@@ -24,6 +24,27 @@
 - Report:
   - `reports/evaluations/202605051339_observability_bootstrap_report.md`
 
+## Latest Session Note (2026-05-05 KST, reward-scale and Optuna chart refinement slice)
+
+- Investigated live reward events where Agent A reached values around `-6499`.
+- Root cause:
+  - the live exerciser intentionally created Agent C backlog phases with `90` to `130` unschedulable pods.
+  - reward logic applied `-50 * sla_violations` directly to Agent A.
+  - controlled backlog count therefore overwhelmed the whole reward stream.
+- Fixed reward scaling:
+  - `sla_pressure_penalty()` now applies bounded log scaling: `-min(180, 35 + 25*log1p(sla_violations))`.
+  - `telemetry_reward_adjustments()` centralizes Agent A/B/C live telemetry deltas for simulator and telemetry audit consistency.
+  - Example: `sla_violations=130` now gives Agent A base telemetry result about `-155.880`, not `-6499`.
+- Refined Optuna charts:
+  - filled objective trace
+  - visible point markers
+  - best-trial highlight ring
+  - end labels for objective and parameter lines
+  - clearer chart-note and canvas styling
+- Validation:
+  - `node --check orchestrator_stack/dashboard/app.js`: success
+  - `PYTHONPATH=orchestrator_stack ./.venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`109 passed`)
+
 ## Latest Session Note (2026-05-03 KST, node-power exporter availability slice)
 
 - Checked current Kind validation cluster for direct node-power telemetry exporters.
