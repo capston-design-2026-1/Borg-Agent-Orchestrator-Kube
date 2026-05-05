@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 from dataclasses import dataclass
 from typing import Any, Protocol
 
@@ -12,6 +13,25 @@ class SimulatorBackend(Protocol):
     def reset(self) -> Observation: ...
 
     def step(self, action: AgentAction) -> StepResult: ...
+
+
+def sla_pressure_penalty(sla_violations: int | float) -> float:
+    """Bound intentional backlog pressure so live reward streams stay interpretable."""
+    count = max(0.0, float(sla_violations))
+    if count <= 0.0:
+        return 0.0
+    return -min(180.0, 35.0 + (25.0 * math.log1p(count)))
+
+
+def telemetry_reward_adjustments(obs: Observation) -> dict[str, float]:
+    has_live_metrics = obs.sla_violations > 0 or obs.completed_tasks > 0 or obs.energy_watts > 0.0
+    if not has_live_metrics:
+        return {"AgentA": 0.0, "AgentB": 0.0, "AgentC": 0.0}
+    return {
+        "AgentA": sla_pressure_penalty(obs.sla_violations),
+        "AgentB": max(0.0, (500.0 - obs.energy_watts) / 100.0),
+        "AgentC": min(10.0, obs.completed_tasks / 10.0),
+    }
 
 
 def _state_value(payload: Any, *keys: str, default: Any = None) -> Any:
@@ -718,7 +738,6 @@ class TraceDrivenTwinBackend:
         rewards = {"AgentA": 1.0, "AgentB": 1.0, "AgentC": 1.0}
         p_fail = max(obs.p_fail_scores.values(), default=0.0)
         demand = max(obs.demand_projection.values(), default=0.0)
-        has_live_metrics = obs.sla_violations > 0 or obs.completed_tasks > 0 or obs.energy_watts > 0.0
 
         if action.agent_name == "AgentA":
             if applied["migrated"] and p_fail > 0.75:
@@ -747,10 +766,9 @@ class TraceDrivenTwinBackend:
             if applied["admitted"] and qlen > 120:
                 rewards["AgentC"] -= 50.0
 
-        if has_live_metrics:
-            rewards["AgentA"] -= 50.0 * obs.sla_violations
-            rewards["AgentB"] += max(0.0, (500.0 - obs.energy_watts) / 100.0)
-            rewards["AgentC"] += min(10.0, obs.completed_tasks / 10.0)
+        telemetry_delta = telemetry_reward_adjustments(obs)
+        for agent_name, delta in telemetry_delta.items():
+            rewards[agent_name] += delta
 
         if any(not task.alive for task in obs.tasks):
             rewards["AgentA"] -= 100.0
@@ -940,7 +958,6 @@ class AIOpsLabBackend(SimulatorBackend):
         rewards = {"AgentA": 1.0, "AgentB": 1.0, "AgentC": 1.0}
         max_risk = max(obs.p_fail_scores.values(), default=max((n.cpu_util + n.mem_util) / 2.0 for n in obs.nodes) if obs.nodes else 0.0)
         min_demand = min(obs.demand_projection.values(), default=min((n.cpu_util + n.mem_util) / 2.0 for n in obs.nodes) if obs.nodes else 0.0)
-        has_live_metrics = obs.sla_violations > 0 or obs.completed_tasks > 0 or obs.energy_watts > 0.0
 
         if action.agent_name == "AgentA" and action.kind in {ActionKind.MIGRATE, ActionKind.REPLICATE, ActionKind.THROTTLE}:
             is_valid_safety_action = (
@@ -966,10 +983,9 @@ class AIOpsLabBackend(SimulatorBackend):
         if action.agent_name == "AgentC" and action.kind == ActionKind.RESOURCE_CAP:
             rewards["AgentC"] += 4.0 if obs.queue_length >= 80 else -5.0
 
-        if has_live_metrics:
-            rewards["AgentA"] -= 50.0 * obs.sla_violations
-            rewards["AgentB"] += max(0.0, (500.0 - obs.energy_watts) / 100.0)
-            rewards["AgentC"] += min(10.0, obs.completed_tasks / 10.0)
+        telemetry_delta = telemetry_reward_adjustments(obs)
+        for agent_name, delta in telemetry_delta.items():
+            rewards[agent_name] += delta
 
         if any(not task.alive for task in obs.tasks):
             rewards["AgentA"] -= 100.0

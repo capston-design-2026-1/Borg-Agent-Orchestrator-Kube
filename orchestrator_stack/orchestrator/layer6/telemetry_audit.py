@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from orchestrator.layer2.simulator import TraceDrivenTwinBackend
+from orchestrator.layer2.simulator import TraceDrivenTwinBackend, telemetry_reward_adjustments
 from orchestrator.layer4.agents import AgentARiskMitigator, AgentBEfficiencyOptimizer, AgentCGatekeeper
 from orchestrator.layer4.referee import resolve
 from orchestrator.layer6.scoreboard import Scoreboard
@@ -16,9 +16,10 @@ def telemetry_reward_delta(obs: Observation, *, alpha: float, beta: float, gamma
     if not has_live_metrics:
         return {"AgentA": 0.0, "AgentB": 0.0, "AgentC": 0.0, "weighted_total": 0.0}
 
-    agent_a = -50.0 * float(obs.sla_violations)
-    agent_b = max(0.0, (500.0 - float(obs.energy_watts)) / 100.0)
-    agent_c = min(10.0, float(obs.completed_tasks) / 10.0)
+    telemetry_delta = telemetry_reward_adjustments(obs)
+    agent_a = telemetry_delta["AgentA"]
+    agent_b = telemetry_delta["AgentB"]
+    agent_c = telemetry_delta["AgentC"]
     return {
         "AgentA": agent_a,
         "AgentB": agent_b,

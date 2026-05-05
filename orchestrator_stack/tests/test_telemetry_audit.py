@@ -1,5 +1,8 @@
 from pathlib import Path
 
+import pytest
+
+from orchestrator.layer2.simulator import sla_pressure_penalty
 from orchestrator.layer6.telemetry_audit import (
     audit_trace_telemetry_rewards,
     telemetry_reward_delta,
@@ -24,7 +27,10 @@ def test_telemetry_reward_delta_reports_weighted_components():
 
     delta = telemetry_reward_delta(obs, alpha=1.0, beta=0.6, gamma=0.8)
 
-    assert delta == {"AgentA": -100.0, "AgentB": 2.0, "AgentC": 2.5, "weighted_total": -96.8}
+    assert delta["AgentA"] == pytest.approx(sla_pressure_penalty(2))
+    assert delta["AgentB"] == 2.0
+    assert delta["AgentC"] == 2.5
+    assert delta["weighted_total"] == pytest.approx(sla_pressure_penalty(2) + 1.2 + 2.0)
 
 
 def test_audit_trace_telemetry_rewards_replays_trace_and_counts_coverage():
@@ -58,7 +64,7 @@ def test_audit_trace_telemetry_rewards_replays_trace_and_counts_coverage():
     assert report["telemetry_steps"] == 1
     assert report["telemetry_coverage"] == 1.0
     assert report["max_sla_violations"] == 1
-    assert report["telemetry_reward_delta"]["AgentA"] == -50.0
+    assert report["telemetry_reward_delta"]["AgentA"] == pytest.approx(sla_pressure_penalty(1))
     assert report["actions"] == {"migrate": 1}
 
 
