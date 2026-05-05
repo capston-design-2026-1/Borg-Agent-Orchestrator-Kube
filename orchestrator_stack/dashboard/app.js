@@ -37,13 +37,22 @@ function niceXTick(value) {
 function drawSeries(canvas, rows, series, options = {}) {
   const ctx = canvas.getContext('2d');
   const w = canvas.width, h = canvas.height;
-  const pad = { left: 68, right: 20, top: 18, bottom: 48 };
+  const pad = { left: 68, right: options.endLabels ? 56 : 24, top: 22, bottom: 50 };
   const plotW = w - pad.left - pad.right;
   const plotH = h - pad.top - pad.bottom;
   ctx.clearRect(0, 0, w, h);
-  const values = rows.flatMap(row => series.map(s => s.value(row))).filter(Number.isFinite);
-  const min = Math.min(...values, 0);
-  const max = Math.max(...values, 1);
+  const valueFor = (row, s) => {
+    const value = Number(s.value(row));
+    return Number.isFinite(value) ? value : null;
+  };
+  const values = rows.flatMap(row => series.map(s => valueFor(row, s))).filter(Number.isFinite);
+  const includeZero = options.includeZero !== false;
+  const rawMin = values.length ? Math.min(...values) : 0;
+  const rawMax = values.length ? Math.max(...values) : 1;
+  const rawSpan = rawMax - rawMin || Math.max(1, Math.abs(rawMax) * 0.1);
+  const padding = rawSpan * (options.yPadding ?? 0.10);
+  const min = includeZero ? Math.min(rawMin - padding, 0) : rawMin - padding;
+  const max = includeZero ? Math.max(rawMax + padding, 1) : rawMax + padding;
   const span = max - min || 1;
   const xValues = rows.map((row, index) => {
     const raw = options.xValue ? options.xValue(row, index) : index;
@@ -58,16 +67,23 @@ function drawSeries(canvas, rows, series, options = {}) {
     if (rows.length === 1) return pad.left + plotW / 2;
     return pad.left + ((xValues[index] - xMin) / xSpan) * plotW;
   };
+  const yFor = (value) => h - pad.bottom - ((value - min) / span) * plotH;
 
   ctx.save();
   ctx.font = '12px "Avenir Next", "Gill Sans", sans-serif';
   ctx.textBaseline = 'middle';
-  ctx.strokeStyle = 'rgba(20,33,27,.16)';
+  const bg = ctx.createLinearGradient(0, pad.top, 0, h - pad.bottom);
+  bg.addColorStop(0, 'rgba(255,255,255,.46)');
+  bg.addColorStop(1, 'rgba(255,255,255,.16)');
+  ctx.fillStyle = bg;
+  ctx.fillRect(pad.left, pad.top, plotW, plotH);
+
+  ctx.strokeStyle = 'rgba(20,33,27,.13)';
   ctx.fillStyle = 'rgba(20,33,27,.62)';
   ctx.lineWidth = 1;
 
-  for (let i = 0; i <= 4; i++) {
-    const ratio = i / 4;
+  for (let i = 0; i <= 5; i++) {
+    const ratio = i / 5;
     const y = pad.top + ratio * plotH;
     const value = max - ratio * span;
     ctx.beginPath();
@@ -76,6 +92,16 @@ function drawSeries(canvas, rows, series, options = {}) {
     ctx.stroke();
     ctx.textAlign = 'right';
     ctx.fillText(niceTick(value), pad.left - 10, y);
+  }
+  if (min < 0 && max > 0) {
+    const yZero = yFor(0);
+    ctx.strokeStyle = 'rgba(20,33,27,.28)';
+    ctx.setLineDash([5, 6]);
+    ctx.beginPath();
+    ctx.moveTo(pad.left, yZero);
+    ctx.lineTo(w - pad.right, yZero);
+    ctx.stroke();
+    ctx.setLineDash([]);
   }
 
   const xTicks = rows.length > 1 ? [0, Math.floor((rows.length - 1) / 2), rows.length - 1] : rows.length ? [0] : [];
@@ -110,13 +136,57 @@ function drawSeries(canvas, rows, series, options = {}) {
 
   if (!rows.length) return;
   series.forEach(s => {
-    ctx.strokeStyle = s.color; ctx.lineWidth = 3; ctx.beginPath();
-    rows.forEach((row, i) => {
-      const x = xFor(i);
-      const y = h - pad.bottom - ((s.value(row) - min) / span) * plotH;
-      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    const points = rows.map((row, i) => ({ x: xFor(i), y: yFor(valueFor(row, s)), value: valueFor(row, s) })).filter(point => point.value !== null);
+    if (!points.length) return;
+    if (options.fillFirst && s === series[0] && points.length > 1) {
+      const fill = ctx.createLinearGradient(0, pad.top, 0, h - pad.bottom);
+      fill.addColorStop(0, `${s.color}33`);
+      fill.addColorStop(1, `${s.color}05`);
+      ctx.fillStyle = fill;
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, h - pad.bottom);
+      points.forEach((point, i) => {
+        if (i === 0) ctx.lineTo(point.x, point.y); else ctx.lineTo(point.x, point.y);
+      });
+      ctx.lineTo(points[points.length - 1].x, h - pad.bottom);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.strokeStyle = s.color;
+    ctx.lineWidth = options.lineWidth ?? 3;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    points.forEach((point, i) => {
+      if (i === 0) ctx.moveTo(point.x, point.y); else ctx.lineTo(point.x, point.y);
     });
     ctx.stroke();
+    if (options.showPoints) {
+      points.forEach(point => {
+        ctx.fillStyle = 'rgba(255,252,244,.96)';
+        ctx.strokeStyle = s.color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, 4.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      });
+    }
+    if (options.highlightMax) {
+      const best = points.reduce((a, b) => (b.value ?? -Infinity) > (a.value ?? -Infinity) ? b : a, points[0]);
+      ctx.strokeStyle = s.color;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(best.x, best.y, 8, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    if (options.endLabels) {
+      const last = points[points.length - 1];
+      ctx.fillStyle = s.color;
+      ctx.textAlign = 'left';
+      ctx.font = '11px "Avenir Next", "Gill Sans", sans-serif';
+      ctx.fillText(niceTick(last.value), Math.min(w - pad.right + 8, last.x + 8), last.y);
+    }
   });
 }
 function eventTone(kind) {
@@ -583,7 +653,7 @@ function renderState(state, events) {
     { color: colors.AgentA, value: r => r.rewards?.AgentA },
     { color: colors.AgentB, value: r => r.rewards?.AgentB },
     { color: colors.AgentC, value: r => r.rewards?.AgentC },
-  ], { xLabel: 'orchestration step', yLabel: 'reward', xValue: (r, i) => r.step ?? i });
+  ], { xLabel: 'orchestration step', yLabel: 'reward', xValue: (r, i) => r.step ?? i, endLabels: true });
   const byAgent = rewardSummary.last_by_agent || {};
   $('rewardStats').innerHTML = [
     ['steps', rewardSummary.count],
@@ -612,6 +682,13 @@ function renderState(state, events) {
     yLabel: 'objective score',
     xValue: runTrial,
     xTickLabel: runTrialLabel,
+    fillFirst: true,
+    showPoints: true,
+    highlightMax: true,
+    endLabels: true,
+    includeZero: false,
+    yPadding: 0.14,
+    lineWidth: 3.5,
   });
   $('optunaObjectiveLegend').innerHTML = `<span><b style="color:${colors.optuna}">■</b> objective score</span>`;
   drawSeries($('optunaParamCanvas'), optunaHistory, [
@@ -623,6 +700,11 @@ function renderState(state, events) {
     yLabel: 'reward weight',
     xValue: runTrial,
     xTickLabel: runTrialLabel,
+    showPoints: true,
+    endLabels: true,
+    includeZero: false,
+    yPadding: 0.18,
+    lineWidth: 3,
   });
   $('optunaParamLegend').innerHTML = ['alpha','beta','gamma'].map(k => `<span><b style="color:${colors[k]}">■</b> ${k}</span>`).join('');
 
