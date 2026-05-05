@@ -1,0 +1,566 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: observe
+  labels:
+    app.kubernetes.io/part-of: borg-orchestrator
+    borg-orchestrator/component: observability
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: metrics-server
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: metrics-server
+    app.kubernetes.io/part-of: borg-orchestrator
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: system:aggregated-metrics-reader
+  labels:
+    app.kubernetes.io/name: metrics-server
+    app.kubernetes.io/part-of: borg-orchestrator
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+    rbac.authorization.k8s.io/aggregate-to-edit: "true"
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+rules:
+  - apiGroups:
+      - metrics.k8s.io
+    resources:
+      - pods
+      - nodes
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: system:metrics-server
+  labels:
+    app.kubernetes.io/name: metrics-server
+    app.kubernetes.io/part-of: borg-orchestrator
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - nodes/metrics
+    verbs:
+      - get
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - nodes
+      - nodes/stats
+      - namespaces
+      - configmaps
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: metrics-server-auth-reader
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: metrics-server
+    app.kubernetes.io/part-of: borg-orchestrator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: extension-apiserver-authentication-reader
+subjects:
+  - kind: ServiceAccount
+    name: metrics-server
+    namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: metrics-server:system:auth-delegator
+  labels:
+    app.kubernetes.io/name: metrics-server
+    app.kubernetes.io/part-of: borg-orchestrator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+  - kind: ServiceAccount
+    name: metrics-server
+    namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: system:metrics-server
+  labels:
+    app.kubernetes.io/name: metrics-server
+    app.kubernetes.io/part-of: borg-orchestrator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:metrics-server
+subjects:
+  - kind: ServiceAccount
+    name: metrics-server
+    namespace: kube-system
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: metrics-server
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: metrics-server
+    app.kubernetes.io/part-of: borg-orchestrator
+spec:
+  selector:
+    app.kubernetes.io/name: metrics-server
+  ports:
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: https
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics-server
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: metrics-server
+    app.kubernetes.io/part-of: borg-orchestrator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: metrics-server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: metrics-server
+        app.kubernetes.io/part-of: borg-orchestrator
+    spec:
+      serviceAccountName: metrics-server
+      priorityClassName: system-cluster-critical
+      containers:
+        - name: metrics-server
+          image: registry.k8s.io/metrics-server/metrics-server:v0.7.2
+          imagePullPolicy: IfNotPresent
+          args:
+            - --cert-dir=/tmp
+            - --secure-port=10250
+            - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+            - --kubelet-use-node-status-port
+            - --kubelet-insecure-tls
+            - --metric-resolution=15s
+          ports:
+            - name: https
+              containerPort: 10250
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: https
+              scheme: HTTPS
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: https
+              scheme: HTTPS
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 200Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp-dir
+      volumes:
+        - name: tmp-dir
+          emptyDir: {}
+---
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+  name: v1beta1.metrics.k8s.io
+  labels:
+    app.kubernetes.io/name: metrics-server
+    app.kubernetes.io/part-of: borg-orchestrator
+spec:
+  group: metrics.k8s.io
+  version: v1beta1
+  insecureSkipTLSVerify: true
+  groupPriorityMinimum: 100
+  versionPriority: 100
+  service:
+    name: metrics-server
+    namespace: kube-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus-server
+  namespace: observe
+  labels:
+    app.kubernetes.io/name: prometheus-server
+    app.kubernetes.io/part-of: borg-orchestrator
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: borg-orchestrator-prometheus
+  labels:
+    app.kubernetes.io/name: prometheus-server
+    app.kubernetes.io/part-of: borg-orchestrator
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+      - nodes/proxy
+      - nodes/metrics
+      - services
+      - endpoints
+      - pods
+      - namespaces
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - discovery.k8s.io
+    resources:
+      - endpointslices
+    verbs:
+      - get
+      - list
+      - watch
+  - nonResourceURLs:
+      - /metrics
+      - /metrics/cadvisor
+    verbs:
+      - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: borg-orchestrator-prometheus
+  labels:
+    app.kubernetes.io/name: prometheus-server
+    app.kubernetes.io/part-of: borg-orchestrator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: borg-orchestrator-prometheus
+subjects:
+  - kind: ServiceAccount
+    name: prometheus-server
+    namespace: observe
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-server-conf
+  namespace: observe
+  labels:
+    app.kubernetes.io/name: prometheus-server
+    app.kubernetes.io/part-of: borg-orchestrator
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+
+    scrape_configs:
+      - job_name: prometheus
+        static_configs:
+          - targets:
+              - 127.0.0.1:9090
+
+      - job_name: kubernetes-apiservers
+        kubernetes_sd_configs:
+          - role: endpoints
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          insecure_skip_verify: true
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+            action: keep
+            regex: default;kubernetes;https
+
+      - job_name: kubernetes-nodes
+        kubernetes_sd_configs:
+          - role: node
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          insecure_skip_verify: true
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        relabel_configs:
+          - action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
+          - target_label: __address__
+            replacement: kubernetes.default.svc:443
+          - source_labels: [__meta_kubernetes_node_name]
+            regex: (.+)
+            target_label: __metrics_path__
+            replacement: /api/v1/nodes/$1/proxy/metrics
+          - source_labels: [__meta_kubernetes_node_name]
+            target_label: node
+
+      - job_name: kubernetes-cadvisor
+        kubernetes_sd_configs:
+          - role: node
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+          insecure_skip_verify: true
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        relabel_configs:
+          - action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
+          - target_label: __address__
+            replacement: kubernetes.default.svc:443
+          - source_labels: [__meta_kubernetes_node_name]
+            regex: (.+)
+            target_label: __metrics_path__
+            replacement: /api/v1/nodes/$1/proxy/metrics/cadvisor
+          - source_labels: [__meta_kubernetes_node_name]
+            target_label: node
+
+      - job_name: kubernetes-pods
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: "true"
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+            target_label: __address__
+          - action: labelmap
+            regex: __meta_kubernetes_pod_label_(.+)
+          - source_labels: [__meta_kubernetes_namespace]
+            action: replace
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            action: replace
+            target_label: pod
+
+      - job_name: node-exporter
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names:
+                - observe
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            action: keep
+            regex: prometheus-node-exporter
+          - source_labels: [__meta_kubernetes_endpoint_port_name]
+            action: keep
+            regex: metrics
+          - source_labels: [__meta_kubernetes_endpoint_node_name]
+            target_label: node
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-server
+  namespace: observe
+  labels:
+    app.kubernetes.io/name: prometheus-server
+    app.kubernetes.io/part-of: borg-orchestrator
+spec:
+  selector:
+    app.kubernetes.io/name: prometheus-server
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-server
+  namespace: observe
+  labels:
+    app.kubernetes.io/name: prometheus-server
+    app.kubernetes.io/part-of: borg-orchestrator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus-server
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: prometheus-server
+        app.kubernetes.io/part-of: borg-orchestrator
+    spec:
+      serviceAccountName: prometheus-server
+      securityContext:
+        fsGroup: 65534
+        runAsGroup: 65534
+        runAsNonRoot: true
+        runAsUser: 65534
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v2.55.1
+          imagePullPolicy: IfNotPresent
+          args:
+            - --config.file=/etc/prometheus/prometheus.yml
+            - --storage.tsdb.path=/prometheus
+            - --storage.tsdb.retention.time=24h
+            - --web.enable-lifecycle
+          ports:
+            - name: http
+              containerPort: 9090
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: http
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: http
+            periodSeconds: 30
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          volumeMounts:
+            - name: config
+              mountPath: /etc/prometheus
+            - name: storage
+              mountPath: /prometheus
+      volumes:
+        - name: config
+          configMap:
+            name: prometheus-server-conf
+        - name: storage
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-node-exporter
+  namespace: observe
+  labels:
+    app.kubernetes.io/name: prometheus-node-exporter
+    app.kubernetes.io/part-of: borg-orchestrator
+spec:
+  selector:
+    app.kubernetes.io/name: prometheus-node-exporter
+  ports:
+    - name: metrics
+      port: 9100
+      protocol: TCP
+      targetPort: metrics
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: prometheus-node-exporter
+  namespace: observe
+  labels:
+    app.kubernetes.io/name: prometheus-node-exporter
+    app.kubernetes.io/part-of: borg-orchestrator
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: prometheus-node-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: prometheus-node-exporter
+        app.kubernetes.io/part-of: borg-orchestrator
+    spec:
+      hostNetwork: true
+      hostPID: true
+      tolerations:
+        - operator: Exists
+      containers:
+        - name: node-exporter
+          image: quay.io/prometheus/node-exporter:v1.8.2
+          imagePullPolicy: IfNotPresent
+          args:
+            - --path.procfs=/host/proc
+            - --path.sysfs=/host/sys
+            - --path.rootfs=/host/root
+            - --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|var/lib/docker/.+|var/lib/kubelet/.+)($|/)
+          ports:
+            - name: metrics
+              containerPort: 9100
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - name: proc
+              mountPath: /host/proc
+              readOnly: true
+            - name: sys
+              mountPath: /host/sys
+              readOnly: true
+            - name: root
+              mountPath: /host/root
+              mountPropagation: HostToContainer
+              readOnly: true
+      volumes:
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: sys
+          hostPath:
+            path: /sys
+        - name: root
+          hostPath:
+            path: /
