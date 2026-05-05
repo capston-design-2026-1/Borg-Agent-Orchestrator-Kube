@@ -73,6 +73,9 @@ def test_dashboard_flow_diagram_uses_measured_card_connectors():
     for action_kind in ("migrate", "replicate", "throttle", "memory_balloon", "dvfs", "admission", "resource_cap"):
         assert f"{action_kind}:" in app_js
     assert "proposal-chip" in app_js
+    assert 'id="repeatCount"' not in index_html
+    assert "$('repeatCount')" not in app_js
+    assert "repeat(6, minmax(0, 1fr))" in styles
     assert "<path id=\"flow-" not in app_js
     assert "rail-label" not in app_js
     assert ".rail-label" not in styles

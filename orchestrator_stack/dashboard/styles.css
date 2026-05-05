@@ -58,7 +58,7 @@ h1 { font-family: Georgia, Times New Roman, serif; font-size: clamp(46px, 6.4vw,
 .status-text { font-size: 22px; font-weight: 900; text-transform: capitalize; }
 .muted { color: var(--muted); font-size: 13px; }
 .grid { display: grid; gap: 18px; }
-.metrics { grid-template-columns: repeat(7, minmax(0, 1fr)); margin-bottom: 18px; }
+.metrics { grid-template-columns: repeat(6, minmax(0, 1fr)); margin-bottom: 18px; }
 .metrics article { border-radius: 26px; padding: 18px; position: relative; overflow: hidden; }
 .metrics article:after { content: ""; position: absolute; inset: auto 14px 10px 14px; height: 3px; border-radius: 999px; background: linear-gradient(90deg, var(--green), rgba(212,138,32,.75)); opacity: .28; }
 .metrics span, .decision-grid span { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .14em; font-weight: 850; }

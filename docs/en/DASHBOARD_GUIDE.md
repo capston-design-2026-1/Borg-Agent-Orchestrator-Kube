@@ -65,7 +65,7 @@ For thesis wording, the precise interpretation is:
 | Status badge: `Running`, `complete`, `failed` | Overall runtime state. `running` means the loop/demo is active, `complete` means a bounded run finished, and `failed` means an error occurred. | `state.status` |
 | `updated ...` | Last runtime state timestamp read by the dashboard. | `state.updated_at` |
 
-## Seven Metrics Cards
+## Six Metrics Cards
 
 | Card | Example | Meaning | Caveat |
 |---|---|---|---|
@@ -75,7 +75,6 @@ For thesis wording, the precise interpretation is:
 | Optuna | `1417.159` or `disabled` | Best Optuna objective score. | `NO_TUNE=1` can make disabled/skipped normal. |
 | Ray Status | `trained`, `disabled`, `idle` | Ray/RLlib PPO bootstrap status. | `NO_POLICY=1` or fast mode can make disabled normal. |
 | Max Risk | `0.590` | Highest current node failure/risk score. | Without XGBoost, this is telemetry-derived from Kubernetes/Prometheus utilization and pod health. |
-| Repeat | `5` | Consecutive count of the same action signature. | The count resets when agent, action kind, target, or cluster snapshot changes. |
 
 ## Current Decision Panel
 
@@ -334,7 +333,6 @@ Large generated traces/reports are not automatically committed to git.
 | Display | Correct interpretation |
 |---|---|
 | `est power ...W` | Calibrated utilization-derived estimate, not direct wattmeter power. |
-| `Repeat` | Same selected action signature repeated; any cluster snapshot change resets it. |
 | `Optuna Best` | Best objective score, not the alpha/beta/gamma values themselves. |
 | `Ray Status: trained` | PPO bootstrap/training completed; live decisions still need to be interpreted with the heuristic/referee path unless a PPO executor is explicitly used. |
 | `AgentB dominates` | Low demand or weak safety/admission conditions can make Agent B's efficiency actions win repeatedly. |

@@ -541,7 +541,6 @@ function renderState(state, events) {
   $('optunaBest').textContent = state.optuna?.status === 'disabled' ? 'disabled' : fmt(state.optuna?.best_score);
   $('rayStatus').textContent = state.ray?.status || 'idle';
   $('maxRisk').textContent = fmt(state.cluster?.max_risk);
-  $('repeatCount').textContent = state.decision?.repeat_count ?? 0;
   $('decisionTime').textContent = state.decision?.time || 'waiting';
   $('decisionAction').textContent = state.decision?.agent ? `${state.decision.agent}:${state.decision.kind}` : 'n/a';
   $('decisionTarget').textContent = state.decision?.target || 'n/a';

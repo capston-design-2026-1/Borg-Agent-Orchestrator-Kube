@@ -77,7 +77,6 @@ cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && LIVE_K8S=
 | Optuna | `1417.159` 또는 `disabled` | Optuna best objective score. | `NO_TUNE=1`이면 disabled/skipped로 보일 수 있다. |
 | Ray Status | `trained`, `disabled`, `idle` | Ray/RLlib PPO bootstrap 상태. | `NO_POLICY=1` 또는 fast mode에서는 disabled가 정상이다. |
 | Max Risk | `0.590` | 현재 node 중 가장 높은 failure/risk score. | XGBoost가 없으면 Kubernetes/Prometheus utilization과 pod health 기반 telemetry risk다. |
-| Repeat | `5` | 같은 action signature가 연속으로 나온 횟수. | signature는 agent, action kind, target, cluster snapshot이 모두 같을 때 증가한다. snapshot이 바뀌면 1로 reset된다. |
 
 ## Current Decision 패널
 
@@ -356,7 +355,6 @@ Event Log는 `events.jsonl`의 최근 event를 표시한다. Flow diagram 아래
 | 표시 | 정확한 해석 |
 |---|---|
 | `est power ...W` | 실제 wattmeter 값이 아니라 CPU/MEM utilization 기반 calibrated estimate다. |
-| `Repeat` | 같은 action이 반복되었다는 의미지만, cluster snapshot이 조금이라도 바뀌면 reset된다. |
 | `Optuna Best` | 현재 best objective score이지 alpha/beta/gamma 자체가 아니다. |
 | `Ray Status: trained` | PPO bootstrap/training이 끝났다는 뜻이며, 현재 live loop에서 heuristic/referee decision과 함께 해석해야 한다. |
 | `AgentB dominates` | cluster가 low demand 상태이거나 Agent A safety/Agent C protective condition이 약하면 Agent B efficiency action이 자주 선택될 수 있다. |
