@@ -228,29 +228,49 @@ function actionTraceMarkup(decision, cluster) {
     </aside>
   `;
 }
-function exerciseSummary(event) {
-  if (!event) return 'no live perturbation event yet';
+function normalizeExerciseEvent(event) {
+  if (!event) return null;
+  const text = `${event.message || ''} ${event.detail || ''}`;
   const resources = event.resources || {};
+  const cpuMatch = text.match(/cpu=([^\s;·]+)/);
+  const memMatch = text.match(/memory=([^\s;·]+)/);
+  const phase = event.phase || 'waiting';
+  const isIdle = phase === 'idle-efficiency';
+  return {
+    ...event,
+    operation: event.operation || (phase === 'waiting' ? 'observe' : isIdle ? 'delete' : 'apply'),
+    deployment: event.deployment || (isIdle || phase === 'waiting' ? null : phase),
+    resources: {
+      cpu_request: resources.cpu_request || cpuMatch?.[1] || null,
+      memory_request: resources.memory_request || memMatch?.[1] || null,
+    },
+  };
+}
+function exerciseSummary(event) {
+  const normalized = normalizeExerciseEvent(event);
+  if (!normalized) return 'no live perturbation event yet';
+  const resources = normalized.resources || {};
   const bits = [
-    event.operation || 'observe',
-    event.deployment ? `deployment/${event.deployment}` : 'exercise deployments',
-    event.namespace ? `ns=${event.namespace}` : null,
+    normalized.operation || 'observe',
+    normalized.deployment ? `deployment/${normalized.deployment}` : 'exercise deployments',
+    normalized.namespace ? `ns=${normalized.namespace}` : null,
     resources.cpu_request ? `cpu=${resources.cpu_request}` : null,
     resources.memory_request ? `mem=${resources.memory_request}` : null,
   ].filter(Boolean);
   return bits.join(' · ');
 }
 function clusterStimulusMarkup(event) {
-  const resources = event?.resources || {};
-  const rollout = event?.rollout;
+  const normalized = normalizeExerciseEvent(event);
+  const resources = normalized?.resources || {};
+  const rollout = normalized?.rollout;
   return `
     <aside class="diagram-stimulus">
       <span class="action-kicker">intentional Kubernetes stimulus</span>
-      <strong>${safeText(event?.phase || 'waiting')}</strong>
-      <p>${safeText(exerciseSummary(event))}</p>
+      <strong>${safeText(normalized?.phase || 'waiting')}</strong>
+      <p>${safeText(exerciseSummary(normalized))}</p>
       <div class="stimulus-grid">
-        <span><b>namespace</b>${safeText(event?.namespace || 'n/a')}</span>
-        <span><b>operation</b>${safeText(event?.operation || 'n/a')}</span>
+        <span><b>namespace</b>${safeText(normalized?.namespace || 'n/a')}</span>
+        <span><b>operation</b>${safeText(normalized?.operation || 'n/a')}</span>
         <span><b>cpu request</b>${safeText(resources.cpu_request || 'n/a')}</span>
         <span><b>memory request</b>${safeText(resources.memory_request || 'n/a')}</span>
         <span><b>rollout rc</b>${safeText(rollout?.returncode ?? 'n/a')}</span>
@@ -498,6 +518,8 @@ function renderFlow(state, events) {
         </section>
       `).join('')}
     </div>
+  `;
+  $('flowOperations').innerHTML = `
     ${clusterStimulusMarkup(latestExercise)}
     ${actionTraceMarkup(decision, cluster)}
   `;

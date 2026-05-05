@@ -90,7 +90,7 @@ h2 { margin: 0; font-size: 21px; letter-spacing: -.02em; }
 }
 .flow-panel .panel-head { padding: 2px 8px 0; }
 .flow-shell {
-  height: clamp(860px, 92vh, 1120px);
+  min-height: clamp(960px, 108vh, 1260px);
   border-radius: 30px;
   background:
     radial-gradient(circle at 13% 18%, rgba(22,131,95,.18), transparent 24rem),
@@ -102,9 +102,9 @@ h2 { margin: 0; font-size: 21px; letter-spacing: -.02em; }
   position: relative;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.82), 0 24px 70px rgba(38,30,12,.13);
   display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-rows: minmax(650px, 1fr) auto auto;
 }
-.flow-diagram { position: relative; width: 100%; height: 100%; min-height: 0; padding: 64px 26px 132px; }
+.flow-diagram { position: relative; width: 100%; height: 100%; min-height: 650px; padding: 64px 26px 34px; }
 .diagram-grid { position: absolute; inset: 0; z-index: 0; background-image: linear-gradient(rgba(18,32,26,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(18,32,26,.045) 1px, transparent 1px); background-size: 44px 44px; mask-image: radial-gradient(circle at center, black 24%, transparent 88%); }
 .diagram-arrows { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; overflow: visible; pointer-events: none; opacity: .72; }
 .diagram-arrows marker path { fill: rgba(18,32,26,.50); }
@@ -212,12 +212,29 @@ h2 { margin: 0; font-size: 21px; letter-spacing: -.02em; }
 .legend-inference { background: var(--blue) !important; }
 .legend-policy { background: var(--amber) !important; }
 .legend-reward { background: var(--green) !important; }
-.diagram-action-trace {
-  position: absolute;
+.flow-operations {
+  position: relative;
   z-index: 7;
-  right: 24px;
-  bottom: 18px;
-  width: min(920px, calc(62% - 34px));
+  display: grid;
+  grid-template-columns: minmax(280px, .72fr) minmax(620px, 1.45fr);
+  gap: 14px;
+  align-items: stretch;
+  padding: 0 22px 18px;
+}
+.flow-operations:before {
+  content: "";
+  position: absolute;
+  left: 38px;
+  right: 38px;
+  top: -14px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(18,32,26,.18), transparent);
+}
+.diagram-action-trace {
+  position: relative;
+  z-index: 7;
+  min-width: 0;
+  width: 100%;
   display: grid;
   grid-template-columns: minmax(170px, .8fr) minmax(260px, 1fr) minmax(190px, .9fr);
   gap: 10px;
@@ -232,11 +249,10 @@ h2 { margin: 0; font-size: 21px; letter-spacing: -.02em; }
   backdrop-filter: blur(18px) saturate(1.16);
 }
 .diagram-stimulus {
-  position: absolute;
+  position: relative;
   z-index: 7;
-  left: 24px;
-  bottom: 18px;
-  width: min(410px, calc(38% - 24px));
+  min-width: 0;
+  width: 100%;
   padding: 12px 14px;
   border-radius: 22px;
   background:
@@ -341,11 +357,11 @@ canvas { width: 100%; height: 270px; border-radius: 22px; background: linear-gra
   .status-card { min-width: 0; }
   .metrics, .two, .stages, .decision-grid { grid-template-columns: 1fr; }
   .flow-panel { margin-left: 0; margin-right: 0; padding: 14px; }
-  .flow-shell { height: 760px; overflow: auto; }
+  .flow-shell { min-height: 760px; overflow: auto; grid-template-rows: auto auto auto; }
   .flow-diagram { min-width: 1180px; min-height: 760px; }
   .diagram-lanes { grid-template-columns: 160px 150px 175px 180px 155px 175px; gap: 10px; }
-  .diagram-action-trace { width: calc(100% - 48px); right: 24px; grid-template-columns: 1fr; }
-  .diagram-stimulus { width: calc(100% - 48px); left: 24px; bottom: 220px; }
+  .flow-operations { min-width: 1180px; grid-template-columns: 1fr 1.6fr; }
+  .diagram-action-trace { grid-template-columns: 1fr; }
   .proposal-strip { grid-column: auto; }
   .diagram-event-rail { grid-template-columns: 1fr; }
   .diagram-event:nth-child(n+2) { display: none; }

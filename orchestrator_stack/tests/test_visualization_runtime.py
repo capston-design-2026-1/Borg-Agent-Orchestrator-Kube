@@ -20,6 +20,7 @@ def test_visualized_run_cli_defaults():
 def test_dashboard_flow_diagram_uses_measured_card_connectors():
     app_js = Path("orchestrator_stack/dashboard/app.js").read_text(encoding="utf-8")
     styles = Path("orchestrator_stack/dashboard/styles.css").read_text(encoding="utf-8")
+    index_html = Path("orchestrator_stack/dashboard/index.html").read_text(encoding="utf-8")
 
     required_lanes = [
         "lane-source",
@@ -59,8 +60,15 @@ def test_dashboard_flow_diagram_uses_measured_card_connectors():
     assert "data-node=" in app_js
     assert "diagram-action-trace" in app_js
     assert "diagram-stimulus" in app_js
+    assert 'id="flowOperations"' in index_html
+    assert "$('flowOperations').innerHTML" in app_js
+    flow_diagram_template = app_js.split("$('flowDiagram').innerHTML = `", 1)[1].split("`;", 1)[0]
+    assert "clusterStimulusMarkup" not in flow_diagram_template
+    assert "actionTraceMarkup" not in flow_diagram_template
+    assert ".diagram-action-trace {\n  position: relative;" in styles
+    assert ".diagram-stimulus {\n  position: relative;" in styles
     assert "exerciseSummary" in app_js
-    assert "optunaParamCanvas" in Path("orchestrator_stack/dashboard/index.html").read_text(encoding="utf-8")
+    assert "optunaParamCanvas" in index_html
     assert "actionSemantics" in app_js
     for action_kind in ("migrate", "replicate", "throttle", "memory_balloon", "dvfs", "admission", "resource_cap"):
         assert f"{action_kind}:" in app_js
