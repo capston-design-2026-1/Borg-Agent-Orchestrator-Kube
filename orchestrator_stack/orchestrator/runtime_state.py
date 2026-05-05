@@ -29,7 +29,16 @@ class VisualizationState:
             "stages": [],
             "rewards": [],
             "reward_summary": {"count": 0, "last_total": None, "average_total": None, "last_by_agent": {}},
-            "optuna": {"status": "idle", "study": None, "trial": None, "best_score": None, "best_params": {}, "history": []},
+            "optuna": {
+                "status": "idle",
+                "study": None,
+                "trial": None,
+                "best_score": None,
+                "best_params": {},
+                "history": [],
+                "history_scope": "none",
+                "completed_trials": 0,
+            },
             "ray": {"status": "idle", "train_iters": None, "reward_mean": None, "checkpoint": None},
             "cluster": {},
             "decision": {},
@@ -116,14 +125,52 @@ class VisualizationState:
 
     def optuna_trial(self, study: str, number: int, value: float | None, params: dict[str, Any], best_value: float | None) -> None:
         optuna = self.state["optuna"]
-        optuna.update({"status": "running", "study": study, "trial": int(number), "best_score": best_value, "best_params": params if value == best_value else optuna.get("best_params", {})})
+        optuna.update(
+            {
+                "status": "running",
+                "study": study,
+                "trial": int(number),
+                "best_score": best_value,
+                "best_params": params if value == best_value else optuna.get("best_params", {}),
+                "history_scope": "current_callback_trials",
+            }
+        )
         optuna["history"].append({"run_trial": len(optuna["history"]) + 1, "trial": int(number), "value": value, "params": params, "time": kst_now_iso()})
-        del optuna["history"][:-40]
         self.emit("optuna", f"trial {number} value={value}", study=study, trial=number, value=value, params=params, best_score=best_value)
+
+    def optuna_history(
+        self,
+        study: str,
+        history: list[dict[str, Any]],
+        *,
+        best_score: float | None = None,
+        best_params: dict[str, Any] | None = None,
+        latest_trial: int | None = None,
+        status: str | None = None,
+    ) -> None:
+        optuna = self.state["optuna"]
+        payload: dict[str, Any] = {
+            "study": study,
+            "history": history,
+            "history_scope": "all_completed_study_trials",
+            "completed_trials": len(history),
+        }
+        if status is not None:
+            payload["status"] = status
+        if latest_trial is not None:
+            payload["trial"] = int(latest_trial)
+        if best_score is not None:
+            payload["best_score"] = best_score
+        if best_params is not None:
+            payload["best_params"] = best_params
+        optuna.update(payload)
+        event_payload = {key: value for key, value in optuna.items() if key != "history"}
+        self.emit("optuna", f"loaded {len(history)} completed persisted trials", **event_payload)
 
     def optuna_update(self, status: str, **data: Any) -> None:
         self.state["optuna"].update({"status": status, **data})
-        self.emit("optuna", f"Optuna {status}", **self.state["optuna"])
+        event_payload = {key: value for key, value in self.state["optuna"].items() if key != "history"}
+        self.emit("optuna", f"Optuna {status}", **event_payload)
 
     def ray_update(self, status: str, **data: Any) -> None:
         self.state["ray"].update({"status": status, **data})

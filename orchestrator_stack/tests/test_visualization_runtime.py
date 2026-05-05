@@ -70,8 +70,8 @@ def test_dashboard_flow_diagram_uses_measured_card_connectors():
     assert "exerciseSummary" in app_js
     assert "telemetrySourceLabel" in app_js
     assert "kubectl + prometheus" in app_js
-    assert "current launch Optuna trial" in app_js
-    assert "persisted study IDs" in app_js
+    assert "persisted Optuna study trial" in app_js
+    assert "Showing all completed persisted Optuna trials" in app_js
     assert "optunaParamCanvas" in index_html
     assert "actionSemantics" in app_js
     for action_kind in ("migrate", "replicate", "throttle", "memory_balloon", "dvfs", "admission", "resource_cap"):
@@ -154,6 +154,61 @@ def test_visualization_state_writes_state_and_events(tmp_path: Path):
     assert payload["optuna"]["history"][-1]["trial"] == 0
     assert payload["ray"]["status"] == "trained"
     assert len(events) >= 4
+
+
+def test_visualization_state_exports_persisted_optuna_history(tmp_path: Path):
+    state = VisualizationState(tmp_path)
+    history = [
+        {"trial": 0, "value": 1.5, "params": {"alpha": 0.9}, "state": "COMPLETE"},
+        {"trial": 1, "value": 4.2, "params": {"alpha": 1.4}, "state": "COMPLETE"},
+    ]
+
+    state.optuna_history(
+        "study",
+        history,
+        best_score=4.2,
+        best_params={"alpha": 1.4},
+        latest_trial=1,
+        status="complete",
+    )
+
+    payload = json.loads((tmp_path / "state.json").read_text(encoding="utf-8"))
+    event = json.loads((tmp_path / "events.jsonl").read_text(encoding="utf-8").splitlines()[-1])
+
+    assert payload["optuna"]["history_scope"] == "all_completed_study_trials"
+    assert payload["optuna"]["completed_trials"] == 2
+    assert payload["optuna"]["history"] == history
+    assert payload["optuna"]["trial"] == 1
+    assert payload["optuna"]["best_params"] == {"alpha": 1.4}
+    assert "history" not in event
+
+
+def test_optuna_study_history_keeps_all_completed_trials():
+    from orchestrator.visualization import _optuna_study_history
+
+    class TrialState:
+        name = "COMPLETE"
+
+    class Trial:
+        def __init__(self, number, value, params):
+            self.number = number
+            self.value = value
+            self.params = params
+            self.state = TrialState()
+            self.datetime_start = None
+            self.datetime_complete = None
+
+    class Study:
+        trials = [
+            Trial(2, 8.0, {"alpha": 1.2}),
+            Trial(0, 3.0, {"alpha": 0.7}),
+            Trial(1, None, {"alpha": 0.9}),
+        ]
+
+    history = _optuna_study_history(Study())
+
+    assert [row["trial"] for row in history] == [0, 2]
+    assert [row["value"] for row in history] == [3.0, 8.0]
 
 
 def test_live_kubernetes_orchestration_loop_uses_cluster_snapshots(monkeypatch, tmp_path: Path):

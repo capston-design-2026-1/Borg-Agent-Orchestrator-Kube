@@ -127,6 +127,46 @@ def _write_live_summary(event_dir: str | Path, state: VisualizationState, *, sta
     return out
 
 
+def _optuna_study_history(study: Any) -> list[dict[str, Any]]:
+    history: list[dict[str, Any]] = []
+    for trial in sorted(study.trials, key=lambda item: int(item.number)):
+        if trial.value is None:
+            continue
+        started = getattr(trial, "datetime_start", None)
+        completed = getattr(trial, "datetime_complete", None)
+        history.append(
+            {
+                "trial": int(trial.number),
+                "value": float(trial.value),
+                "params": dict(trial.params),
+                "state": getattr(getattr(trial, "state", None), "name", str(getattr(trial, "state", "UNKNOWN"))),
+                "datetime_start": started.isoformat() if started else None,
+                "datetime_complete": completed.isoformat() if completed else None,
+            }
+        )
+    return history
+
+
+def _sync_optuna_study_history(study: Any, study_name: str, state: VisualizationState, *, status: str | None = None) -> None:
+    history = _optuna_study_history(study)
+    best_score: float | None = None
+    best_params: dict[str, Any] | None = None
+    try:
+        best = study.best_trial
+        best_score = float(best.value) if best.value is not None else None
+        best_params = dict(best.params)
+    except ValueError:
+        best_params = {}
+    state.optuna_history(
+        study_name,
+        history,
+        best_score=best_score,
+        best_params=best_params,
+        latest_trial=history[-1]["trial"] if history else None,
+        status=status,
+    )
+
+
 def _tune_rewards(config: OrchestratorConfig, rows: list[dict[str, Any]], state: VisualizationState, *, trials: int) -> dict[str, Any]:
     if optuna is None:
         return {"status": "skipped", "reason": "optuna is not installed"}
@@ -134,6 +174,7 @@ def _tune_rewards(config: OrchestratorConfig, rows: list[dict[str, Any]], state:
     storage = f"sqlite:///{config.optuna_storage_path.resolve()}"
     study_name = "visualized_orchestrator_reward_weights"
     study = optuna.create_study(direction="maximize", storage=storage, study_name=study_name, load_if_exists=True)
+    _sync_optuna_study_history(study, study_name, state, status="running")
 
     def objective(trial: Any) -> float:
         alpha = trial.suggest_float("alpha", 0.5, 2.5)
@@ -166,9 +207,16 @@ def _tune_rewards(config: OrchestratorConfig, rows: list[dict[str, Any]], state:
         return float(run_episode(trial_cfg, verbose=False).total_score)
 
     def callback(study: Any, trial: Any) -> None:
-        state.optuna_trial(study_name, trial.number, trial.value, dict(trial.params), float(study.best_value))
+        best_value: float | None = None
+        try:
+            best_value = float(study.best_value)
+        except ValueError:
+            pass
+        state.optuna_trial(study_name, trial.number, trial.value, dict(trial.params), best_value)
+        _sync_optuna_study_history(study, study_name, state, status="running")
 
     study.optimize(objective, n_trials=max(1, trials), callbacks=[callback], catch=(Exception,))
+    _sync_optuna_study_history(study, study_name, state, status="complete")
     report = export_study_report(study, study_name)
     state.artifact(report, "Optuna reward report")
     best = study.best_trial
