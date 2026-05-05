@@ -61,6 +61,7 @@ These instructions apply to work performed in this repository.
 - Keep full 6-layer orchestrator implementation work under `orchestrator_stack/` so it does not mix with baseline or advanced XGBoost tracks.
 - Use `orchestrator_stack/AGENTS.md` and `orchestrator_stack/NEXT_STEPS.md` as the first continuity references when resuming orchestrator-specific tasks.
 - When the repository-wide orchestration architecture changes, keep the one-command launcher and visualization path synchronized in the same session: `orchestrator_stack/scripts/launch_orchestration.sh`, `docs/ORCHESTRATION_LAUNCH.md`, and `orchestrator_stack/dashboard/`.
+- When dashboard UI, runtime state fields, event schemas, Agent A/B/C action semantics, rewards, Optuna/Ray display, or Kubernetes stimulus behavior changes, update both dashboard guides in the same session: `docs/en/DASHBOARD_GUIDE.md` and `docs/ko/DASHBOARD_GUIDE.md`.
 
 ## Isolated Autonomy Track
 

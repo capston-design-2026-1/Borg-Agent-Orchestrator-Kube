@@ -18,6 +18,7 @@ This directory is isolated from the baseline/advanced XGBoost tracks and owns th
 - Preserve backend portability: local trace twin and AIOpsLab adapter must remain API-compatible
 - Preserve objective portability: heuristic runner and RLlib wrapper must share reward semantics
 - Keep `orchestrator_stack/scripts/launch_orchestration.sh`, `docs/ORCHESTRATION_LAUNCH.md`, and `orchestrator_stack/dashboard/` aligned with architecture changes so the thesis demo path stays one command
+- Keep `docs/en/DASHBOARD_GUIDE.md` and `docs/ko/DASHBOARD_GUIDE.md` aligned whenever dashboard UI, event/state schemas, agent action semantics, reward formulas, Optuna/Ray display, or Kubernetes exerciser behavior changes
 - Use near per-file commits for orchestrator module changes (simulator, predictor, referee, optimizer, etc. committed separately when practical)
 
 ## Open-Source Integration Policy
