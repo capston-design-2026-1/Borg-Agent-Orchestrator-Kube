@@ -49,7 +49,7 @@ def test_aiopslab_policy_agent_returns_parser_compliant_action():
     response = asyncio.run(agent.get_action(state))
 
     assert '"agent": "AgentA"' in response
-    assert '"kind": "migrate"' in response
+    assert '"kind": "replicate"' in response
     assert '"target": "n1"' in response
     assert response.count("```") == 2
     assert 'exec_shell("kubectl get pods --all-namespaces")' in response

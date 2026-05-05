@@ -46,13 +46,13 @@ def test_rllib_env_exposes_referee_metadata_in_infos():
 
     assert backend.last_action is not None
     assert backend.last_action.agent_name == "AgentA"
-    assert backend.last_action.kind == ActionKind.MIGRATE
+    assert backend.last_action.kind == ActionKind.REPLICATE
     assert rewards == {"AgentA": 11.0, "AgentB": 1.0, "AgentC": 4.0}
     assert terminated["__all__"] is False
     assert truncated["__all__"] is False
     assert infos["AgentB"]["proposal"]["overridden"] is True
     assert infos["AgentC"]["proposal"]["overridden"] is True
     assert infos["AgentA"]["resolved_action"]["agent_name"] == "AgentA"
-    assert infos["AgentA"]["resolved_action"]["kind"] == "migrate"
-    assert infos["AgentA"]["referee_rationale"] == "agent-a migration preempts lower-priority actions"
+    assert infos["AgentA"]["resolved_action"]["kind"] == "replicate"
+    assert infos["AgentA"]["referee_rationale"] == "agent-a replicate preempts lower-priority actions"
     assert infos["AgentA"]["global_score_total"] == 14.8

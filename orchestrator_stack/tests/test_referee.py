@@ -39,7 +39,7 @@ def test_referee_treats_secondary_safety_actions_as_top_priority():
 
     assert decision.action.agent_name == "AgentA"
     assert decision.action.kind == ActionKind.REPLICATE
-    assert decision.overridden["AgentB"] == "safety-first migration takes precedence"
+    assert decision.overridden["AgentB"] == "safety-first replicate takes precedence"
 
 
 def test_referee_returns_priority_noop_when_everyone_is_idle():
