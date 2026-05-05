@@ -6,7 +6,9 @@ flowchart TB
         BorgTrace["Google Borg traces\nraw shards outside git"]
         KubeCluster["Kind Kubernetes cluster\nkind-borg-aiopslab"]
         AIOpsLab["Upstream AIOpsLab\nproblem registry and session API"]
-        Prometheus["Prometheus / node-exporter\nCPU and memory telemetry"]
+        MetricsServer["Metrics Server\nmetrics.k8s.io for kubectl top"]
+        NodeExporter["Node Exporter DaemonSet\nnode CPU and memory counters"]
+        Prometheus["In-cluster Prometheus\nobserve/prometheus-server"]
         PowerSource["Measured power exporter\nKepler / RAPL / IPMI\ncurrently not present"]
     end
 
@@ -73,8 +75,8 @@ flowchart TB
             ArchReport["architecture_report.py\ncurrent status report generator"]
         end
 
-        Scripts["scripts/\nKind setup, AIOpsLab env setup, live smoke runner"]
-        Tests["tests/\n87 passing unit and integration tests"]
+        Scripts["scripts/\nKind setup, AIOpsLab env setup, observability bootstrap, live launcher"]
+        Tests["tests/\nunit and integration tests"]
     end
 
     subgraph ValidationEvidence["Current Thesis Validation Evidence"]
@@ -104,7 +106,8 @@ flowchart TB
     %% Orchestrator input and runtime flow.
     KubeCluster --> KubeTrace
     AIOpsLab --> AIOpsContract
-    Prometheus --> PromClient --> KubeTrace
+    KubeCluster --> MetricsServer
+    KubeCluster --> NodeExporter --> Prometheus --> PromClient --> KubeTrace
     PowerSource -. "not available; calibration fallback" .-> KubeTrace
     KubeTrace --> TraceIngestor
     Collector --> TraceIngestor
@@ -145,6 +148,9 @@ flowchart TB
     Configs --> RunCLI
     Examples --> Predictors
     Scripts --> KubeCluster
+    Scripts --> MetricsServer
+    Scripts --> NodeExporter
+    Scripts --> Prometheus
     Scripts --> AIOpsLab
     Scripts --> KubeTrace
     Tests --> RunCLI

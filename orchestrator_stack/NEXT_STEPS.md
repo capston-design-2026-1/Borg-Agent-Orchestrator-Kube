@@ -3,6 +3,27 @@
 1. Expand the current five-family policy gate suite with another full-phase AIOpsLab family when available.
 2. Replace calibrated utilization-derived energy watts with a direct measured node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
 
+## Latest Session Note (2026-05-05 KST, live observability bootstrap slice)
+
+- Root cause for missing in-cluster telemetry:
+  - Metrics Server was never installed, so `v1beta1.metrics.k8s.io` and `kubectl top nodes` were unavailable.
+  - The old Prometheus setup was blocked by a Pending `observe/prometheus-pvc` that requested missing storage class `openebs-hostpath`.
+- Added a Kind-compatible observability manifest at `orchestrator_stack/k8s/observability/metrics-prometheus.yaml`:
+  - Metrics Server in `kube-system`
+  - Prometheus in `observe`
+  - Node Exporter DaemonSet in `observe`
+  - `emptyDir` Prometheus storage so the live thesis demo does not depend on OpenEBS.
+- Added `orchestrator_stack/scripts/bootstrap_observability.sh` and wired it into `orchestrator_stack/scripts/launch_orchestration.sh`.
+- `LIVE_K8S=1` now bootstraps observability by default, starts a Prometheus port-forward, and passes `--prometheus-base-url` to the live loop automatically.
+- Live validation:
+  - `kubectl top nodes` returned CPU/memory samples for `borg-aiopslab-control-plane`.
+  - Prometheus query and trace capture returned `telemetry_sources=["kubernetes_api","prometheus_node_exporter"]` with no `prometheus_error`.
+  - One-iteration launcher smoke completed with Prometheus enrichment enabled.
+- Test validation:
+  - `PYTHONPATH=orchestrator_stack ./.venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`108 passed`)
+- Report:
+  - `reports/evaluations/202605051339_observability_bootstrap_report.md`
+
 ## Latest Session Note (2026-05-03 KST, node-power exporter availability slice)
 
 - Checked current Kind validation cluster for direct node-power telemetry exporters.

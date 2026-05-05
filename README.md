@@ -62,9 +62,13 @@ Do not type `\./orchestrator_stack/...`; the `\` is only a line-continuation mar
 
 This keeps observing Kubernetes through `kubectl`, selecting Agent A/B/C/referee actions, computing rewards, appending a live trace, and refreshing the dashboard until stopped.
 
+In `LIVE_K8S=1` mode, the launcher now bootstraps the in-cluster observability path by default: Metrics Server in `kube-system`, Prometheus in `observe`, Node Exporter on the Kind node, and a local Prometheus port-forward at `http://127.0.0.1:19090`. The live trace collector receives this Prometheus URL automatically, so rows should include `prometheus_node_exporter` in `telemetry_sources` when the stack is healthy.
+
 In `LIVE_K8S=1` mode, the default is `MODE=full`: Ray/RLlib and Optuna bootstrap run before the continuous Kubernetes loop. Use `MODE=fast LIVE_K8S=1` only for quick debugging without Ray/Optuna.
 
 `LIVE_K8S=1` also enables `EXERCISE_CLUSTER=1` and `EXERCISE_RANDOMIZE=1` by default. This creates randomized safe workloads in `borg-orchestrator-exercise` so the cluster state fluctuates across explicit action-covering phases: Agent B `power_state`, `dvfs`, and `memory_balloon`; Agent A `throttle`, `migrate`, and `replicate`; and Agent C `admission:queue`, `admission:deprioritize`, and `resource_cap`. Set `EXERCISE_CLUSTER=0` to observe without synthetic workload changes, `EXERCISE_RANDOMIZE=0` to debug the deterministic coverage cycle, or `EXERCISE_SEED=<number>` for reproducible randomized phases.
+
+Set `OBSERVABILITY_STACK=0` only if you have already installed a compatible telemetry stack. Set `PROMETHEUS_PORT=<port>` if local port `19090` is already in use, or provide `PROMETHEUS_BASE_URL=<url>` to use an existing Prometheus endpoint.
 
 Dashboard field-by-field documentation:
 

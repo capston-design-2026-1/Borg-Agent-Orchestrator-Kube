@@ -19,6 +19,7 @@ Files that must be checked together:
 | Referee conflict resolution | `orchestrator_stack/orchestrator/layer4/referee.py` | Decision Gate section |
 | Reward computation | `orchestrator_stack/orchestrator/layer2/simulator.py`, `orchestrator_stack/orchestrator/layer6/scoreboard.py` | Reward Stream and agent reward tables |
 | Kubernetes intentional perturbation | `orchestrator_stack/orchestrator/layer1/kubernetes_exerciser.py` | Intentional Kubernetes Stimulus section |
+| Kubernetes observability bootstrap | `orchestrator_stack/scripts/bootstrap_observability.sh`, `orchestrator_stack/k8s/observability/metrics-prometheus.yaml` | Live Kubernetes Environment and telemetry-source sections |
 
 ## Launch and Data Flow Summary
 
@@ -32,7 +33,7 @@ The live-mode flow is:
 
 | Step | Layer | Runtime behavior | Dashboard location |
 |---:|---|---|---|
-| 1 | Layer 1 Kubernetes Source | Reads node/pod state with `kubectl`; optionally merges Prometheus CPU/memory samples. | Metrics, Kubernetes Cluster card, `cluster` events |
+| 1 | Layer 1 Kubernetes Source | Reads node/pod state with `kubectl`; live launch also bootstraps Prometheus/Node Exporter and merges Prometheus CPU/memory samples by default. | Metrics, Kubernetes Cluster card, `cluster` events |
 | 2 | Live Perturbation | Applies or deletes safe synthetic workloads in the `borg-orchestrator-exercise` namespace. | Workload Exerciser card, Intentional Kubernetes Stimulus card, `exercise` events |
 | 3 | Layer 2 AIOpsLab Twin | Converts the snapshot into an `Observation` and computes twin transitions/rewards after selected actions. | AIOpsLab Twin card, Reward Stream |
 | 4 | Layer 3 XGBoost Brains | Enriches risk and demand forecasts, or uses telemetry-derived values if XGBoost is unavailable. | XGBoost Brains card, Max Risk, Decision Reason |
@@ -44,7 +45,7 @@ The live-mode flow is:
 
 ## Live Kubernetes Environment
 
-The current live orchestration target is a local Kind validation cluster, not a managed cloud Kubernetes cluster or a production multi-node deployment. The exact inspected environment is recorded in `reports/evaluations/202605051249_kubernetes_environment_snapshot.md`.
+The current live orchestration target is a local Kind validation cluster, not a managed cloud Kubernetes cluster or a production multi-node deployment. The baseline inspected environment is recorded in `reports/evaluations/202605051249_kubernetes_environment_snapshot.md`, and the observability repair is recorded in `reports/evaluations/202605051339_observability_bootstrap_report.md`.
 
 | Field | Current value |
 |---|---|
@@ -74,18 +75,28 @@ Active namespaces observed in this environment:
 | `default` | Contains a completed `wrk2` validation job from earlier AIOpsLab/DeathStarBench work. |
 | `kube-system` | CoreDNS, API server, scheduler, controller-manager, etcd, kube-proxy, and kindnet. |
 | `local-path-storage` | Local-path storage provisioner. |
-| `observe` | Intended observability namespace; currently no running observability pods in the inspected snapshot. |
+| `observe` | In-cluster observability namespace. The live launcher deploys `prometheus-server` and `prometheus-node-exporter` here. |
 | `test-social-network` | DeathStarBench/AIOpsLab namespace; currently no active social-network resources in the inspected snapshot. |
 
-Important runtime caveats:
+Important runtime telemetry status:
 
 | Item | Current status | Dashboard implication |
 |---|---|---|
-| Metrics Server | Not available; `kubectl top nodes/pods` fails. | The dashboard cannot currently rely on Metrics API samples. |
-| In-cluster Prometheus | No running Prometheus pods were observed. | Prometheus enrichment is absent unless an external `PROMETHEUS_BASE_URL` is provided. |
-| `observe/prometheus-pvc` | Pending because it requests missing storage class `openebs-hostpath`. | The observability stack is not fully deployed in this Kind cluster. |
+| Metrics Server | Installed by `bootstrap_observability.sh`; `v1beta1.metrics.k8s.io` is available and `kubectl top nodes` returns CPU/memory samples. | Operator-level Kubernetes metrics are now available for direct checks and debugging. |
+| In-cluster Prometheus | `observe/prometheus-server` runs from the repository manifest. The launcher port-forwards it to `http://127.0.0.1:19090` unless overridden. | Live trace rows can include Prometheus-derived CPU/memory enrichment. Healthy rows show `prometheus_node_exporter` in `telemetry_sources`. |
+| Node Exporter | `observe/prometheus-node-exporter` runs as a DaemonSet on the Kind node. | Prometheus queries such as `node_cpu_seconds_total` and `node_memory_MemAvailable_bytes` feed the trace collector. |
+| Legacy `openebs-hostpath` PVC | The old pending `observe/prometheus-pvc` came from a storage class this Kind cluster does not have. The bootstrap script deletes that stale pending PVC and uses `emptyDir` Prometheus storage instead. | The thesis demo no longer depends on OpenEBS just to collect telemetry. Prometheus data is ephemeral across pod restarts, which is acceptable for live dashboard evidence. |
 | Energy watts | Estimated by the default utilization model. | `est power ...W` is not a physical wattmeter reading. |
 | Agent placement realism | Single-node cluster. | Agent C admission logic is visible, but true multi-node placement/migration behavior cannot be demonstrated here. |
+
+Expected live telemetry indicators:
+
+| Check | Expected result |
+|---|---|
+| `kubectl get apiservice v1beta1.metrics.k8s.io` | APIService exists and condition `Available=True`. |
+| `kubectl top nodes` | Returns the Kind node CPU and memory sample. |
+| `kubectl -n observe get pods,svc -l app.kubernetes.io/part-of=borg-orchestrator` | Shows running Prometheus and Node Exporter pods/services. |
+| `state.json` / trace rows | `telemetry_sources` includes both `kubernetes_api` and `prometheus_node_exporter` when Prometheus enrichment succeeds. |
 
 The live exerciser does perform real Kubernetes mutations. For example, it creates `pause` Deployments such as `light-dvfs`, `safety-replicate`, and `admission-queue` under `borg-orchestrator-exercise`. Those Deployments can create real scheduler outcomes such as `Pending` pods and `FailedScheduling` events. The dashboard therefore mixes:
 
@@ -175,7 +186,7 @@ This is the heart of the dashboard. The upper canvas is the architecture map. Th
 
 | Lane | Node | Display value | Meaning |
 |---|---|---|---|
-| Layer 1 | Kubernetes Cluster | `risk ...` | Highest risk score in the current cluster snapshot; also shows nodes/tasks/SLA. |
+| Layer 1 | Kubernetes Cluster | `risk ...` | Highest risk score in the current cluster snapshot; also shows nodes/tasks/SLA and whether the row is `kubectl only` or `kubectl + prometheus`. |
 | Layer 1 | Workload Exerciser | `active` or `idle` | Whether synthetic workload perturbation is active. |
 | Layer 2 | AIOpsLab Twin | `cpu ...` | Average CPU after live snapshot normalization; detail shows memory and estimated power. |
 | Layer 3 | XGBoost Brains | `risk ... / demand ...` | Risk forecast and resource demand projection. |

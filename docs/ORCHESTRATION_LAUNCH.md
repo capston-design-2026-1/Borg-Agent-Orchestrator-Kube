@@ -34,20 +34,32 @@ Do not write `\./orchestrator_stack/...`; the backslash must end the previous li
 
 `LIVE_K8S=1` keeps capturing real Kubernetes snapshots, selecting Agent A/B/C/referee actions, scoring rewards, appending `live_kubernetes_trace.json`, and refreshing the dashboard until you press `Ctrl-C`.
 
+By default, live mode also bootstraps in-cluster observability before the control loop starts:
+
+- Metrics Server in `kube-system`, including `v1beta1.metrics.k8s.io`
+- Prometheus in the `observe` namespace
+- Node Exporter as a DaemonSet on the Kind node
+- a local Prometheus port-forward at `http://127.0.0.1:19090`
+
+The launcher passes that Prometheus URL into `live-kubernetes-run`, so live trace rows should include `prometheus_node_exporter` in `telemetry_sources` when the stack is healthy.
+
 Live mode defaults to `MODE=full`: Ray/RLlib policy bootstrap and Optuna reward tuning run before the continuous Kubernetes loop. Use the repository `.venv` Python for this full mode because it contains Ray, Optuna, XGBoost, and Torch.
 
 Live mode also defaults to `EXERCISE_CLUSTER=1`. The launcher rotates safe synthetic Kubernetes workloads in the dedicated `borg-orchestrator-exercise` namespace so the live cluster does not stay idle. The rotation intentionally covers distinct action families: Agent B `power_state`, `dvfs`, and `memory_balloon`; Agent A `throttle`, `migrate`, and `replicate`; and Agent C `admission:queue`, `admission:deprioritize`, and `resource_cap`.
 
 What it does:
 
-1. Starts the local visualization dashboard at `http://127.0.0.1:8765`.
-2. Opens the dashboard automatically on macOS.
-3. Loads or builds the Layer 1 trace from `orchestrator_stack/config/orchestrator.example.json`.
-4. Trains the Layer 3 XGBoost risk and demand models.
-5. Runs the Layer 4 multi-agent heuristic/referee episode and streams per-step rewards.
-6. Runs Ray/RLlib PPO training and streams Ray status plus final checkpoint/reward metadata.
-7. Runs Optuna reward tuning and streams trial scores/parameters.
-8. Writes runtime state and summary files under `orchestrator_stack/runtime/visualization/`.
+1. Applies `orchestrator_stack/k8s/observability/metrics-prometheus.yaml` when `LIVE_K8S=1` and `OBSERVABILITY_STACK=1`.
+2. Waits for Metrics Server, `kubectl top nodes`, Prometheus, and Node Exporter.
+3. Starts a local Prometheus port-forward unless `PROMETHEUS_BASE_URL` is already provided.
+4. Starts the local visualization dashboard at `http://127.0.0.1:8765`.
+5. Opens the dashboard automatically on macOS.
+6. Loads or builds the Layer 1 trace from `orchestrator_stack/config/orchestrator.example.json`.
+7. Trains the Layer 3 XGBoost risk and demand models.
+8. Runs the Layer 4 multi-agent heuristic/referee episode and streams per-step rewards.
+9. Runs Ray/RLlib PPO training and streams Ray status plus final checkpoint/reward metadata.
+10. Runs Optuna reward tuning and streams trial scores/parameters.
+11. Writes runtime state and summary files under `orchestrator_stack/runtime/visualization/`.
 
 After the orchestration run finishes, the dashboard stays open. Press `Ctrl-C` in the shell to stop the dashboard server.
 
@@ -81,6 +93,7 @@ orchestrator_stack/runtime/visualization/events.jsonl
 orchestrator_stack/runtime/visualization/summary.json
 orchestrator_stack/runtime/dashboard/server.log
 orchestrator_stack/runtime/dashboard/run.log
+orchestrator_stack/runtime/dashboard/prometheus-port-forward.log
 ```
 
 ## Common Options
@@ -158,10 +171,28 @@ Run only 20 live Kubernetes iterations:
 LIVE_K8S=1 LIVE_MAX_ITERATIONS=20 ./orchestrator_stack/scripts/launch_orchestration.sh
 ```
 
-Use Prometheus enrichment in live Kubernetes loop:
+Use a different local Prometheus port-forward port:
+
+```bash
+LIVE_K8S=1 PROMETHEUS_PORT=19091 ./orchestrator_stack/scripts/launch_orchestration.sh
+```
+
+Use an existing Prometheus endpoint instead of the launcher's local port-forward:
 
 ```bash
 LIVE_K8S=1 PROMETHEUS_BASE_URL=http://127.0.0.1:19090 ./orchestrator_stack/scripts/launch_orchestration.sh
+```
+
+Skip observability bootstrap only when Metrics Server, Prometheus, and Node Exporter are already installed:
+
+```bash
+LIVE_K8S=1 OBSERVABILITY_STACK=0 ./orchestrator_stack/scripts/launch_orchestration.sh
+```
+
+Start the observability stack manually:
+
+```bash
+KUBECONFIG=~/Documents/aiopslab_validation_env/kubeconfig ./orchestrator_stack/scripts/bootstrap_observability.sh
 ```
 
 Do not open browser automatically:
@@ -216,11 +247,21 @@ PYTHONPATH=orchestrator_stack ~/Documents/aiopslab_validation_env/bin/python \
   --kube-config ~/Documents/aiopslab_validation_env/kubeconfig
 ```
 
+To verify the live telemetry stack directly:
+
+```bash
+KUBECONFIG=~/Documents/aiopslab_validation_env/kubeconfig kubectl get apiservice v1beta1.metrics.k8s.io
+KUBECONFIG=~/Documents/aiopslab_validation_env/kubeconfig kubectl top nodes
+KUBECONFIG=~/Documents/aiopslab_validation_env/kubeconfig kubectl -n observe get pods,svc -l app.kubernetes.io/part-of=borg-orchestrator
+```
+
 ## Architecture Update Rule
 
 When `docs/repository_architecture.mmd` or any real orchestration layer changes, keep these files synchronized in the same work session:
 
 - `orchestrator_stack/scripts/launch_orchestration.sh`
+- `orchestrator_stack/scripts/bootstrap_observability.sh`
+- `orchestrator_stack/k8s/observability/metrics-prometheus.yaml`
 - `docs/ORCHESTRATION_LAUNCH.md`
 - `orchestrator_stack/dashboard/index.html`
 - `orchestrator_stack/dashboard/app.js`

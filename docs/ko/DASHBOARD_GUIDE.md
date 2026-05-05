@@ -19,6 +19,7 @@
 | Referee 충돌 해결 | `orchestrator_stack/orchestrator/layer4/referee.py` | Decision Gate 설명 |
 | Reward 계산 | `orchestrator_stack/orchestrator/layer2/simulator.py`, `orchestrator_stack/orchestrator/layer6/scoreboard.py` | Reward Stream 및 Agent 보상 표 |
 | Kubernetes 의도적 부하 변화 | `orchestrator_stack/orchestrator/layer1/kubernetes_exerciser.py` | Intentional Kubernetes Stimulus 설명 |
+| Kubernetes observability bootstrap | `orchestrator_stack/scripts/bootstrap_observability.sh`, `orchestrator_stack/k8s/observability/metrics-prometheus.yaml` | 실시간 Kubernetes 환경과 telemetry source 설명 |
 
 ## 실행과 데이터 흐름 요약
 
@@ -32,7 +33,7 @@ cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && LIVE_K8S=
 
 | 순서 | 레이어 | 실제 동작 | 대시보드에 보이는 위치 |
 |---:|---|---|---|
-| 1 | Layer 1 Kubernetes Source | `kubectl`로 node/pod 상태를 읽고, 필요하면 Prometheus CPU/memory 샘플을 병합한다. | Metrics, Kubernetes Cluster 카드, Event Log의 `cluster` 이벤트 |
+| 1 | Layer 1 Kubernetes Source | `kubectl`로 node/pod 상태를 읽고, live launcher가 Prometheus/Node Exporter를 기본 bootstrap한 뒤 Prometheus CPU/memory 샘플을 병합한다. | Metrics, Kubernetes Cluster 카드, Event Log의 `cluster` 이벤트 |
 | 2 | Live Perturbation | `borg-orchestrator-exercise` namespace에 안전한 synthetic workload를 `apply/delete`하여 클러스터 상태를 일부러 흔든다. | Workload Exerciser 카드, Intentional Kubernetes Stimulus 카드, `exercise` 이벤트 |
 | 3 | Layer 2 AIOpsLab Twin | Kubernetes snapshot을 `Observation`으로 변환하고 action에 따른 twin transition/reward를 계산한다. | AIOpsLab Twin 카드, Reward Stream |
 | 4 | Layer 3 XGBoost Brains | 위험도 `p_fail_scores`와 수요 `demand_projection`을 보강하거나, XGBoost가 없으면 live telemetry 값을 그대로 쓴다. | XGBoost Brains 카드, Max Risk, Decision Reason |
@@ -44,7 +45,7 @@ cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && LIVE_K8S=
 
 ## 실시간 Kubernetes 환경
 
-현재 live orchestration target은 local Kind validation cluster다. managed cloud Kubernetes나 production multi-node cluster가 아니다. 정확한 inspection 결과는 `reports/evaluations/202605051249_kubernetes_environment_snapshot.md`에 기록되어 있다.
+현재 live orchestration target은 local Kind validation cluster다. managed cloud Kubernetes나 production multi-node cluster가 아니다. baseline inspection 결과는 `reports/evaluations/202605051249_kubernetes_environment_snapshot.md`에 있고, observability 수정 검증은 `reports/evaluations/202605051339_observability_bootstrap_report.md`에 기록되어 있다.
 
 | 항목 | 현재 값 |
 |---|---|
@@ -74,18 +75,28 @@ cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && LIVE_K8S=
 | `default` | 이전 AIOpsLab/DeathStarBench 검증에서 사용된 completed `wrk2` job 존재 |
 | `kube-system` | CoreDNS, API server, scheduler, controller-manager, etcd, kube-proxy, kindnet 등 cluster system component |
 | `local-path-storage` | local-path storage provisioner |
-| `observe` | observability namespace로 의도되었으나, inspection snapshot 기준 running observability pod는 없음 |
+| `observe` | in-cluster observability namespace. live launcher가 여기에 `prometheus-server`와 `prometheus-node-exporter`를 배포한다. |
 | `test-social-network` | DeathStarBench/AIOpsLab namespace이나, inspection snapshot 기준 active social-network resource는 없음 |
 
-반드시 알고 있어야 할 runtime caveat는 다음과 같다.
+반드시 알고 있어야 할 runtime telemetry 상태는 다음과 같다.
 
 | 항목 | 현재 상태 | Dashboard 해석 |
 |---|---|---|
-| Metrics Server | 없음. `kubectl top nodes/pods`가 실패한다. | dashboard는 현재 Metrics API sample에 의존할 수 없다. |
-| In-cluster Prometheus | running Prometheus pod가 관측되지 않았다. | 외부 `PROMETHEUS_BASE_URL`을 주지 않는 한 Prometheus enrichment는 없다. |
-| `observe/prometheus-pvc` | 존재하지만 `openebs-hostpath` storage class가 없어 Pending 상태다. | observability stack이 이 Kind cluster에 완전히 배포된 상태가 아니다. |
+| Metrics Server | `bootstrap_observability.sh`가 설치한다. `v1beta1.metrics.k8s.io`가 Available이고 `kubectl top nodes`가 CPU/memory sample을 반환한다. | operator가 Metrics API로 cluster 상태를 직접 확인할 수 있다. |
+| In-cluster Prometheus | repository manifest가 `observe/prometheus-server`를 실행한다. launcher는 기본적으로 `http://127.0.0.1:19090`으로 port-forward한다. | live trace row가 Prometheus 기반 CPU/memory enrichment를 포함할 수 있다. 정상 row에는 `telemetry_sources`에 `prometheus_node_exporter`가 들어간다. |
+| Node Exporter | `observe/prometheus-node-exporter` DaemonSet이 Kind node에서 실행된다. | `node_cpu_seconds_total`, `node_memory_MemAvailable_bytes` 같은 node-exporter metric이 trace collector에 공급된다. |
+| Legacy `openebs-hostpath` PVC | 예전 `observe/prometheus-pvc`는 이 Kind cluster에 없는 storage class를 요구해서 Pending이었다. bootstrap script가 이 stale Pending PVC를 삭제하고 Prometheus는 `emptyDir`를 사용한다. | thesis demo가 telemetry 수집을 위해 OpenEBS에 의존하지 않는다. Prometheus 데이터는 pod 재시작 시 사라지는 ephemeral 데이터이며 live dashboard evidence에는 충분하다. |
 | Energy watts | default utilization model 기반 estimate다. | `est power ...W`는 실제 wattmeter 측정값이 아니다. |
 | Agent placement realism | single-node cluster다. | Agent C admission logic은 볼 수 있지만, 진짜 multi-node placement/migration 실험은 이 환경만으로는 보여주기 어렵다. |
+
+실시간 telemetry 정상 여부는 다음 신호로 확인한다.
+
+| 확인 항목 | 정상 결과 |
+|---|---|
+| `kubectl get apiservice v1beta1.metrics.k8s.io` | APIService가 존재하고 condition이 `Available=True`다. |
+| `kubectl top nodes` | Kind node의 CPU/memory sample을 반환한다. |
+| `kubectl -n observe get pods,svc -l app.kubernetes.io/part-of=borg-orchestrator` | Prometheus와 Node Exporter pod/service가 running으로 보인다. |
+| `state.json` / trace row | Prometheus enrichment가 성공하면 `telemetry_sources`에 `kubernetes_api`와 `prometheus_node_exporter`가 함께 들어간다. |
 
 live exerciser는 실제 Kubernetes mutation을 수행한다. 예를 들어 `borg-orchestrator-exercise` namespace에 `light-dvfs`, `safety-replicate`, `admission-queue` 같은 `pause` Deployment를 만들거나 삭제한다. 이 Deployment들은 실제 scheduler 결과를 만들 수 있으며, `Pending` pod와 `FailedScheduling` event가 발생한다. 따라서 dashboard는 다음 데이터들을 섞어서 보여준다.
 
@@ -119,7 +130,7 @@ live exerciser는 실제 Kubernetes mutation을 수행한다. 예를 들어 `bor
 | 상태 배지 `Running`, `complete`, `failed` | 런타임 전체 상태. `running`이면 루프 또는 demo가 진행 중이고, `complete`는 bounded run 완료, `failed`는 오류 발생이다. | `state.status` |
 | `updated ...` | dashboard가 마지막으로 읽은 runtime state timestamp. | `state.updated_at` |
 
-## Metrics 카드 7개
+## Metrics 카드 6개
 
 상단 metrics는 가장 빠르게 현재 상태를 판단하기 위한 요약 영역이다.
 
@@ -181,7 +192,7 @@ Architecture Stages는 전체 6-layer pipeline의 stage 상태를 보여준다.
 
 | Lane | Node | 표시 값 | 의미 |
 |---|---|---|---|
-| Layer 1 | Kubernetes Cluster | `risk ...` | 현재 cluster snapshot의 가장 큰 risk score. `nodes/tasks/sla`도 표시한다. |
+| Layer 1 | Kubernetes Cluster | `risk ...` | 현재 cluster snapshot의 가장 큰 risk score. `nodes/tasks/sla`와 함께 해당 row가 `kubectl only`인지 `kubectl + prometheus`인지도 표시한다. |
 | Layer 1 | Workload Exerciser | `active` 또는 `idle` | synthetic workload perturbation이 활성화되어 있는지 보여준다. |
 | Layer 2 | AIOpsLab Twin | `cpu ...` | live snapshot을 twin observation으로 변환한 평균 CPU. detail에는 memory와 estimated power가 표시된다. |
 | Layer 3 | XGBoost Brains | `risk ... / demand ...` | risk forecast와 resource demand projection. XGBoost runtime이 disabled이면 telemetry-derived value를 사용한다. |
