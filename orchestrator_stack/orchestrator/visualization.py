@@ -365,6 +365,11 @@ def run_live_kubernetes_orchestration(
             if isinstance(power_calibration, dict):
                 snapshot["power_metric_kind"] = "estimated"
                 snapshot["power_calibration_source"] = str(power_calibration.get("source", "calibrated"))
+            telemetry_sources = row.get("telemetry_sources") if isinstance(row, dict) else None
+            if isinstance(telemetry_sources, list):
+                snapshot["telemetry_sources"] = [str(source) for source in telemetry_sources]
+            if isinstance(row, dict) and row.get("prometheus_error"):
+                snapshot["prometheus_error"] = str(row["prometheus_error"])
             state.cluster_snapshot(snapshot)
             proposals = [agent.act(obs) for agent in agents]
             action = resolve(proposals)

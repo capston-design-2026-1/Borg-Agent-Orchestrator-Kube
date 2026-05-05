@@ -426,13 +426,19 @@ function renderFlow(state, events) {
     return `last reward ${fmt(reward)} / observing`;
   };
   const powerSource = cluster.power_calibration_source ? ` (${cluster.power_calibration_source})` : '';
+  const telemetrySources = Array.isArray(cluster.telemetry_sources) ? cluster.telemetry_sources : [];
+  const telemetrySourceLabel = telemetrySources.includes('prometheus_node_exporter')
+    ? 'kubectl + prometheus'
+    : cluster.prometheus_error
+      ? 'kubectl + prometheus error'
+      : 'kubectl only';
   const nodes = [
     {
       id: 'cluster', tone: 'cluster',
       kicker: 'Layer 1 source',
       title: 'Kubernetes Cluster',
       metric: `risk ${fmt(cluster.max_risk)}`,
-      detail: `${cluster.nodes ?? 0} node / ${cluster.tasks ?? 0} task / sla ${cluster.sla_violations ?? 0}`,
+      detail: `${cluster.nodes ?? 0} node / ${cluster.tasks ?? 0} task / sla ${cluster.sla_violations ?? 0} / ${telemetrySourceLabel}`,
     },
     {
       id: 'exercise', tone: 'exercise',
