@@ -59,6 +59,11 @@ Default URL:
 http://127.0.0.1:8765
 ```
 
+Detailed dashboard interpretation guides:
+
+- English: `docs/en/DASHBOARD_GUIDE.md`
+- Korean: `docs/ko/DASHBOARD_GUIDE.md`
+
 The dashboard shows:
 
 - current orchestration stage
@@ -220,5 +225,7 @@ When `docs/repository_architecture.mmd` or any real orchestration layer changes,
 - `orchestrator_stack/dashboard/index.html`
 - `orchestrator_stack/dashboard/app.js`
 - `orchestrator_stack/dashboard/styles.css`
+- `docs/en/DASHBOARD_GUIDE.md`
+- `docs/ko/DASHBOARD_GUIDE.md`
 
 The launch shell is the canonical simple operator path. If the architecture gains a new runtime stage, expose that stage in the shell and dashboard state stream.

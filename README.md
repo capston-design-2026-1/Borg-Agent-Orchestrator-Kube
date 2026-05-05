@@ -23,6 +23,7 @@ An independent end-to-end orchestrator workspace now exists at `orchestrator_sta
 - Mermaid architecture source is tracked at `orchestrator_stack/ARCHITECTURE.md`
 - Repository-wide Mermaid architecture source is tracked at `docs/repository_architecture.mmd`
 - One-command orchestration launch and live visualization instructions are tracked at `docs/ORCHESTRATION_LAUNCH.md`
+- Detailed dashboard interpretation guides are tracked at `docs/en/DASHBOARD_GUIDE.md` and `docs/ko/DASHBOARD_GUIDE.md`
 - Repo `.venv` has verified orchestrator smoke support for reward-weight Optuna runs, Layer 4 referee/RLlib environment smoke checks, and sample predictor training
 - Layer 5 policy tuning now forwards real PPO hyperparameters into RLlib-backed trials instead of scoring a placeholder learning-rate proxy; in restricted sandboxes it returns a structured skip when Ray process permissions are blocked
 - Layer 1 ingestion/trace contracts are strict by default (row-indexed schema checks, `.json/.jsonl` contract validation, bool-like and non-negative queue guardrails)
@@ -64,6 +65,11 @@ This keeps observing Kubernetes through `kubectl`, selecting Agent A/B/C/referee
 In `LIVE_K8S=1` mode, the default is `MODE=full`: Ray/RLlib and Optuna bootstrap run before the continuous Kubernetes loop. Use `MODE=fast LIVE_K8S=1` only for quick debugging without Ray/Optuna.
 
 `LIVE_K8S=1` also enables `EXERCISE_CLUSTER=1` and `EXERCISE_RANDOMIZE=1` by default. This creates randomized safe workloads in `borg-orchestrator-exercise` so the cluster state fluctuates and Agent A, Agent B, and Agent C all receive decision opportunities without a repeating reward-wave pattern. Set `EXERCISE_CLUSTER=0` to observe without synthetic workload changes, `EXERCISE_RANDOMIZE=0` to debug the old fixed phase cycle, or `EXERCISE_SEED=<number>` for reproducible randomized phases.
+
+Dashboard field-by-field documentation:
+
+- English: `docs/en/DASHBOARD_GUIDE.md`
+- Korean: `docs/ko/DASHBOARD_GUIDE.md`
 
 ## New Isolated Track: Codex Autonomy Runner
 

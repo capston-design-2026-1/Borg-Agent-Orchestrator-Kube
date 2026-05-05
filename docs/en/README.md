@@ -13,6 +13,12 @@ Repository-level companion documents now live under:
 
 The original Markdown files remain the canonical working documents, and the language directories provide organized English/Korean companion access.
 
+## Dashboard Guide
+
+For a detailed explanation of every dashboard panel, graph, runtime event, Agent A/B/C operation, reward rule, Optuna trace, Ray/RLlib status, and Kubernetes stimulus field, see:
+
+- `docs/en/DASHBOARD_GUIDE.md`
+
 ## Structure
 
 ```text
