@@ -324,6 +324,9 @@ Optuna is the Layer 5 meta-optimizer. The dashboard separates objective score fr
 | `alpha`, `beta`, `gamma` cards | Best trial's reward weights. |
 | Objective score graph | The single scalar objective Optuna maximizes. It has one line because there is one objective value. |
 | Weight graph | Trial-by-trial sampled `alpha`, `beta`, and `gamma` values. |
+| Optuna graph x-axis | Actual Optuna trial IDs such as `T15`, `T16`, `T17`, not local array positions. |
+
+The Optuna runtime state can keep only a recent visible history window. If the chart shows three points labeled `T15`, `T16`, and `T17`, that means the visible window contains real Optuna trials 15 through 17. It should not be interpreted as a fresh local sequence `0,1,2`.
 
 Search ranges:
 
