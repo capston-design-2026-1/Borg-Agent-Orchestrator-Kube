@@ -341,10 +341,10 @@ Optuna is the Layer 5 meta-optimizer. The dashboard separates objective score fr
 | `alpha`, `beta`, `gamma` cards | Best trial's reward weights. |
 | Objective score graph | The single scalar objective Optuna maximizes. It has one line because there is one objective value. |
 | Weight graph | Trial-by-trial sampled `alpha`, `beta`, and `gamma` values, drawn with points and end labels so each sampled parameter remains readable. |
-| Optuna graph x-axis | Current-launch trial sequence, such as `#1`, `#2`, `#3`. |
-| Optuna window note | Maps the current-launch sequence to persisted Optuna study IDs, such as `T18` through `T20`. |
+| Optuna graph x-axis | Persisted Optuna study trial ID, such as `T0`, `T1`, and `T20`. |
+| Optuna window note | Reports how many completed persisted trials are currently loaded and the visible `Tfirst` to `Tlast` range. |
 
-The persisted Optuna study keeps counting across launches because `load_if_exists=True` reuses `orchestrator_stack/runtime/optuna/orchestrator.db`. Therefore, a new three-trial live launch can create global study IDs `T18`, `T19`, and `T20`. The graph x-axis intentionally shows the local launch sequence `#1` to `#3`; the note below the parameter cards records the corresponding persisted study IDs.
+The persisted Optuna study keeps counting across launches because `load_if_exists=True` reuses `orchestrator_stack/runtime/optuna/orchestrator.db`. The dashboard now exports and plots all completed trials in that persistent study, not only the latest three-trial bootstrap callback window. Therefore, if the study already contains trials `T0` through `T20`, both the objective graph and the weight graph should show the full `T0` to `T20` history after the launcher is restarted with this version of the runtime.
 
 Search ranges:
 

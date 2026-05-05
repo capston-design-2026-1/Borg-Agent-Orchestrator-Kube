@@ -3,6 +3,25 @@
 1. Expand the current five-family policy gate suite with another full-phase AIOpsLab family when available.
 2. Replace calibrated utilization-derived energy watts with a direct measured node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
 
+## Latest Session Note (2026-05-05 KST, full Optuna study-history dashboard slice)
+
+- Root cause for the Optuna graph showing only three points:
+  - `visualized_orchestrator_reward_weights` is persisted in `orchestrator_stack/runtime/optuna/orchestrator.db` and already contains older trials.
+  - The dashboard state only received the three callback rows produced by the latest live bootstrap.
+- Fixed runtime state export:
+  - `VisualizationState.optuna_history()` now stores `history_scope="all_completed_study_trials"` and `completed_trials`.
+  - `_tune_rewards()` syncs the complete persisted study history before tuning, after every callback, and after tuning completes.
+  - Optuna events omit the full history payload so `events.jsonl` stays readable while `state.json` carries the graph data.
+- Dashboard behavior:
+  - Optuna objective and weight graphs now use persisted study trial IDs on the x-axis (`T0`, `T1`, ..., `Tn`).
+  - The chart note states whether it is showing full persisted history or only live callback rows from an older running process.
+- Local persistent study check:
+  - `visualized_orchestrator_reward_weights` currently exports `21` completed trials, `T0` through `T20`.
+- Validation:
+  - `node --check orchestrator_stack/dashboard/app.js`: success
+  - `PYTHONPATH=orchestrator_stack ./.venv/bin/python -m pytest orchestrator_stack/tests/test_visualization_runtime.py -q`: success (`8 passed`)
+  - `PYTHONPATH=orchestrator_stack ./.venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`111 passed`)
+
 ## Latest Session Note (2026-05-05 KST, live observability bootstrap slice)
 
 - Root cause for missing in-cluster telemetry:

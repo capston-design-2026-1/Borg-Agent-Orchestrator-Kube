@@ -80,7 +80,7 @@ The dashboard shows:
 
 - current orchestration stage
 - per-step reward stream for Agent A, Agent B, Agent C, and weighted total score
-- Optuna study name, latest trial, best score, and best parameters
+- Optuna study name, full completed persistent-trial history, latest trial, best score, and best parameters
 - Ray/RLlib PPO trainer status, checkpoint path, train iterations, and reward mean
 - generated artifacts, including trace/model/report/summary paths
 - live event log from the runtime JSONL stream
