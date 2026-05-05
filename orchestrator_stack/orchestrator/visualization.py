@@ -96,6 +96,17 @@ def _decision_reason(snapshot: dict[str, Any], action_agent: str, action_kind: s
     return "no-op or unknown action"
 
 
+def _action_label(action: Any) -> str:
+    label = f"{action.agent_name}:{action.kind.value}"
+    if action.kind.value == "admission":
+        decision = action.payload.get("decision")
+        return f"{label}:{decision}" if decision else label
+    if action.kind.value == "power_state":
+        state = action.payload.get("state")
+        return f"{label}:{state}" if state else label
+    return label
+
+
 def _write_live_summary(event_dir: str | Path, state: VisualizationState, *, status: str = "running") -> Path:
     summary = {
         "status": status,
@@ -358,6 +369,7 @@ def run_live_kubernetes_orchestration(
             proposals = [agent.act(obs) for agent in agents]
             action = resolve(proposals)
             reason = _decision_reason(snapshot, action.agent_name, action.kind.value)
+            action_label = _action_label(action)
             signature = (action.agent_name, action.kind.value, action.target, json.dumps(snapshot, sort_keys=True))
             if signature == last_signature:
                 repeat_count += 1
@@ -369,6 +381,7 @@ def run_live_kubernetes_orchestration(
                 "kind": action.kind.value,
                 "target": action.target,
                 "payload": dict(action.payload),
+                "action_label": action_label,
                 "score": float(action.score),
                 "priority": int(action.priority),
                 "repeat_count": repeat_count,
@@ -392,7 +405,7 @@ def run_live_kubernetes_orchestration(
                 iteration,
                 {key: float(value) for key, value in result.reward_by_agent.items()},
                 score.total,
-                f"{action.agent_name}:{action.kind.value}",
+                action_label,
             )
             state.state["summary"].update(
                 {
@@ -407,7 +420,7 @@ def run_live_kubernetes_orchestration(
                 "live_kubernetes_loop",
                 "running",
                 detail=(
-                    f"iteration {iteration + 1}; recommendation {action.agent_name}:{action.kind.value}; "
+                    f"iteration {iteration + 1}; recommendation {action_label}; "
                     f"repeat={repeat_count}; {reason}"
                 ),
                 progress=progress,

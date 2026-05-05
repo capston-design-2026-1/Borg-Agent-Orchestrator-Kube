@@ -104,10 +104,11 @@ class VisualizationState:
         self.state["decision"] = {"time": kst_now_iso(), **decision}
         event_payload = dict(self.state["decision"])
         event_payload["action_kind"] = event_payload.pop("kind", None)
+        label = decision.get("action_label") or f"{decision.get('agent')}:{decision.get('kind')}"
         self.emit(
             "decision",
             (
-                f"{decision.get('agent')}:{decision.get('kind')} target={decision.get('target')} "
+                f"{label} target={decision.get('target')} "
                 f"repeat={decision.get('repeat_count')} reason={decision.get('reason')}"
             ),
             **event_payload,

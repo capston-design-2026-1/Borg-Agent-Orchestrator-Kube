@@ -228,7 +228,7 @@ function actionTraceMarkup(decision, cluster) {
     <aside class="diagram-action-trace ${semantics.tone}" data-action="${safeText(decision.kind || 'noop')}">
       <div class="action-main">
         <span class="action-kicker">performed action</span>
-        <strong>${safeText(decision.agent ? `${decision.agent}:${actionLabel(decision.kind)}` : 'waiting')}</strong>
+        <strong>${safeText(decision.action_label || (decision.agent ? `${decision.agent}:${actionLabel(decision.kind)}` : 'waiting'))}</strong>
         <p>${safeText(semantics.verb)}</p>
       </div>
       <div class="action-route">
@@ -253,7 +253,7 @@ function normalizeExerciseEvent(event) {
   const cpuMatch = text.match(/cpu=([^\s;·]+)/);
   const memMatch = text.match(/memory=([^\s;·]+)/);
   const phase = event.phase || 'waiting';
-  const isIdle = phase === 'idle-efficiency';
+  const isIdle = phase === 'idle-efficiency' || phase === 'idle-power-save';
   return {
     ...event,
     operation: event.operation || (phase === 'waiting' ? 'observe' : isIdle ? 'delete' : 'apply'),
@@ -261,6 +261,8 @@ function normalizeExerciseEvent(event) {
     resources: {
       cpu_request: resources.cpu_request || cpuMatch?.[1] || null,
       memory_request: resources.memory_request || memMatch?.[1] || null,
+      replicas: resources.replicas ?? null,
+      node_selector: resources.node_selector ?? null,
     },
   };
 }
@@ -269,9 +271,11 @@ function exerciseSummary(event) {
   if (!normalized) return 'no live perturbation event yet';
   const resources = normalized.resources || {};
   const bits = [
+    normalized.intended_action ? `aim=${normalized.intended_agent || 'agent'}:${normalized.intended_action}` : null,
     normalized.operation || 'observe',
     normalized.deployment ? `deployment/${normalized.deployment}` : 'exercise deployments',
     normalized.namespace ? `ns=${normalized.namespace}` : null,
+    resources.replicas ? `replicas=${resources.replicas}` : null,
     resources.cpu_request ? `cpu=${resources.cpu_request}` : null,
     resources.memory_request ? `mem=${resources.memory_request}` : null,
   ].filter(Boolean);
@@ -289,6 +293,8 @@ function clusterStimulusMarkup(event) {
       <div class="stimulus-grid">
         <span><b>namespace</b>${safeText(normalized?.namespace || 'n/a')}</span>
         <span><b>operation</b>${safeText(normalized?.operation || 'n/a')}</span>
+        <span><b>intended action</b>${safeText(normalized?.intended_action || 'n/a')}</span>
+        <span><b>replicas</b>${safeText(resources.replicas ?? 'n/a')}</span>
         <span><b>cpu request</b>${safeText(resources.cpu_request || 'n/a')}</span>
         <span><b>memory request</b>${safeText(resources.memory_request || 'n/a')}</span>
         <span><b>rollout rc</b>${safeText(rollout?.returncode ?? 'n/a')}</span>
@@ -388,7 +394,7 @@ function eventDetail(event) {
     const payload = event.payload && Object.keys(event.payload).length
       ? Object.entries(event.payload).map(([key, value]) => `${key}=${value}`).join(', ')
       : 'no payload';
-    return `${event.agent}:${event.action_kind || event.kind} -> ${event.target || 'cluster'}; ${payload}; ${event.reason || ''}`;
+    return `${event.action_label || `${event.agent}:${event.action_kind || event.kind}`} -> ${event.target || 'cluster'}; ${payload}; ${event.reason || ''}`;
   }
   if (event.kind === 'optuna') {
     const params = event.params || {};
