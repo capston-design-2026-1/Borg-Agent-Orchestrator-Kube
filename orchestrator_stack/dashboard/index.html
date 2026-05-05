@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Borg Orchestrator Live</title>
-  <link rel="stylesheet" href="styles.css?v=202605052045" />
+  <link rel="stylesheet" href="styles.css?v=202605051255" />
 </head>
 <body>
   <main class="shell">
@@ -77,7 +77,7 @@
       <article class="panel">
         <div class="panel-head"><h2>Optuna</h2><span id="optunaStudy" class="muted">study waiting</span></div>
         <div id="optunaParams" class="params"></div>
-        <p class="chart-note">Objective score shows what Optuna maximizes; alpha, beta, and gamma are reward-weight parameters sampled per trial.</p>
+        <p id="optunaWindow" class="chart-note">Objective score shows what Optuna maximizes; alpha, beta, and gamma are reward-weight parameters sampled per actual Optuna trial ID.</p>
         <canvas id="optunaCanvas" width="900" height="320"></canvas>
         <div id="optunaObjectiveLegend" class="legend"></div>
         <canvas id="optunaParamCanvas" class="small-canvas" width="900" height="220"></canvas>
@@ -101,7 +101,7 @@
       <div id="events" class="events"></div>
     </section>
   </main>
-  <script>window.DASHBOARD_VERSION = "202605052045";</script>
-  <script src="app.js?v=202605052045"></script>
+  <script>window.DASHBOARD_VERSION = "202605051255";</script>
+  <script src="app.js?v=202605051255"></script>
 </body>
 </html>

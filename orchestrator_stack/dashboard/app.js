@@ -30,6 +30,10 @@ function niceTick(value) {
   if (abs >= 10) return value.toFixed(1);
   return value.toFixed(2);
 }
+function niceXTick(value) {
+  if (!Number.isFinite(value)) return 'n/a';
+  return Number.isInteger(value) ? String(value) : niceTick(value);
+}
 function drawSeries(canvas, rows, series, options = {}) {
   const ctx = canvas.getContext('2d');
   const w = canvas.width, h = canvas.height;
@@ -41,6 +45,19 @@ function drawSeries(canvas, rows, series, options = {}) {
   const min = Math.min(...values, 0);
   const max = Math.max(...values, 1);
   const span = max - min || 1;
+  const xValues = rows.map((row, index) => {
+    const raw = options.xValue ? options.xValue(row, index) : index;
+    const value = Number(raw);
+    return Number.isFinite(value) ? value : index;
+  });
+  const xMin = xValues.length ? Math.min(...xValues) : 0;
+  const xMax = xValues.length ? Math.max(...xValues) : 1;
+  const xSpan = xMax - xMin || 1;
+  const xFor = (index) => {
+    if (!rows.length) return pad.left;
+    if (rows.length === 1) return pad.left + plotW / 2;
+    return pad.left + ((xValues[index] - xMin) / xSpan) * plotW;
+  };
 
   ctx.save();
   ctx.font = '12px "Avenir Next", "Gill Sans", sans-serif';
@@ -61,15 +78,16 @@ function drawSeries(canvas, rows, series, options = {}) {
     ctx.fillText(niceTick(value), pad.left - 10, y);
   }
 
-  const xTicks = rows.length > 1 ? [0, Math.floor((rows.length - 1) / 2), rows.length - 1] : [0];
+  const xTicks = rows.length > 1 ? [0, Math.floor((rows.length - 1) / 2), rows.length - 1] : rows.length ? [0] : [];
   xTicks.forEach((index) => {
-    const x = rows.length <= 1 ? pad.left : pad.left + (index / (rows.length - 1)) * plotW;
+    const x = xFor(index);
+    const label = options.xTickLabel ? options.xTickLabel(rows[index], index, xValues[index]) : niceXTick(xValues[index]);
     ctx.beginPath();
     ctx.moveTo(x, pad.top);
     ctx.lineTo(x, h - pad.bottom);
     ctx.stroke();
     ctx.textAlign = 'center';
-    ctx.fillText(String(index), x, h - 24);
+    ctx.fillText(String(label), x, h - 24);
   });
 
   ctx.strokeStyle = 'rgba(20,33,27,.58)';
@@ -94,7 +112,7 @@ function drawSeries(canvas, rows, series, options = {}) {
   series.forEach(s => {
     ctx.strokeStyle = s.color; ctx.lineWidth = 3; ctx.beginPath();
     rows.forEach((row, i) => {
-      const x = rows.length === 1 ? pad.left : pad.left + (i / (rows.length - 1)) * plotW;
+      const x = xFor(i);
       const y = h - pad.bottom - ((s.value(row) - min) / span) * plotH;
       if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     });
@@ -553,7 +571,7 @@ function renderState(state, events) {
     { color: colors.AgentA, value: r => r.rewards?.AgentA },
     { color: colors.AgentB, value: r => r.rewards?.AgentB },
     { color: colors.AgentC, value: r => r.rewards?.AgentC },
-  ], { xLabel: 'orchestration step', yLabel: 'reward' });
+  ], { xLabel: 'orchestration step', yLabel: 'reward', xValue: (r, i) => r.step ?? i });
   const byAgent = rewardSummary.last_by_agent || {};
   $('rewardStats').innerHTML = [
     ['steps', rewardSummary.count],
@@ -568,13 +586,31 @@ function renderState(state, events) {
   $('optunaStudy').textContent = opt.status === 'disabled' ? (opt.reason || 'disabled') : (opt.study || 'study waiting');
   const params = opt.best_params || {};
   $('optunaParams').innerHTML = Object.keys(params).length ? Object.entries(params).map(([k,v]) => `<div><b>${k}</b><br>${fmt(v)}</div>`).join('') : '<div>no completed trial yet</div>';
-  drawSeries($('optunaCanvas'), opt.history || [], [{ color: colors.optuna, value: r => r.value }], { xLabel: 'trial', yLabel: 'objective score' });
+  const optunaHistory = opt.history || [];
+  const trialId = (row, index) => row.trial ?? index;
+  const trialLabel = (row, index) => `T${row.trial ?? index}`;
+  const trials = optunaHistory.map((row, index) => Number(trialId(row, index))).filter(Number.isFinite);
+  const trialWindow = trials.length
+    ? `Showing actual Optuna trial IDs T${trials[0]} to T${trials[trials.length - 1]}; the runtime stores the recent visible trial window.`
+    : 'Waiting for completed Optuna trials; objective and reward-weight traces will appear here.';
+  $('optunaWindow').textContent = trialWindow;
+  drawSeries($('optunaCanvas'), optunaHistory, [{ color: colors.optuna, value: r => r.value }], {
+    xLabel: 'Optuna trial id',
+    yLabel: 'objective score',
+    xValue: trialId,
+    xTickLabel: trialLabel,
+  });
   $('optunaObjectiveLegend').innerHTML = `<span><b style="color:${colors.optuna}">■</b> objective score</span>`;
-  drawSeries($('optunaParamCanvas'), opt.history || [], [
+  drawSeries($('optunaParamCanvas'), optunaHistory, [
     { color: colors.alpha, value: r => r.params?.alpha },
     { color: colors.beta, value: r => r.params?.beta },
     { color: colors.gamma, value: r => r.params?.gamma },
-  ], { xLabel: 'trial', yLabel: 'reward weight' });
+  ], {
+    xLabel: 'Optuna trial id',
+    yLabel: 'reward weight',
+    xValue: trialId,
+    xTickLabel: trialLabel,
+  });
   $('optunaParamLegend').innerHTML = ['alpha','beta','gamma'].map(k => `<span><b style="color:${colors[k]}">■</b> ${k}</span>`).join('');
 
   const ray = state.ray || {};
