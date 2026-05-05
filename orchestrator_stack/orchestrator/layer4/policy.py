@@ -22,9 +22,33 @@ def default_policy_actions(obs: Observation) -> dict[str, int]:
     max_risk = max(obs.p_fail_scores.values(), default=0.0)
     min_demand = min(obs.demand_projection.values(), default=1.0)
 
-    agent_a = 1 if max_risk >= 0.7 else 0
-    agent_b = 1 if min_demand < 0.3 else (2 if max(obs.demand_projection.values(), default=0.0) > 0.8 else 0)
-    agent_c = 1 if obs.queue_length > 100 else 0
+    agent_a = 0
+    if max_risk >= 0.83:
+        agent_a = 2
+    elif max_risk >= 0.7:
+        agent_a = 1
+    elif max_risk >= 0.5:
+        agent_a = 3
+
+    agent_b = 0
+    if min_demand < 0.12:
+        agent_b = 1
+    elif min_demand < 0.3:
+        agent_b = 3
+    elif min_demand < 0.45:
+        agent_b = 4
+    elif max(obs.demand_projection.values(), default=0.0) > 0.8:
+        agent_b = 2
+
+    agent_c = 0
+    if obs.queue_length >= 120:
+        agent_c = 4
+    elif obs.queue_length >= 80:
+        agent_c = 3
+    elif obs.queue_length >= 8:
+        agent_c = 1
+    elif obs.sla_violations > 0 and obs.queue_length > 0:
+        agent_c = 2
     return {"AgentA": agent_a, "AgentB": agent_b, "AgentC": agent_c}
 
 

@@ -52,15 +52,15 @@ def resolve_with_context(actions: list[AgentAction]) -> RefereeDecision:
         None,
     )
     if agent_a_safety is not None:
+        safety_label = "migration" if agent_a_safety.kind == ActionKind.MIGRATE else agent_a_safety.kind.value
         overridden = {
-            action.agent_name: "safety-first migration takes precedence"
+            action.agent_name: f"safety-first {safety_label} takes precedence"
             for action in meaningful
             if action is not agent_a_safety
         }
-        rationale_kind = "migration" if agent_a_safety.kind == ActionKind.MIGRATE else agent_a_safety.kind.value
         return RefereeDecision(
             action=agent_a_safety,
-            rationale=f"agent-a {rationale_kind} preempts lower-priority actions",
+            rationale=f"agent-a {safety_label} preempts lower-priority actions",
             overridden=overridden,
         )
 

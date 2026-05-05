@@ -13,7 +13,7 @@ class AgentARiskMitigator:
         if not obs.p_fail_scores:
             return AgentAction("AgentA", ActionKind.NOOP, score=0.0, priority=self.priority)
         node_id, score = max(obs.p_fail_scores.items(), key=lambda kv: kv[1])
-        if score >= 0.9:
+        if score >= 0.83:
             return AgentAction("AgentA", ActionKind.REPLICATE, target=node_id, score=float(score), priority=self.priority)
         if score >= 0.7:
             return AgentAction("AgentA", ActionKind.MIGRATE, target=node_id, score=float(score), priority=self.priority)
@@ -31,6 +31,15 @@ class AgentBEfficiencyOptimizer:
             return AgentAction("AgentB", ActionKind.NOOP, score=0.0, priority=self.priority)
 
         node_id, demand = min(obs.demand_projection.items(), key=lambda kv: kv[1])
+        if demand < 0.12:
+            return AgentAction(
+                "AgentB",
+                ActionKind.POWER_STATE,
+                target=node_id,
+                payload={"state": "sleep"},
+                score=1.0 - float(demand),
+                priority=self.priority,
+            )
         if demand < 0.3:
             return AgentAction(
                 "AgentB",
@@ -58,7 +67,40 @@ class AgentCGatekeeper:
 
     def act(self, obs: Observation) -> AgentAction:
         overloaded = sum(1 for n in obs.nodes if n.cpu_util > 0.85 or n.mem_util > 0.85)
-        if obs.queue_length > 120 or overloaded >= max(1, len(obs.nodes) // 2):
+        if obs.queue_length >= 120:
+            return AgentAction(
+                "AgentC",
+                ActionKind.RESOURCE_CAP,
+                target=max(obs.nodes, key=lambda node: node.cpu_util + node.mem_util).node_id if obs.nodes else None,
+                payload={"cpu_cap": 0.85, "mem_cap": 0.85},
+                score=1.0,
+                priority=self.priority,
+            )
+        if obs.queue_length >= 80:
+            return AgentAction(
+                "AgentC",
+                ActionKind.ADMISSION,
+                payload={"decision": "deprioritize"},
+                score=0.95,
+                priority=self.priority,
+            )
+        if obs.queue_length >= 8:
+            return AgentAction(
+                "AgentC",
+                ActionKind.ADMISSION,
+                payload={"decision": "queue"},
+                score=0.9,
+                priority=self.priority,
+            )
+        if obs.sla_violations > 0 and obs.queue_length > 0:
+            return AgentAction(
+                "AgentC",
+                ActionKind.ADMISSION,
+                payload={"decision": "reject"},
+                score=0.85,
+                priority=self.priority,
+            )
+        if overloaded >= max(1, len(obs.nodes) // 2):
             return AgentAction(
                 "AgentC",
                 ActionKind.RESOURCE_CAP,
