@@ -42,6 +42,60 @@ cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && LIVE_K8S=
 | 8 | Layer 5 Optuna | reward weight `alpha/beta/gamma`를 trial별로 탐색한다. | Optuna 카드, Objective graph, Weight graph |
 | 9 | Ray/RLlib | multi-agent PPO policy를 bootstrap/training한다. | Ray Status, Ray/RLlib panel, Ray RLlib PPO Policy 카드 |
 
+## 실시간 Kubernetes 환경
+
+현재 live orchestration target은 local Kind validation cluster다. managed cloud Kubernetes나 production multi-node cluster가 아니다. 정확한 inspection 결과는 `reports/evaluations/202605051249_kubernetes_environment_snapshot.md`에 기록되어 있다.
+
+| 항목 | 현재 값 |
+|---|---|
+| Kubernetes context | `kind-borg-aiopslab` |
+| Cluster type | Docker에서 실행되는 local Kind cluster |
+| API server | `https://127.0.0.1:54392` |
+| Kind node container | `borg-aiopslab-control-plane` |
+| Kind node image | `kindest/node:v1.35.0` |
+| Kubernetes server | `v1.35.0` |
+| kubectl client | `v1.34.1` |
+| Node 수 | `1` |
+| Node role | 하나의 `control-plane` node가 worker 역할까지 함께 수행 |
+| Node architecture | `arm64` |
+| Node OS | `Debian GNU/Linux 12 (bookworm)` |
+| Kernel | `6.12.76-linuxkit` |
+| Container runtime | `containerd://2.2.0` |
+| Node capacity | CPU core `10`, memory 약 `8Gi`, pod `110` |
+| Pod CIDR | `10.244.0.0/24` |
+| CNI | Kindnet |
+| Default storage class | `standard`, provisioner `rancher.io/local-path` |
+
+현재 환경에서 확인된 namespace의 의미는 다음과 같다.
+
+| Namespace | 역할 |
+|---|---|
+| `borg-orchestrator-exercise` | live exerciser가 synthetic workload Deployment를 생성/삭제하는 핵심 namespace |
+| `default` | 이전 AIOpsLab/DeathStarBench 검증에서 사용된 completed `wrk2` job 존재 |
+| `kube-system` | CoreDNS, API server, scheduler, controller-manager, etcd, kube-proxy, kindnet 등 cluster system component |
+| `local-path-storage` | local-path storage provisioner |
+| `observe` | observability namespace로 의도되었으나, inspection snapshot 기준 running observability pod는 없음 |
+| `test-social-network` | DeathStarBench/AIOpsLab namespace이나, inspection snapshot 기준 active social-network resource는 없음 |
+
+반드시 알고 있어야 할 runtime caveat는 다음과 같다.
+
+| 항목 | 현재 상태 | Dashboard 해석 |
+|---|---|---|
+| Metrics Server | 없음. `kubectl top nodes/pods`가 실패한다. | dashboard는 현재 Metrics API sample에 의존할 수 없다. |
+| In-cluster Prometheus | running Prometheus pod가 관측되지 않았다. | 외부 `PROMETHEUS_BASE_URL`을 주지 않는 한 Prometheus enrichment는 없다. |
+| `observe/prometheus-pvc` | 존재하지만 `openebs-hostpath` storage class가 없어 Pending 상태다. | observability stack이 이 Kind cluster에 완전히 배포된 상태가 아니다. |
+| Energy watts | default utilization model 기반 estimate다. | `est power ...W`는 실제 wattmeter 측정값이 아니다. |
+| Agent placement realism | single-node cluster다. | Agent C admission logic은 볼 수 있지만, 진짜 multi-node placement/migration 실험은 이 환경만으로는 보여주기 어렵다. |
+
+live exerciser는 실제 Kubernetes mutation을 수행한다. 예를 들어 `borg-orchestrator-exercise` namespace에 `moderate-demand`, `high-risk`, `bursty-safety` 같은 `pause` Deployment를 만들거나 삭제한다. 이 Deployment들은 실제 scheduler 결과를 만들 수 있으며, `Pending` pod와 `FailedScheduling: Insufficient cpu` 같은 event가 발생한다. 따라서 dashboard는 다음 데이터들을 섞어서 보여준다.
+
+| 데이터 종류 | 실제성 수준 |
+|---|---|
+| Node, pod, deployment, event, namespace, scheduler failure | Kind cluster의 실제 Kubernetes API 데이터 |
+| Synthetic workload phase와 rollout return code | exerciser가 실행한 실제 `kubectl apply/delete/rollout status` 결과 |
+| Agent A/B/C proposal, Referee choice, reward total | live cluster observation을 기반으로 twin/reward path에서 평가되는 orchestrator control-plane decision |
+| Energy watts | 별도 calibration이 없으면 `idle_watts=80`, `cpu_full_scale_watts=120`, `mem_full_scale_watts=60`을 쓰는 model-derived estimate |
+
 ## 아주 중요한 해석: 실제 Kubernetes 변화와 선택된 오케스트레이션 action
 
 대시보드에는 두 종류의 action-like 정보가 동시에 보인다.
