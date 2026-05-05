@@ -87,7 +87,7 @@ Important runtime caveats:
 | Energy watts | Estimated by the default utilization model. | `est power ...W` is not a physical wattmeter reading. |
 | Agent placement realism | Single-node cluster. | Agent C admission logic is visible, but true multi-node placement/migration behavior cannot be demonstrated here. |
 
-The live exerciser does perform real Kubernetes mutations. For example, it creates `pause` Deployments such as `moderate-demand`, `high-risk`, and `bursty-safety` under `borg-orchestrator-exercise`. Those Deployments can create real scheduler outcomes such as `Pending` pods and `FailedScheduling: Insufficient cpu`. The dashboard therefore mixes:
+The live exerciser does perform real Kubernetes mutations. For example, it creates `pause` Deployments such as `light-dvfs`, `safety-replicate`, and `admission-queue` under `borg-orchestrator-exercise`. Those Deployments can create real scheduler outcomes such as `Pending` pods and `FailedScheduling` events. The dashboard therefore mixes:
 
 | Data type | Reality level |
 |---|---|
@@ -192,7 +192,7 @@ This is the heart of the dashboard. The upper canvas is the architecture map. Th
 
 | Card | Meaning | Key fields |
 |---|---|---|
-| Intentional Kubernetes Stimulus | Real synthetic workload mutation applied to the cluster. | phase, namespace, operation, CPU request, memory request, rollout return code |
+| Intentional Kubernetes Stimulus | Real synthetic workload mutation applied to the cluster. | phase, intended action, namespace, operation, replicas, CPU request, memory request, rollout return code |
 | Performed Action | Final Referee-selected orchestration decision. | selected agent/action, route, target, payload, proposal chips |
 
 Stimulus operations:
@@ -207,15 +207,19 @@ Stimulus operations:
 
 ## Kubernetes Stimulus Phases
 
-When `EXERCISE_CLUSTER=1`, the exerciser rotates safe synthetic workloads. The default is randomized mode.
+When `EXERCISE_CLUSTER=1`, the exerciser rotates safe synthetic workloads. The default is randomized mode. Randomized mode samples from the same action-covering phase library below and jitters request sizes so the run is less periodic.
 
-| Phase | Kubernetes mutation | Purpose | Fixed/random resources |
+| Phase | Kubernetes mutation | Intended action coverage | Fixed/random resources |
 |---|---|---|---|
-| `idle-efficiency` | Deletes exercise Deployments. | Creates low demand so Agent B can produce efficiency actions. | No deployment |
-| `moderate-demand` | Creates a moderate-demand Deployment. | Gives Agent C/referee a non-efficiency decision opportunity. | Fixed: `8500m`, `128Mi`; random: `6500m-8800m`, `96Mi-768Mi` |
-| `high-risk` | Creates a high-risk Deployment. | Pushes high requested load so Agent A's safety path activates. | Fixed: `8800m`, `3Gi`; random: `8600m-9900m`, `1536Mi-4096Mi` |
-| `bursty-safety` | Creates a bursty-safety Deployment. | Produces a high CPU burst to trigger safety decisions. | Random: `9000m-10000m`, `512Mi-2048Mi` |
-| `memory-pressure` | Creates a memory-pressure Deployment. | Creates memory pressure to alter demand/risk and agent selection. | Random: `4000m-7200m`, `2048Mi-5120Mi` |
+| `idle-power-save` | Deletes exercise Deployments. | AgentB `power_state:sleep` under very low demand. | No deployment |
+| `light-dvfs` | Creates a light schedulable Deployment. | AgentB `dvfs` under low-but-not-empty demand. | Fixed: `2200m`, `256Mi`; random: `1600m-2800m`, `128Mi-512Mi` |
+| `moderate-memory` | Creates a moderate schedulable Deployment. | AgentB `memory_balloon` under moderate demand. | Fixed: `6200m`, `768Mi`; random: `5200m-6800m`, `512Mi-1280Mi` |
+| `safety-throttle` | Creates a moderate-high schedulable Deployment. | AgentA `throttle`. | Fixed: `8600m`, `1Gi`; random: `8200m-8800m`, `768Mi-1536Mi` |
+| `safety-migrate` | Creates a high schedulable Deployment. | AgentA `migrate`. | Fixed: `9200m`, `5Gi`; random: `9000m-9300m`, `4096Mi-5632Mi` |
+| `safety-replicate` | Creates a severe-but-schedulable Deployment. | AgentA `replicate`. | Fixed: `9400m`, `7Gi`; random: `9300m-9450m`, `6656Mi-7424Mi` |
+| `admission-queue` | Creates 12 unschedulable pods using an intentionally unmatched node selector. | AgentC `admission:queue`. | `12` replicas, random `80m-200m`, `48Mi-128Mi` |
+| `admission-deprioritize` | Creates 90 unschedulable pods using an intentionally unmatched node selector. | AgentC `admission:deprioritize`. | `90` replicas, random `80m-200m`, `48Mi-128Mi` |
+| `admission-cap` | Creates 130 unschedulable pods using an intentionally unmatched node selector. | AgentC `resource_cap`. | `130` replicas, random `80m-200m`, `48Mi-128Mi` |
 
 ## Agent A/B/C Operations and Rewards
 
@@ -235,8 +239,8 @@ Default config weights are `alpha=1.0`, `beta=0.6`, and `gamma=0.8`; Optuna sear
 |---|---|---:|---|---|---|
 | `noop` | No `p_fail_scores` or max risk `< 0.5` | 0 | None | No state change. | Base `+1.0`; live telemetry penalties can still apply. |
 | `throttle` | max risk `>= 0.5` and `< 0.7` | 3 | None | Multiplies target node CPU and network utilization by `0.85`. | If selected and `p_fail >= 0.5`, AgentA gets `+3.0`. |
-| `migrate` | max risk `>= 0.7` and `< 0.9` | 1 | None | Moves one active task from the highest-loaded other on-node to the target; lowers source load and raises target load slightly. | `+10.0` if `p_fail > 0.75`; `-20.0` if migrating at `p_fail < 0.4`. |
-| `replicate` | max risk `>= 0.9` | 2 | None | Replicates the most urgent task on the target node to the lowest-loaded other node. | `+8.0` if `p_fail > 0.85`. |
+| `migrate` | max risk `>= 0.7` and `< 0.83` | 1 | None | Moves one active task from the highest-loaded other on-node to the target; lowers source load and raises target load slightly. | `+10.0` if `p_fail > 0.75`; `-20.0` if migrating at `p_fail < 0.4`. |
+| `replicate` | max risk `>= 0.83` | 2 | None | Replicates the most urgent task on the target node to the lowest-loaded other node. | `+8.0` if `p_fail >= 0.83`. |
 
 Live telemetry effects that can always affect Agent A:
 
@@ -250,9 +254,9 @@ Live telemetry effects that can always affect Agent A:
 | Action | Heuristic trigger | RLlib action id | Payload | Twin transition effect | Possible reward |
 |---|---|---:|---|---|---|
 | `noop` | No demand projection or min demand `>= 0.45` | 0 | None | No state change. | Base `+1.0`; estimated-power telemetry bonus can still apply. |
-| `dvfs` | min demand `< 0.3` | 3 | `clock_scale=0.65` | Multiplies target CPU by `clock_scale`; adjusts network by `0.9 + 0.1*clock_scale`. | Selected efficiency action gets `+5.0` when max demand `< 0.35`; `-30.0` when max demand `> 0.75`. |
+| `power_state` sleep | min demand `< 0.12` | 1 | `state=sleep` | Sets node power state and reduces CPU/MEM utilization for sleep/off. | Same efficiency reward rule as DVFS. |
+| `dvfs` | min demand `>= 0.12` and `< 0.3` | 3 | `clock_scale=0.65` | Multiplies target CPU by `clock_scale`; adjusts network by `0.9 + 0.1*clock_scale`. | Selected efficiency action gets `+5.0` when max demand `< 0.35`; `-30.0` when max demand `> 0.75`. |
 | `memory_balloon` | min demand `>= 0.3` and `< 0.45` | 4 | `mem_scale=0.75` | Multiplies target memory utilization by `mem_scale`. | Same efficiency reward rule as DVFS. |
-| `power_state` sleep | Not selected by heuristic; possible through RLlib policy | 1 | `state=sleep` | Sets node power state and reduces CPU/MEM utilization for sleep/off. | Same efficiency reward rule. |
 | `power_state` on | Not selected by heuristic; possible through RLlib policy | 2 | `state=on` | Wakes/keeps node on and slightly raises CPU/MEM utilization. | Uses the common efficiency reward rule. |
 
 Live telemetry effect for Agent B:
@@ -268,10 +272,10 @@ Note: `est power ...W` is not a direct wattmeter value. It is calibrated utiliza
 | Action | Heuristic trigger | RLlib action id | Payload | Twin transition effect | Possible reward |
 |---|---|---:|---|---|---|
 | `admission:admit` | queue `< 20` and no overloaded nodes gives score `1.0`; otherwise normal state gives score `0.5` | 0 | `decision=admit` | Reduces queue length by up to 2. | `+5.0` when queue `< 80`; `-50.0` when queue `> 120`. |
-| `admission:queue` | Not selected by heuristic; possible through RLlib policy | 1 | `decision=queue` | Increases queue length by 1. | No explicit bonus in the trace twin, but protective admission can preempt Agent B in the Referee. |
-| `admission:reject` | Not selected by heuristic; possible through RLlib policy | 2 | `decision=reject` | Reduces queue length by 1. | `-20.0` when queue `< 60`. |
-| `admission:deprioritize` | Not selected by heuristic; possible through RLlib policy | 3 | `decision=deprioritize` | Lowers queued task priority. | `+3.0` when queue `>= 80`. |
-| `resource_cap` | queue `> 120` or overloaded nodes are at least half of all nodes | 4 | `cpu_cap=0.85`, `mem_cap=0.85` | Caps target CPU/MEM utilization at payload values. | `+4.0` when queue `>= 80`; the AIOpsLab adapter path can give `-5.0` when queue `< 80`. |
+| `admission:queue` | queue `>= 8` and `< 80` | 1 | `decision=queue` | Increases queue length by 1. | No explicit bonus in the trace twin, but protective admission can preempt Agent B in the Referee. |
+| `admission:reject` | `sla_violations > 0` and queue `> 0` but below the queue band | 2 | `decision=reject` | Reduces queue length by 1. | `-20.0` when queue `< 60`. |
+| `admission:deprioritize` | queue `>= 80` and `< 120` | 3 | `decision=deprioritize` | Lowers queued task priority. | `+3.0` when queue `>= 80`. |
+| `resource_cap` | queue `>= 120` or overloaded nodes are at least half of all nodes | 4 | `cpu_cap=0.85`, `mem_cap=0.85` | Caps target CPU/MEM utilization at payload values. | `+4.0` when queue `>= 80`; the AIOpsLab adapter path can give `-5.0` when queue `< 80`. |
 
 Live telemetry effect for Agent C:
 
@@ -309,7 +313,7 @@ Why the graph may look patterned:
 
 | Cause | Explanation |
 |---|---|
-| Deterministic exercise cycle | `EXERCISE_RANDOMIZE=0` repeats idle/moderate/high-risk phases. |
+| Deterministic exercise cycle | `EXERCISE_RANDOMIZE=0` repeats the action-covering stimulus phases in a fixed order. |
 | Randomized exercise | Default `EXERCISE_RANDOMIZE=1` randomizes phase and resource requests. |
 | Live cluster saturation | A one-node/one-workload cluster can push decisions toward one agent/action. |
 | Referee priority | High safety risk can repeatedly select Agent A; sustained low demand can repeatedly select Agent B. |

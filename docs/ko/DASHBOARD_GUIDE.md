@@ -87,7 +87,7 @@ cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && LIVE_K8S=
 | Energy watts | default utilization model 기반 estimate다. | `est power ...W`는 실제 wattmeter 측정값이 아니다. |
 | Agent placement realism | single-node cluster다. | Agent C admission logic은 볼 수 있지만, 진짜 multi-node placement/migration 실험은 이 환경만으로는 보여주기 어렵다. |
 
-live exerciser는 실제 Kubernetes mutation을 수행한다. 예를 들어 `borg-orchestrator-exercise` namespace에 `moderate-demand`, `high-risk`, `bursty-safety` 같은 `pause` Deployment를 만들거나 삭제한다. 이 Deployment들은 실제 scheduler 결과를 만들 수 있으며, `Pending` pod와 `FailedScheduling: Insufficient cpu` 같은 event가 발생한다. 따라서 dashboard는 다음 데이터들을 섞어서 보여준다.
+live exerciser는 실제 Kubernetes mutation을 수행한다. 예를 들어 `borg-orchestrator-exercise` namespace에 `light-dvfs`, `safety-replicate`, `admission-queue` 같은 `pause` Deployment를 만들거나 삭제한다. 이 Deployment들은 실제 scheduler 결과를 만들 수 있으며, `Pending` pod와 `FailedScheduling` event가 발생한다. 따라서 dashboard는 다음 데이터들을 섞어서 보여준다.
 
 | 데이터 종류 | 실제성 수준 |
 |---|---|
@@ -200,7 +200,7 @@ Flow map 아래의 operations deck은 architecture canvas와 분리되어 있어
 
 | 카드 | 의미 | 주요 필드 |
 |---|---|---|
-| Intentional Kubernetes Stimulus | 실제 cluster에 가한 synthetic workload 변화. | phase, namespace, operation, cpu request, memory request, rollout return code |
+| Intentional Kubernetes Stimulus | 실제 cluster에 가한 synthetic workload 변화. | phase, intended action, namespace, operation, replicas, cpu request, memory request, rollout return code |
 | Performed Action | Referee가 선택한 최종 orchestration decision. | selected agent/action, route, target, payload, proposal chips |
 
 Intentional Kubernetes Stimulus의 `operation`은 보통 다음 중 하나다.
@@ -215,15 +215,19 @@ Intentional Kubernetes Stimulus의 `operation`은 보통 다음 중 하나다.
 
 ## Kubernetes Stimulus phase
 
-Live mode에서 `EXERCISE_CLUSTER=1`이면 exerciser가 safe synthetic workloads를 반복적으로 적용한다. 기본은 randomized mode다.
+Live mode에서 `EXERCISE_CLUSTER=1`이면 exerciser가 safe synthetic workloads를 반복적으로 적용한다. 기본은 randomized mode다. randomized mode는 아래 action-covering phase library에서 phase를 샘플링하고 request size를 흔들어 reward/action pattern이 너무 주기적으로 보이지 않게 만든다.
 
-| Phase | 실제 Kubernetes 변화 | 목적 | 기본/랜덤 리소스 |
+| Phase | 실제 Kubernetes 변화 | 의도한 action coverage | 기본/랜덤 리소스 |
 |---|---|---|---|
-| `idle-efficiency` | exercise deployment 삭제 | 낮은 demand 상태를 만들어 Agent B efficiency action 기회를 만든다. | deployment 없음 |
-| `moderate-demand` | moderate-demand Deployment 생성 | Agent C admission/referee가 efficiency 외 decision을 낼 수 있게 한다. | 고정: `8500m`, `128Mi`; 랜덤: `6500m-8800m`, `96Mi-768Mi` |
-| `high-risk` | high-risk Deployment 생성 | 높은 요청량으로 Agent A safety path를 자극한다. | 고정: `8800m`, `3Gi`; 랜덤: `8600m-9900m`, `1536Mi-4096Mi` |
-| `bursty-safety` | bursty-safety Deployment 생성 | 순간적인 높은 CPU burst로 safety decision을 유도한다. | 랜덤: `9000m-10000m`, `512Mi-2048Mi` |
-| `memory-pressure` | memory-pressure Deployment 생성 | memory pressure를 만들어 demand/risk와 Agent A/B/C 선택을 흔든다. | 랜덤: `4000m-7200m`, `2048Mi-5120Mi` |
+| `idle-power-save` | exercise Deployment 삭제 | AgentB `power_state:sleep` | deployment 없음 |
+| `light-dvfs` | 낮은 schedulable Deployment 생성 | AgentB `dvfs` | 고정: `2200m`, `256Mi`; 랜덤: `1600m-2800m`, `128Mi-512Mi` |
+| `moderate-memory` | 중간 수준 schedulable Deployment 생성 | AgentB `memory_balloon` | 고정: `6200m`, `768Mi`; 랜덤: `5200m-6800m`, `512Mi-1280Mi` |
+| `safety-throttle` | 중간-높은 schedulable Deployment 생성 | AgentA `throttle` | 고정: `8600m`, `1Gi`; 랜덤: `8200m-8800m`, `768Mi-1536Mi` |
+| `safety-migrate` | 높은 schedulable Deployment 생성 | AgentA `migrate` | 고정: `9200m`, `5Gi`; 랜덤: `9000m-9300m`, `4096Mi-5632Mi` |
+| `safety-replicate` | severe-but-schedulable Deployment 생성 | AgentA `replicate` | 고정: `9400m`, `7Gi`; 랜덤: `9300m-9450m`, `6656Mi-7424Mi` |
+| `admission-queue` | intentionally unmatched node selector를 가진 unschedulable pod 12개 생성 | AgentC `admission:queue` | `12` replicas, 랜덤 `80m-200m`, `48Mi-128Mi` |
+| `admission-deprioritize` | intentionally unmatched node selector를 가진 unschedulable pod 90개 생성 | AgentC `admission:deprioritize` | `90` replicas, 랜덤 `80m-200m`, `48Mi-128Mi` |
+| `admission-cap` | intentionally unmatched node selector를 가진 unschedulable pod 130개 생성 | AgentC `resource_cap` | `130` replicas, 랜덤 `80m-200m`, `48Mi-128Mi` |
 
 ## Agent A/B/C: action과 reward 상세
 
@@ -245,8 +249,8 @@ Agent A는 node failure risk와 task survival을 담당한다.
 |---|---|---:|---|---|---|
 | `noop` | `p_fail_scores`가 없거나 max risk `< 0.5` | 0 | 없음 | 상태 변경 없음 | 기본 `+1.0`; live telemetry penalty는 별도 적용 가능 |
 | `throttle` | max risk `>= 0.5` and `< 0.7` | 3 | 없음 | target node의 `cpu_util`과 `net_util`을 각각 `*0.85`로 낮춘다. | 선택된 action이고 `p_fail >= 0.5`이면 AgentA `+3.0` |
-| `migrate` | max risk `>= 0.7` and `< 0.9` | 1 | 없음 | 가장 부하가 큰 다른 on node에서 task 하나를 target으로 이동시키고 source load를 낮추며 target load를 소폭 올린다. | `p_fail > 0.75`이면 `+10.0`; `p_fail < 0.4`인데 migrate하면 `-20.0` |
-| `replicate` | max risk `>= 0.9` | 2 | 없음 | target node의 가장 urgent한 task를 낮은 부하 node에 replica로 추가한다. | `p_fail > 0.85`이면 `+8.0` |
+| `migrate` | max risk `>= 0.7` and `< 0.83` | 1 | 없음 | 가장 부하가 큰 다른 on node에서 task 하나를 target으로 이동시키고 source load를 낮추며 target load를 소폭 올린다. | `p_fail > 0.75`이면 `+10.0`; `p_fail < 0.4`인데 migrate하면 `-20.0` |
+| `replicate` | max risk `>= 0.83` | 2 | 없음 | target node의 가장 urgent한 task를 낮은 부하 node에 replica로 추가한다. | `p_fail >= 0.83`이면 `+8.0` |
 
 Agent A에 항상 영향을 줄 수 있는 live telemetry reward/penalty는 다음과 같다.
 
@@ -262,9 +266,9 @@ Agent B는 낮은 수요 node를 찾아 DVFS, memory balloon, power state 같은
 | Action | 발생 조건: heuristic policy | RLlib policy action id | payload | Twin transition 효과 | Reward 가능성 |
 |---|---|---:|---|---|---|
 | `noop` | demand projection이 없거나 min demand `>= 0.45` | 0 | 없음 | 상태 변경 없음 | 기본 `+1.0`; estimated power bonus는 live telemetry가 있으면 별도 적용 가능 |
-| `dvfs` | min demand `< 0.3` | 3 | `clock_scale=0.65` | target node의 `cpu_util *= clock_scale`, `net_util *= 0.9 + 0.1*clock_scale` | selected efficiency action이고 max demand `< 0.35`이면 `+5.0`; max demand `> 0.75`이면 `-30.0` |
+| `power_state` sleep | min demand `< 0.12` | 1 | `state=sleep` | target node power state를 sleep/off/on 중 하나로 바꾸며 sleep/off는 CPU/MEM utilization을 낮춘다. | selected efficiency action이고 max demand `< 0.35`이면 `+5.0`; max demand `> 0.75`이면 `-30.0` |
+| `dvfs` | min demand `>= 0.12` and `< 0.3` | 3 | `clock_scale=0.65` | target node의 `cpu_util *= clock_scale`, `net_util *= 0.9 + 0.1*clock_scale` | selected efficiency action이고 max demand `< 0.35`이면 `+5.0`; max demand `> 0.75`이면 `-30.0` |
 | `memory_balloon` | min demand `>= 0.3` and `< 0.45` | 4 | `mem_scale=0.75` | target node의 `mem_util *= mem_scale` | selected efficiency action이고 max demand `< 0.35`이면 `+5.0`; max demand `> 0.75`이면 `-30.0` |
-| `power_state` sleep | heuristic은 직접 선택하지 않음; RLlib policy에서 가능 | 1 | `state=sleep` | target node power state를 sleep/off/on 중 하나로 바꾸며 sleep/off는 CPU/MEM utilization을 낮춘다. | selected efficiency action이고 max demand `< 0.35`이면 `+5.0`; max demand `> 0.75`이면 `-30.0` |
 | `power_state` on | heuristic은 직접 선택하지 않음; RLlib policy에서 가능 | 2 | `state=on` | node를 on 상태로 두고 CPU/MEM utilization을 소폭 올린다. | high demand node wake-up policy로 사용될 수 있으나 reward rule은 efficiency action 공통 규칙을 따른다. |
 
 Agent B에 항상 영향을 줄 수 있는 live telemetry reward는 다음과 같다.
@@ -282,10 +286,10 @@ Agent C는 queue pressure와 overloaded node를 보고 admission 또는 resource
 | Action | 발생 조건: heuristic policy | RLlib policy action id | payload | Twin transition 효과 | Reward 가능성 |
 |---|---|---:|---|---|---|
 | `admission:admit` | queue `< 20` and overloaded node `0`이면 score `1.0`; 그 외 일반 상태에서는 score `0.5` | 0 | `decision=admit` | queue length를 최대 2 줄인다. | queue `< 80`이면 `+5.0`; queue `> 120`에서 admit하면 `-50.0` |
-| `admission:queue` | heuristic은 직접 선택하지 않음; RLlib policy에서 가능 | 1 | `decision=queue` | queue length를 1 늘린다. | explicit reward bonus는 없지만 protective admission으로 Referee에서 Agent B보다 우선될 수 있다. |
-| `admission:reject` | heuristic은 직접 선택하지 않음; RLlib policy에서 가능 | 2 | `decision=reject` | queue length를 1 줄인다. | queue `< 60`에서 reject하면 `-20.0` |
-| `admission:deprioritize` | heuristic은 직접 선택하지 않음; RLlib policy에서 가능 | 3 | `decision=deprioritize` | queued task priority를 낮춘다. | queue `>= 80`이면 `+3.0` |
-| `resource_cap` | queue `> 120` 또는 overloaded node가 node 수의 절반 이상 | 4 | `cpu_cap=0.85`, `mem_cap=0.85` | target node CPU/MEM utilization을 cap 이하로 제한한다. | queue `>= 80`이면 `+4.0`; AIOpsLab adapter path에서는 queue `< 80`이면 `-5.0` |
+| `admission:queue` | queue `>= 8` and `< 80` | 1 | `decision=queue` | queue length를 1 늘린다. | explicit reward bonus는 없지만 protective admission으로 Referee에서 Agent B보다 우선될 수 있다. |
+| `admission:reject` | `sla_violations > 0`이고 queue `> 0`이지만 queue band 미만 | 2 | `decision=reject` | queue length를 1 줄인다. | queue `< 60`에서 reject하면 `-20.0` |
+| `admission:deprioritize` | queue `>= 80` and `< 120` | 3 | `decision=deprioritize` | queued task priority를 낮춘다. | queue `>= 80`이면 `+3.0` |
+| `resource_cap` | queue `>= 120` 또는 overloaded node가 node 수의 절반 이상 | 4 | `cpu_cap=0.85`, `mem_cap=0.85` | target node CPU/MEM utilization을 cap 이하로 제한한다. | queue `>= 80`이면 `+4.0`; AIOpsLab adapter path에서는 queue `< 80`이면 `-5.0` |
 
 Agent C에 항상 영향을 줄 수 있는 live telemetry reward는 다음과 같다.
 
@@ -325,7 +329,7 @@ Reward Stream panel은 최근 reward history를 보여준다.
 
 | 원인 | 설명 |
 |---|---|
-| deterministic exercise cycle | `EXERCISE_RANDOMIZE=0`이면 idle/moderate/high-risk phase가 반복되어 reward도 반복 패턴을 보일 수 있다. |
+| deterministic exercise cycle | `EXERCISE_RANDOMIZE=0`이면 action-covering stimulus phase가 고정 순서로 반복되어 reward도 반복 패턴을 보일 수 있다. |
 | randomized exercise | 기본 `EXERCISE_RANDOMIZE=1`에서는 phase와 resource request가 무작위로 변해 더 불규칙한 reward stream이 된다. |
 | live cluster saturation | 실제 cluster가 한 node/한 workload 중심이면 decision이 한 agent/action에 몰릴 수 있다. |
 | Referee priority | safety risk가 높으면 Agent A가 반복적으로 preempt할 수 있고, low demand가 지속되면 Agent B가 반복될 수 있다. |

@@ -36,7 +36,7 @@ Do not write `\./orchestrator_stack/...`; the backslash must end the previous li
 
 Live mode defaults to `MODE=full`: Ray/RLlib policy bootstrap and Optuna reward tuning run before the continuous Kubernetes loop. Use the repository `.venv` Python for this full mode because it contains Ray, Optuna, XGBoost, and Torch.
 
-Live mode also defaults to `EXERCISE_CLUSTER=1`. The launcher rotates safe synthetic Kubernetes workloads in the dedicated `borg-orchestrator-exercise` namespace so the live cluster does not stay idle. The rotation intentionally creates idle, moderate-demand, and high-risk request patterns so Agent B, Agent C, and Agent A all receive decision opportunities.
+Live mode also defaults to `EXERCISE_CLUSTER=1`. The launcher rotates safe synthetic Kubernetes workloads in the dedicated `borg-orchestrator-exercise` namespace so the live cluster does not stay idle. The rotation intentionally covers distinct action families: Agent B `power_state`, `dvfs`, and `memory_balloon`; Agent A `throttle`, `migrate`, and `replicate`; and Agent C `admission:queue`, `admission:deprioritize`, and `resource_cap`.
 
 What it does:
 
@@ -128,7 +128,7 @@ Change exercise cadence:
 LIVE_K8S=1 EXERCISE_INTERVAL_ITERATIONS=2 ./orchestrator_stack/scripts/launch_orchestration.sh
 ```
 
-Use deterministic old-style exercise phases for debugging:
+Use deterministic action-coverage exercise phases for debugging:
 
 ```bash
 LIVE_K8S=1 EXERCISE_RANDOMIZE=0 ./orchestrator_stack/scripts/launch_orchestration.sh
