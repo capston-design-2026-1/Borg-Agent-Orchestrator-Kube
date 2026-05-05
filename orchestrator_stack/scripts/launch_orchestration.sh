@@ -25,6 +25,15 @@ INTERVAL_SECONDS="${INTERVAL_SECONDS:-10}"
 LIVE_MAX_ITERATIONS="${LIVE_MAX_ITERATIONS:-}"
 NAMESPACE_PREFIXES="${NAMESPACE_PREFIXES:-test-,default}"
 PROMETHEUS_BASE_URL="${PROMETHEUS_BASE_URL:-}"
+if [[ "$LIVE_K8S" == "1" ]]; then
+  OBSERVABILITY_STACK="${OBSERVABILITY_STACK:-1}"
+  PROMETHEUS_PORT_FORWARD="${PROMETHEUS_PORT_FORWARD:-1}"
+else
+  OBSERVABILITY_STACK="${OBSERVABILITY_STACK:-0}"
+  PROMETHEUS_PORT_FORWARD="${PROMETHEUS_PORT_FORWARD:-0}"
+fi
+PROMETHEUS_PORT="${PROMETHEUS_PORT:-19090}"
+OBSERVABILITY_WAIT_TIMEOUT="${OBSERVABILITY_WAIT_TIMEOUT:-180s}"
 POWER_CALIBRATION="${POWER_CALIBRATION:-}"
 TRACE_OUT="${TRACE_OUT:-orchestrator_stack/runtime/visualization/live_kubernetes_trace.json}"
 if [[ "$LIVE_K8S" == "1" ]]; then
@@ -44,6 +53,7 @@ fi
 mkdir -p "$EVENT_DIR" orchestrator_stack/runtime/dashboard
 SERVER_LOG="orchestrator_stack/runtime/dashboard/server.log"
 RUN_LOG="orchestrator_stack/runtime/dashboard/run.log"
+PROMETHEUS_FORWARD_LOG="orchestrator_stack/runtime/dashboard/prometheus-port-forward.log"
 RUN_ID="$(date +%Y%m%d%H%M%S)"
 GIT_REV="$(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
 
@@ -70,7 +80,53 @@ if ! mkdir "$LOCK_DIR" 2>/dev/null; then
   mkdir "$LOCK_DIR"
 fi
 echo "$$" > "$LOCK_DIR/pid"
-trap 'kill "${SERVER_PID:-}" >/dev/null 2>&1 || true; rm -f "$LOCK_DIR/pid" >/dev/null 2>&1 || true; rmdir "$LOCK_DIR" >/dev/null 2>&1 || true' EXIT
+
+cleanup() {
+  kill "${SERVER_PID:-}" >/dev/null 2>&1 || true
+  kill "${PROMETHEUS_PF_PID:-}" >/dev/null 2>&1 || true
+  rm -f "$LOCK_DIR/pid" >/dev/null 2>&1 || true
+  rmdir "$LOCK_DIR" >/dev/null 2>&1 || true
+}
+trap cleanup EXIT
+
+wait_for_local_http() {
+  local url="$1"
+  local timeout_seconds="$2"
+  local watched_pid="${3:-}"
+  local deadline=$((SECONDS + timeout_seconds))
+  while (( SECONDS < deadline )); do
+    if [[ -n "$watched_pid" ]] && ! kill -0 "$watched_pid" >/dev/null 2>&1; then
+      return 2
+    fi
+    if "$PYTHON_BIN" -c 'import sys; from urllib.request import urlopen; urlopen(sys.argv[1], timeout=2).read()' "$url" >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 1
+  done
+  return 1
+}
+
+if [[ "$LIVE_K8S" == "1" && "$OBSERVABILITY_STACK" == "1" ]]; then
+  echo "observability: bootstrapping in-cluster Metrics Server, Prometheus, and Node Exporter"
+  KUBECONFIG="$KUBECONFIG_PATH" \
+  OBSERVABILITY_WAIT_TIMEOUT="$OBSERVABILITY_WAIT_TIMEOUT" \
+    ./orchestrator_stack/scripts/bootstrap_observability.sh
+fi
+
+if [[ "$LIVE_K8S" == "1" && -z "$PROMETHEUS_BASE_URL" && "$PROMETHEUS_PORT_FORWARD" == "1" ]]; then
+  echo "observability: starting Prometheus port-forward on 127.0.0.1:$PROMETHEUS_PORT"
+  : > "$PROMETHEUS_FORWARD_LOG"
+  kubectl --kubeconfig "$KUBECONFIG_PATH" -n observe port-forward svc/prometheus-server "$PROMETHEUS_PORT:80" > "$PROMETHEUS_FORWARD_LOG" 2>&1 &
+  PROMETHEUS_PF_PID=$!
+  if ! wait_for_local_http "http://127.0.0.1:$PROMETHEUS_PORT/-/ready" 45 "$PROMETHEUS_PF_PID"; then
+    echo "error: Prometheus port-forward did not become ready" >&2
+    sed 's/^/prometheus-port-forward: /' "$PROMETHEUS_FORWARD_LOG" >&2 || true
+    exit 1
+  fi
+  PROMETHEUS_BASE_URL="http://127.0.0.1:$PROMETHEUS_PORT"
+  echo "observability: Prometheus ready at $PROMETHEUS_BASE_URL"
+fi
+
 cat > "$EVENT_DIR/run_manifest.json" <<EOF
 {
   "run_id": "$RUN_ID",
@@ -79,7 +135,11 @@ cat > "$EVENT_DIR/run_manifest.json" <<EOF
   "mode": "$MODE",
   "config": "$CONFIG",
   "event_dir": "$EVENT_DIR",
-  "python": "$PYTHON_BIN"
+  "python": "$PYTHON_BIN",
+  "observability_stack": "$OBSERVABILITY_STACK",
+  "prometheus_base_url": "$PROMETHEUS_BASE_URL",
+  "prometheus_port_forward": "$PROMETHEUS_PORT_FORWARD",
+  "prometheus_port": "$PROMETHEUS_PORT"
 }
 EOF
 
@@ -94,6 +154,10 @@ echo "run id: $RUN_ID"
 echo "git rev: $GIT_REV"
 echo "live k8s: $LIVE_K8S"
 echo "mode: $MODE"
+echo "observability stack: $OBSERVABILITY_STACK"
+if [[ -n "$PROMETHEUS_BASE_URL" ]]; then
+  echo "prometheus: $PROMETHEUS_BASE_URL"
+fi
 
 if [[ "$OPEN_BROWSER" == "1" && "$(uname -s)" == "Darwin" ]]; then
   open "$URL" >/dev/null 2>&1 || true
