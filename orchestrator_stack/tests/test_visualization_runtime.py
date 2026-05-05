@@ -70,6 +70,8 @@ def test_dashboard_flow_diagram_uses_measured_card_connectors():
     assert "exerciseSummary" in app_js
     assert "telemetrySourceLabel" in app_js
     assert "kubectl + prometheus" in app_js
+    assert "current launch Optuna trial" in app_js
+    assert "persisted study IDs" in app_js
     assert "optunaParamCanvas" in index_html
     assert "actionSemantics" in app_js
     for action_kind in ("migrate", "replicate", "throttle", "memory_balloon", "dvfs", "admission", "resource_cap"):
@@ -148,6 +150,8 @@ def test_visualization_state_writes_state_and_events(tmp_path: Path):
     assert payload["cluster"]["max_risk"] == 0.4
     assert payload["decision"]["reason"] == "risk=0.4"
     assert payload["optuna"]["best_score"] == 3.2
+    assert payload["optuna"]["history"][-1]["run_trial"] == 1
+    assert payload["optuna"]["history"][-1]["trial"] == 0
     assert payload["ray"]["status"] == "trained"
     assert len(events) >= 4
 

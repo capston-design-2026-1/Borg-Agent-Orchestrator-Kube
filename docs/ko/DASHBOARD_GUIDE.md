@@ -355,9 +355,10 @@ Optuna는 reward weight와 일부 policy tuning을 위한 meta-optimization laye
 | `alpha`, `beta`, `gamma` 카드 | 현재 best trial의 reward weights. |
 | Objective score graph | Optuna가 maximize하는 objective value. 선이 하나인 이유는 objective가 하나이기 때문이다. |
 | Weight graph | trial마다 sample된 `alpha`, `beta`, `gamma` 세 weight의 변화. |
-| Optuna graph x-axis | local array position이 아니라 `T15`, `T16`, `T17` 같은 실제 Optuna trial ID를 표시한다. |
+| Optuna graph x-axis | 현재 launch 안에서의 trial 순서다. 예: `#1`, `#2`, `#3`. |
+| Optuna window note | 현재 launch 순서가 persisted Optuna study ID 몇 번에 해당하는지 보여준다. 예: `T18`부터 `T20`. |
 
-Optuna runtime state는 최근 visible history window만 저장할 수 있다. 따라서 chart에 `T15`, `T16`, `T17` 세 점이 보이면 이것은 실제 Optuna trial 15-17을 의미한다. 새로 시작한 local sequence `0,1,2`로 해석하면 안 된다.
+Optuna study는 `orchestrator_stack/runtime/optuna/orchestrator.db`에 저장되고 `load_if_exists=True`로 재사용되기 때문에 launch가 바뀌어도 global trial ID가 계속 증가한다. 그래서 새로 3-trial live launch를 실행해도 persisted study ID는 `T18`, `T19`, `T20`처럼 보일 수 있다. 그래프 x-axis는 혼동을 줄이기 위해 현재 launch 기준 `#1`부터 `#3`을 표시하고, note가 해당 point의 persisted study ID 범위를 따로 기록한다.
 
 Optuna search range는 다음과 같다.
 

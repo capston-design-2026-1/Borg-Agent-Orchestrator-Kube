@@ -599,18 +599,19 @@ function renderState(state, events) {
   const params = opt.best_params || {};
   $('optunaParams').innerHTML = Object.keys(params).length ? Object.entries(params).map(([k,v]) => `<div><b>${k}</b><br>${fmt(v)}</div>`).join('') : '<div>no completed trial yet</div>';
   const optunaHistory = opt.history || [];
-  const trialId = (row, index) => row.trial ?? index;
-  const trialLabel = (row, index) => `T${row.trial ?? index}`;
-  const trials = optunaHistory.map((row, index) => Number(trialId(row, index))).filter(Number.isFinite);
-  const trialWindow = trials.length
-    ? `Showing actual Optuna trial IDs T${trials[0]} to T${trials[trials.length - 1]}; the runtime stores the recent visible trial window.`
+  const runTrial = (row, index) => row.run_trial ?? index + 1;
+  const runTrialLabel = (row, index) => `#${runTrial(row, index)}`;
+  const studyTrials = optunaHistory.map(row => Number(row.trial)).filter(Number.isFinite);
+  const runTrials = optunaHistory.map((row, index) => Number(runTrial(row, index))).filter(Number.isFinite);
+  const trialWindow = runTrials.length && studyTrials.length
+    ? `Showing current-launch trials #${runTrials[0]} to #${runTrials[runTrials.length - 1]}; persisted study IDs are T${studyTrials[0]} to T${studyTrials[studyTrials.length - 1]}.`
     : 'Waiting for completed Optuna trials; objective and reward-weight traces will appear here.';
   $('optunaWindow').textContent = trialWindow;
   drawSeries($('optunaCanvas'), optunaHistory, [{ color: colors.optuna, value: r => r.value }], {
-    xLabel: 'Optuna trial id',
+    xLabel: 'current launch Optuna trial',
     yLabel: 'objective score',
-    xValue: trialId,
-    xTickLabel: trialLabel,
+    xValue: runTrial,
+    xTickLabel: runTrialLabel,
   });
   $('optunaObjectiveLegend').innerHTML = `<span><b style="color:${colors.optuna}">■</b> objective score</span>`;
   drawSeries($('optunaParamCanvas'), optunaHistory, [
@@ -618,10 +619,10 @@ function renderState(state, events) {
     { color: colors.beta, value: r => r.params?.beta },
     { color: colors.gamma, value: r => r.params?.gamma },
   ], {
-    xLabel: 'Optuna trial id',
+    xLabel: 'current launch Optuna trial',
     yLabel: 'reward weight',
-    xValue: trialId,
-    xTickLabel: trialLabel,
+    xValue: runTrial,
+    xTickLabel: runTrialLabel,
   });
   $('optunaParamLegend').innerHTML = ['alpha','beta','gamma'].map(k => `<span><b style="color:${colors[k]}">■</b> ${k}</span>`).join('');
 

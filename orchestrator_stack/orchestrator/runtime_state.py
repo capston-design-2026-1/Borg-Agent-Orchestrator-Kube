@@ -117,7 +117,7 @@ class VisualizationState:
     def optuna_trial(self, study: str, number: int, value: float | None, params: dict[str, Any], best_value: float | None) -> None:
         optuna = self.state["optuna"]
         optuna.update({"status": "running", "study": study, "trial": int(number), "best_score": best_value, "best_params": params if value == best_value else optuna.get("best_params", {})})
-        optuna["history"].append({"trial": int(number), "value": value, "params": params, "time": kst_now_iso()})
+        optuna["history"].append({"run_trial": len(optuna["history"]) + 1, "trial": int(number), "value": value, "params": params, "time": kst_now_iso()})
         del optuna["history"][:-40]
         self.emit("optuna", f"trial {number} value={value}", study=study, trial=number, value=value, params=params, best_score=best_value)
 
