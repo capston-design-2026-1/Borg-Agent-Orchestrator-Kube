@@ -68,6 +68,8 @@ def test_dashboard_flow_diagram_uses_measured_card_connectors():
     assert ".diagram-action-trace {\n  position: relative;" in styles
     assert ".diagram-stimulus {\n  position: relative;" in styles
     assert "exerciseSummary" in app_js
+    assert "telemetrySourceLabel" in app_js
+    assert "kubectl + prometheus" in app_js
     assert "optunaParamCanvas" in index_html
     assert "actionSemantics" in app_js
     for action_kind in ("migrate", "replicate", "throttle", "memory_balloon", "dvfs", "admission", "resource_cap"):
@@ -195,6 +197,7 @@ def test_live_kubernetes_orchestration_loop_uses_cluster_snapshots(monkeypatch, 
         "completed_tasks": 0,
         "energy_watts": 210.0,
         "power_calibration": {"source": "default_utilization_model"},
+        "telemetry_sources": ["kubernetes_api", "prometheus_node_exporter"],
     }
     monkeypatch.setattr(visualization, "capture_kubernetes_trace_row", lambda **kwargs: dict(live_row))
     monkeypatch.setattr(
@@ -230,6 +233,7 @@ def test_live_kubernetes_orchestration_loop_uses_cluster_snapshots(monkeypatch, 
     assert state["cluster"]["sla_violations"] == 0
     assert state["cluster"]["power_metric_kind"] == "estimated"
     assert state["cluster"]["power_calibration_source"] == "default_utilization_model"
+    assert state["cluster"]["telemetry_sources"] == ["kubernetes_api", "prometheus_node_exporter"]
 
 
 def test_live_kubernetes_loop_continues_without_xgboost(monkeypatch, tmp_path: Path):
