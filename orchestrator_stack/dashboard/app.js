@@ -1,5 +1,5 @@
 const $ = (id) => document.getElementById(id);
-const colors = { total: '#14211b', AgentA: '#b44634', AgentB: '#16835f', AgentC: '#2f6f9f', optuna: '#d48a20', alpha: '#b44634', beta: '#16835f', gamma: '#2f6f9f' };
+const colors = { total: '#14211b', AgentA: '#b44634', AgentB: '#16835f', AgentC: '#2f6f9f', optuna: '#d48a20', learning: '#16835f', ray: '#745f9f', alpha: '#b44634', beta: '#16835f', gamma: '#2f6f9f' };
 async function getJSON(path) { const res = await fetch(path, { cache: 'no-store' }); return res.json(); }
 let reloadingForVersion = false;
 async function reloadIfDashboardChanged() {
@@ -33,6 +33,16 @@ function niceTick(value) {
 function niceXTick(value) {
   if (!Number.isFinite(value)) return 'n/a';
   return Number.isInteger(value) ? String(value) : niceTick(value);
+}
+function finiteNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+function optunaTrialId(row, index) {
+  return row.trial ?? row.run_trial ?? index;
+}
+function optunaTrialLabel(row, index) {
+  return `T${optunaTrialId(row, index)}`;
 }
 function drawSeries(canvas, rows, series, options = {}) {
   const ctx = canvas.getContext('2d');
@@ -158,7 +168,14 @@ function drawSeries(canvas, rows, series, options = {}) {
     ctx.lineCap = 'round';
     ctx.beginPath();
     points.forEach((point, i) => {
-      if (i === 0) ctx.moveTo(point.x, point.y); else ctx.lineTo(point.x, point.y);
+      if (i === 0) {
+        ctx.moveTo(point.x, point.y);
+      } else if (s.stepped) {
+        ctx.lineTo(point.x, points[i - 1].y);
+        ctx.lineTo(point.x, point.y);
+      } else {
+        ctx.lineTo(point.x, point.y);
+      }
     });
     ctx.stroke();
     if (options.showPoints) {
@@ -188,6 +205,104 @@ function drawSeries(canvas, rows, series, options = {}) {
       ctx.fillText(niceTick(last.value), Math.min(w - pad.right + 8, last.x + 8), last.y);
     }
   });
+}
+function learningRowsFromOptuna(history) {
+  const rows = (history || [])
+    .map((row, index) => ({ ...row, trial_id: Number(optunaTrialId(row, index)), objective: finiteNumber(row.value), source_index: index }))
+    .filter(row => Number.isFinite(row.trial_id) && row.objective !== null)
+    .sort((a, b) => a.trial_id - b.trial_id);
+  let best = -Infinity;
+  return rows.map((row, index) => {
+    const previousBest = best;
+    const isFirst = index === 0;
+    const improved = row.objective > best;
+    if (improved) best = row.objective;
+    return {
+      ...row,
+      sequence: index + 1,
+      best_so_far: best,
+      improved: improved && !isFirst,
+      improvement_delta: isFirst ? 0 : Math.max(0, best - previousBest),
+    };
+  });
+}
+function learningSummary(rows, ray) {
+  if (!rows.length) {
+    return {
+      status: 'waiting',
+      statusClass: 'waiting',
+      lift: null,
+      liftPct: null,
+      improvements: 0,
+      bestRow: null,
+      latestRow: null,
+      plateauTrials: null,
+      rayMean: finiteNumber(ray?.reward_mean),
+      note: 'Waiting for Optuna trials. Run with NO_TUNE=0 to stream optimizer evidence into this panel.',
+    };
+  }
+  const first = rows[0];
+  const latest = rows[rows.length - 1];
+  const bestRow = rows.reduce((best, row) => row.objective > best.objective ? row : best, first);
+  const lift = bestRow.objective - first.objective;
+  const liftPct = Math.abs(first.objective) > 1e-9 ? (lift / Math.abs(first.objective)) * 100 : null;
+  const improvements = rows.filter(row => row.improved).length;
+  const plateauTrials = latest.sequence - bestRow.sequence;
+  const rayMean = finiteNumber(ray?.reward_mean);
+  const statusClass = improvements === 0 ? 'exploring' : plateauTrials <= 3 ? 'improving' : 'plateau';
+  const status = statusClass === 'improving' ? 'improving' : statusClass === 'plateau' ? 'plateau watch' : 'exploring';
+  const note = statusClass === 'improving'
+    ? `Best-so-far improved ${improvements} time${improvements === 1 ? '' : 's'} and the current best is recent at ${optunaTrialLabel(bestRow, bestRow.source_index)}.`
+    : statusClass === 'plateau'
+      ? `Optuna is still exploring, but no new best appeared for ${plateauTrials} trial${plateauTrials === 1 ? '' : 's'} after ${optunaTrialLabel(bestRow, bestRow.source_index)}.`
+      : 'Optuna has trial evidence but has not beaten the initial observed objective yet.';
+  return { status, statusClass, lift, liftPct, improvements, bestRow, latestRow: latest, plateauTrials, rayMean, note };
+}
+function renderLearningPanel(state) {
+  const opt = state.optuna || {};
+  const ray = state.ray || {};
+  const rows = learningRowsFromOptuna(opt.history || []);
+  const summary = learningSummary(rows, ray);
+  $('learningStatus').className = `learning-status ${summary.statusClass}`;
+  $('learningStatus').textContent = summary.status;
+  const liftText = summary.liftPct === null ? fmt(summary.lift) : `${fmt(summary.lift)} (${summary.liftPct >= 0 ? '+' : ''}${summary.liftPct.toFixed(1)}%)`;
+  $('learningStats').innerHTML = [
+    ['completed trials', opt.completed_trials ?? rows.length],
+    ['best-so-far lift', liftText],
+    ['new-best events', summary.improvements],
+    ['best trial', summary.bestRow ? optunaTrialLabel(summary.bestRow, summary.bestRow.source_index) : 'n/a'],
+    ['PPO reward mean', fmt(summary.rayMean)],
+  ].map(([k, v]) => `<div><b>${safeText(k)}</b><strong>${safeText(v ?? 'n/a')}</strong></div>`).join('');
+  $('learningNote').textContent = summary.note;
+  drawSeries($('learningCanvas'), rows, [
+    { color: colors.optuna, value: r => r.objective },
+    { color: colors.learning, value: r => r.best_so_far, stepped: true },
+  ], {
+    xLabel: 'persisted Optuna study trial',
+    yLabel: 'objective score',
+    xValue: r => r.trial_id,
+    xTickLabel: (row, index) => optunaTrialLabel(row, index),
+    fillFirst: true,
+    showPoints: true,
+    endLabels: true,
+    includeZero: false,
+    yPadding: 0.14,
+    lineWidth: 3.2,
+  });
+  $('learningLegend').innerHTML = [
+    `<span><b style="color:${colors.learning}">■</b> best-so-far score: rises only when learning finds a better configuration</span>`,
+    `<span><b style="color:${colors.optuna}">■</b> raw trial objective: expected to fluctuate during exploration</span>`,
+    `<span><b style="color:${colors.ray}">■</b> Ray PPO reward mean: latest trainer signal</span>`,
+  ].join('');
+  const visibleRows = rows.slice(-48);
+  $('learningRail').innerHTML = visibleRows.length
+    ? visibleRows.map(row => `
+        <span class="${row.improved ? 'improved' : ''} ${summary.bestRow && row.trial_id === summary.bestRow.trial_id ? 'best' : ''}" title="${safeText(optunaTrialLabel(row, row.source_index))}: objective ${fmt(row.objective)}, best ${fmt(row.best_so_far)}">
+          <b>${safeText(optunaTrialLabel(row, row.source_index))}</b>
+          <em>${row.improved ? `+${fmt(row.improvement_delta)}` : fmt(row.objective)}</em>
+        </span>
+      `).join('')
+    : '<span class="empty"><b>waiting</b><em>no Optuna trials yet</em></span>';
 }
 function eventTone(kind) {
   if (kind === 'decision') return 'agent';
@@ -665,12 +780,13 @@ function renderState(state, events) {
   $('rewardLegend').innerHTML = ['total','AgentA','AgentB','AgentC'].map(k => `<span><b style="color:${colors[k]}">■</b> ${k}</span>`).join('');
 
   const opt = state.optuna || {};
+  renderLearningPanel(state);
   $('optunaStudy').textContent = opt.status === 'disabled' ? (opt.reason || 'disabled') : (opt.study || 'study waiting');
   const params = opt.best_params || {};
   $('optunaParams').innerHTML = Object.keys(params).length ? Object.entries(params).map(([k,v]) => `<div><b>${k}</b><br>${fmt(v)}</div>`).join('') : '<div>no completed trial yet</div>';
   const optunaHistory = opt.history || [];
-  const studyTrial = (row, index) => row.trial ?? row.run_trial ?? index;
-  const studyTrialLabel = (row, index) => `T${studyTrial(row, index)}`;
+  const studyTrial = optunaTrialId;
+  const studyTrialLabel = optunaTrialLabel;
   const studyTrials = optunaHistory.map(row => Number(row.trial)).filter(Number.isFinite);
   const completedTrials = opt.completed_trials ?? optunaHistory.filter(row => Number.isFinite(Number(row.value))).length;
   const fullHistory = opt.history_scope === 'all_completed_study_trials';

@@ -73,6 +73,11 @@ def test_dashboard_flow_diagram_uses_measured_card_connectors():
     assert "persisted Optuna study trial" in app_js
     assert "Showing all completed persisted Optuna trials" in app_js
     assert "optunaParamCanvas" in index_html
+    assert 'id="learningCanvas"' in index_html
+    assert "learningRowsFromOptuna" in app_js
+    assert "best-so-far score" in app_js
+    assert "stepped: true" in app_js
+    assert ".learning-panel" in styles
     assert "actionSemantics" in app_js
     for action_kind in ("migrate", "replicate", "throttle", "memory_balloon", "dvfs", "admission", "resource_cap"):
         assert f"{action_kind}:" in app_js

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Borg Orchestrator Live</title>
-  <link rel="stylesheet" href="styles.css?v=202605051315" />
+  <link rel="stylesheet" href="styles.css?v=202605062144" />
 </head>
 <body>
   <main class="shell">
@@ -67,6 +67,21 @@
       </div>
     </section>
 
+    <section class="panel learning-panel">
+      <div class="panel-head">
+        <div>
+          <h2>Learning Progress</h2>
+          <span class="muted">best-so-far optimization, exploration quality, and PPO training signal</span>
+        </div>
+        <span id="learningStatus" class="learning-status waiting">waiting</span>
+      </div>
+      <div id="learningStats" class="learning-stats"></div>
+      <p id="learningNote" class="chart-note">Learning progress is clearest when the green best-so-far curve rises; orange trial objectives may fluctuate because Optuna is exploring.</p>
+      <canvas id="learningCanvas" width="1400" height="340"></canvas>
+      <div id="learningLegend" class="legend"></div>
+      <div id="learningRail" class="learning-rail"></div>
+    </section>
+
     <section class="grid two">
       <article class="panel">
         <div class="panel-head"><h2>Reward Stream</h2><span class="muted">AgentA / AgentB / AgentC</span></div>
@@ -101,7 +116,7 @@
       <div id="events" class="events"></div>
     </section>
   </main>
-  <script>window.DASHBOARD_VERSION = "202605051315";</script>
-  <script src="app.js?v=202605051315"></script>
+  <script>window.DASHBOARD_VERSION = "202605062144";</script>
+  <script src="app.js?v=202605062144"></script>
 </body>
 </html>
