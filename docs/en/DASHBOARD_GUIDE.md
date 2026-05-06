@@ -331,6 +331,31 @@ Why the graph may look patterned:
 | Live cluster saturation | A one-node/one-workload cluster can push decisions toward one agent/action. |
 | Referee priority | High safety risk can repeatedly select Agent A; sustained low demand can repeatedly select Agent B. |
 
+## Learning Progress Panel
+
+The Learning Progress panel is the fastest place to check whether the architecture is learning better configurations over time. It does not treat every raw trial as improvement, because Optuna must explore weak and strong parameter samples. Instead, it separates exploration from confirmed improvement.
+
+| UI element | Meaning |
+|---|---|
+| Status badge | `improving`, `exploring`, `plateau watch`, or `waiting`, derived from Optuna best-so-far progress. |
+| Completed trials | Number of completed Optuna trials currently loaded from the persistent study. |
+| Best-so-far lift | Difference between the current best objective and the first visible objective, with percent lift when computable. |
+| New-best events | Count of trials that beat every previous objective score. |
+| Best trial | Persisted trial ID, such as `T15`, that currently owns the best objective score. |
+| PPO reward mean | Latest Ray/RLlib PPO trainer reward mean, if available. |
+| Orange objective line | Raw Optuna objective value per trial. It may go down because exploration is expected. |
+| Green stepped line | Best-so-far objective. This is the clearest dashboard signal that learning/meta-optimization is improving. It only rises when a trial beats the previous best. |
+| Trial rail | Compact timeline of recent trials. Green-highlighted cells mark new-best events; the strongest outlined cell is the current best. |
+
+Interpretation:
+
+| Pattern | Meaning |
+|---|---|
+| Green stepped line rises repeatedly | Optuna is finding better reward weights. |
+| Orange line fluctuates while green line stays flat | Optuna is exploring, but has not found a new best recently. |
+| `plateau watch` | The best trial is no longer recent; more trials or wider search may be needed. |
+| PPO reward mean appears | Ray/RLlib produced a policy-training signal; compare it with Optuna progress rather than treating it as the same metric. |
+
 ## Optuna Panel
 
 Optuna is the Layer 5 meta-optimizer. The dashboard separates objective score from reward-weight parameter traces.

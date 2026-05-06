@@ -347,6 +347,31 @@ Reward Stream panel은 최근 reward history를 보여준다.
 | live cluster saturation | 실제 cluster가 한 node/한 workload 중심이면 decision이 한 agent/action에 몰릴 수 있다. |
 | Referee priority | safety risk가 높으면 Agent A가 반복적으로 preempt할 수 있고, low demand가 지속되면 Agent B가 반복될 수 있다. |
 
+## Learning Progress 패널
+
+Learning Progress 패널은 architecture가 시간이 지날수록 더 좋은 configuration을 찾고 있는지 가장 빠르게 확인하는 곳이다. 모든 raw trial을 improvement로 보지 않는다. Optuna는 일부러 약한 parameter와 강한 parameter를 모두 탐색하기 때문에 raw objective는 흔들리는 것이 정상이다. 대신 이 패널은 exploration과 확정된 improvement를 분리해서 보여준다.
+
+| UI 요소 | 의미 |
+|---|---|
+| Status badge | `improving`, `exploring`, `plateau watch`, `waiting` 중 하나. Optuna best-so-far 진행 상태로 계산한다. |
+| Completed trials | persistent study에서 dashboard가 불러온 completed Optuna trial 수. |
+| Best-so-far lift | 첫 번째 visible objective 대비 현재 best objective가 얼마나 올라갔는지. 계산 가능하면 percent lift도 함께 표시한다. |
+| New-best events | 이전 모든 objective score를 이긴 trial 개수. |
+| Best trial | 현재 best objective score를 만든 persistent trial ID. 예: `T15`. |
+| PPO reward mean | Ray/RLlib PPO trainer가 제공한 최신 reward mean. 있으면 표시한다. |
+| Orange objective line | trial별 raw Optuna objective value. Exploration 때문에 내려갈 수 있다. |
+| Green stepped line | best-so-far objective. dashboard에서 learning/meta-optimization이 좋아지고 있음을 보여주는 가장 직접적인 signal이다. 이전 best를 이긴 trial이 나올 때만 상승한다. |
+| Trial rail | 최근 trial들의 compact timeline. 초록색 cell은 new-best event이고, 가장 진하게 outline된 cell은 현재 best trial이다. |
+
+해석 방법:
+
+| 패턴 | 의미 |
+|---|---|
+| Green stepped line이 반복적으로 상승 | Optuna가 더 좋은 reward weight를 찾고 있다. |
+| Orange line은 흔들리지만 green line이 flat | Optuna가 탐색 중이지만 최근에는 new best를 찾지 못했다. |
+| `plateau watch` | best trial이 최근 trial이 아니므로, 더 많은 trial 또는 search range 조정이 필요할 수 있다. |
+| PPO reward mean 표시 | Ray/RLlib policy-training signal이 생성되었다는 뜻이다. Optuna objective와 같은 metric으로 보지 말고, learning evidence의 다른 축으로 비교해야 한다. |
+
 ## Optuna 패널
 
 Optuna는 reward weight와 일부 policy tuning을 위한 meta-optimization layer다. Dashboard의 Optuna panel은 두 종류의 그래프를 분리해서 보여준다.

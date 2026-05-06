@@ -3,6 +3,25 @@
 1. Expand the current five-family policy gate suite with another full-phase AIOpsLab family when available.
 2. Replace calibrated utilization-derived energy watts with a direct measured node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
 
+## Latest Session Note (2026-05-06 KST, learning-progress dashboard slice)
+
+- Added a dedicated `Learning Progress` dashboard panel.
+- The panel separates noisy exploration from confirmed improvement:
+  - orange line: raw Optuna objective per persistent trial
+  - green stepped line: best-so-far objective, rising only when Optuna finds a new best
+  - compact trial rail: recent trials, with new-best events and the current best highlighted
+- Added at-a-glance learning metrics:
+  - completed trials
+  - best-so-far lift
+  - new-best event count
+  - current best trial ID
+  - latest Ray/RLlib PPO reward mean
+- Updated dashboard guide documentation in English and Korean.
+- Validation:
+  - `node --check orchestrator_stack/dashboard/app.js`: success
+  - `PYTHONPATH=orchestrator_stack ./.venv/bin/python -m pytest orchestrator_stack/tests/test_visualization_runtime.py -q`: success
+  - `PYTHONPATH=orchestrator_stack ./.venv/bin/python -m pytest orchestrator_stack/tests -q`: success
+
 ## Latest Session Note (2026-05-05 KST, full Optuna study-history dashboard slice)
 
 - Root cause for the Optuna graph showing only three points:
