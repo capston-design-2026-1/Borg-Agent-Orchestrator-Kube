@@ -121,7 +121,7 @@ def reconcile(args: argparse.Namespace, idle_counts: dict[str, int]) -> dict[str
 def main() -> None:
     parser = argparse.ArgumentParser(description="Local Kind Karpenter-style warm-node controller for HPA baseline experiments")
     parser.add_argument("--kubeconfig", required=True)
-    parser.add_argument("--namespace", default="borg-baseline")
+    parser.add_argument("--namespace", default="borg-comparison-workload")
     parser.add_argument("--state-out", default="orchestrator_stack/runtime/comparison/local_karpenter_state.json")
     parser.add_argument("--interval-seconds", type=float, default=5.0)
     parser.add_argument("--pending-threshold", type=int, default=1)
