@@ -428,6 +428,35 @@ Large generated traces/reports are not automatically committed to git.
 | `orchestrator_stack/runtime/dashboard/server.log` | Dashboard HTTP server log. |
 | `orchestrator_stack/runtime/dashboard/run.log` | Launcher/orchestrator process log. |
 
+## Comparison Dashboard
+
+The separate local comparison dashboard is launched with:
+
+```bash
+./orchestrator_stack/scripts/launch_cluster_comparison.sh
+```
+
+Default URL:
+
+```text
+http://127.0.0.1:8876
+```
+
+It compares `borg-experimental` against `borg-baseline` through `GET /api/comparison`.
+
+| Section | Meaning |
+|---|---|
+| Behavior scorecards | Queue pressure, CPU utilization, replica reaction, and capacity reaction as paired experimental/baseline summaries. |
+| Behavior difference ledger | Experimental value, baseline value, and experimental-minus-baseline delta for ready workers, pending pods, restarts, live resource usage, and requested resources. |
+| Pressure timeline | Recent samples for pending pods, CPU percent, and memory percent across both clusters. |
+| Live resource mix | Metrics Server-backed `kubectl top` CPU and memory usage for each cluster. |
+| Capacity and demand | CPU/memory requests compared with allocatable cluster resources. |
+| Pod phase and namespace charts | Scheduling/admission outcomes and where workload pressure is concentrated. |
+| Controller reactions | Latest Agent A/B/C decision/proposals plus Ray/Optuna status versus HPA replica movement and local Karpenter active/warm nodes. |
+| Node and workload inventory | Per-node readiness/schedulability/resources and the Kubernetes workload controllers discovered in both clusters. |
+
+This dashboard is local-only. HPA is real Kubernetes HPA; Karpenter behavior is represented by the local Kind warm-node controller because upstream AWS Karpenter requires cloud provider APIs.
+
 ## Common Misreadings
 
 | Display | Correct interpretation |
