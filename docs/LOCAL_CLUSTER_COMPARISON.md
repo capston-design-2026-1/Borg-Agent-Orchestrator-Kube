@@ -53,8 +53,15 @@ The script creates:
 - one control-plane and three workers for the experimental cluster
 - one control-plane and three workers for the baseline cluster
 - Metrics Server, Prometheus, and Node Exporter in both clusters
-- baseline `borg-baseline/hpa-web` Deployment, Service, and HPA
-- baseline `borg-baseline/karpenter-surge` Deployment for triggering local Karpenter-style capacity activation
+- identical shared `borg-comparison-workload/comparison-web` workload, Service, and load generator in both clusters
+- baseline-only HPA object targeting `borg-comparison-workload/comparison-web`
+- baseline-only `borg-comparison-workload/karpenter-surge` Deployment for triggering local Karpenter-style capacity activation
+
+Fairness boundary:
+
+- Shared environment: same namespace, application Deployment, Service, load generator, mirrored intentional exerciser phases, CPU/memory requests, and replica baselines.
+- Baseline-only controller layer: HPA object, HPA-driven replica changes, local Karpenter warm-node activation, and the optional `karpenter-surge` pressure target.
+- Experimental-only controller layer: Agent A/B/C decisions, Referee choices, Ray/Optuna metadata, and orchestration reward state.
 
 Recreate both clusters from scratch:
 
@@ -159,7 +166,7 @@ Custom surge:
 REPLICAS=14 ./orchestrator_stack/scripts/apply_baseline_surge.sh
 ```
 
-The local Karpenter-style controller watches pending pods in `borg-baseline` and activates warm worker nodes by:
+The local Karpenter-style controller watches pending pods in `borg-comparison-workload` and activates warm worker nodes by:
 
 - removing the `borg.local/capacity=warm:NoSchedule` taint
 - uncordoning the node
