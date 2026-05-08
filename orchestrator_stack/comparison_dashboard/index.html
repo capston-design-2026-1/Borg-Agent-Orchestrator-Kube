@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Borg Orchestrator Comparison</title>
-  <link rel="stylesheet" href="styles.css?v=202605081030" />
+  <link rel="stylesheet" href="styles.css?v=202605081130" />
 </head>
 <body>
   <main class="shell">
@@ -12,46 +12,95 @@
       <div>
         <p class="eyebrow">Local dual-cluster evaluation</p>
         <h1>Experimental Orchestrator vs HPA + Local Karpenter</h1>
-        <p class="subtitle">Side-by-side view of the multi-node experimental cluster and the local HPA/Karpenter-style baseline cluster.</p>
+        <p class="subtitle">A live behavior comparison of two multi-node Kind clusters: the Agent A/B/C orchestration architecture and a real Kubernetes HPA baseline with local Karpenter-style capacity activation.</p>
       </div>
-      <div class="status-card"><span id="updatedAt">waiting</span></div>
+      <aside class="status-card">
+        <span>last sample</span>
+        <b id="updatedAt">waiting</b>
+        <em id="sampleCount">0 samples</em>
+      </aside>
     </section>
+
+    <section id="scorecards" class="scorecards"></section>
 
     <section class="comparison-grid">
       <article class="cluster-card experimental">
         <div class="panel-head"><h2>Experimental Cluster</h2><span id="experimentalRole">orchestrator</span></div>
         <div id="experimentalMetrics" class="metric-grid"></div>
-        <div class="signal-band"><span>risk</span><b id="experimentalRisk">n/a</b><span>decision</span><b id="experimentalDecision">n/a</b></div>
+        <div class="signal-band"><span>latest decision</span><b id="experimentalDecision">n/a</b><span>risk</span><b id="experimentalRisk">n/a</b></div>
       </article>
       <article class="cluster-card baseline">
         <div class="panel-head"><h2>HPA + Local Karpenter Baseline</h2><span id="baselineRole">baseline</span></div>
         <div id="baselineMetrics" class="metric-grid"></div>
-        <div class="signal-band"><span>HPA desired</span><b id="baselineHpa">n/a</b><span>warm nodes</span><b id="baselineWarm">n/a</b></div>
+        <div class="signal-band"><span>HPA reaction</span><b id="baselineHpa">n/a</b><span>capacity state</span><b id="baselineWarm">n/a</b></div>
       </article>
     </section>
 
-    <section class="panel">
-      <div class="panel-head"><h2>Cluster Difference</h2><span>live Kubernetes API comparison</span></div>
-      <canvas id="differenceCanvas" width="1400" height="340"></canvas>
-      <div id="differenceLegend" class="legend"></div>
+    <section class="panel insight-panel">
+      <div class="panel-head"><h2>Behavior Difference Ledger</h2><span>experimental minus baseline</span></div>
+      <div id="differenceLedger" class="ledger"></div>
     </section>
 
-    <section class="panel details">
+    <section class="chart-grid primary-charts">
+      <article class="panel chart-card wide">
+        <div class="panel-head"><h2>Pressure Timeline</h2><span>pending pods, workers, CPU, memory</span></div>
+        <canvas id="timelineCanvas" width="1700" height="420"></canvas>
+        <div id="timelineLegend" class="legend"></div>
+      </article>
+      <article class="panel chart-card">
+        <div class="panel-head"><h2>Live Resource Mix</h2><span>kubectl top</span></div>
+        <canvas id="resourcePieCanvas" width="760" height="420"></canvas>
+      </article>
+      <article class="panel chart-card">
+        <div class="panel-head"><h2>Capacity And Demand</h2><span>requests vs allocatable</span></div>
+        <canvas id="capacityCanvas" width="760" height="420"></canvas>
+      </article>
+    </section>
+
+    <section class="chart-grid secondary-charts">
+      <article class="panel chart-card">
+        <div class="panel-head"><h2>Pod Phase Mix</h2><span>running, pending, completed</span></div>
+        <canvas id="phaseCanvas" width="760" height="360"></canvas>
+      </article>
+      <article class="panel chart-card">
+        <div class="panel-head"><h2>Namespace Distribution</h2><span>where work is concentrated</span></div>
+        <canvas id="namespaceCanvas" width="760" height="360"></canvas>
+      </article>
+      <article class="panel chart-card">
+        <div class="panel-head"><h2>Controller Reactions</h2><span>Agent A/B/C vs HPA/Karpenter</span></div>
+        <div id="reactionPanel" class="reaction-panel"></div>
+      </article>
+    </section>
+
+    <section class="panel details node-section">
       <div>
-        <h2>Baseline HPA</h2>
-        <div id="hpaTable" class="table"></div>
+        <div class="panel-head"><h2>Experimental Nodes</h2><span>capacity, usage, scheduling</span></div>
+        <div id="experimentalNodes" class="table node-table"></div>
       </div>
       <div>
-        <h2>Local Karpenter Emulation</h2>
-        <div id="karpenterState" class="table"></div>
+        <div class="panel-head"><h2>Baseline Nodes</h2><span>active/warm and usage</span></div>
+        <div id="baselineNodes" class="table node-table"></div>
+      </div>
+    </section>
+
+    <section class="panel details workload-section">
+      <div>
+        <div class="panel-head"><h2>Workload Inventory</h2><span>deployments, daemonsets, jobs</span></div>
+        <div id="workloadInventory" class="table compact-table"></div>
+      </div>
+      <div>
+        <div class="panel-head"><h2>Baseline Autoscalers</h2><span>real HPA and local Karpenter</span></div>
+        <div id="hpaTable" class="table compact-table"></div>
+        <div id="karpenterState" class="table compact-table"></div>
       </div>
     </section>
 
     <section class="panel note-panel">
-      <h2>Interpretation Boundary</h2>
+      <div class="panel-head"><h2>Interpretation Boundary</h2><span>what is real and what is local emulation</span></div>
       <p id="notes">waiting</p>
+      <p id="errors" class="error-line"></p>
     </section>
   </main>
-  <script src="app.js?v=202605081030"></script>
+  <script src="app.js?v=202605081130"></script>
 </body>
 </html>
