@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Borg Orchestrator Comparison</title>
-  <link rel="stylesheet" href="styles.css?v=202605081725" />
+  <link rel="stylesheet" href="styles.css?v=202605081900" />
 </head>
 <body>
   <main class="shell">
@@ -21,8 +21,6 @@
       </aside>
     </section>
 
-    <section id="scorecards" class="scorecards"></section>
-
     <section class="comparison-grid">
       <article class="cluster-card experimental">
         <div class="panel-head"><h2>Experimental Cluster</h2><span id="experimentalRole">orchestrator</span></div>
@@ -32,68 +30,32 @@
       <article class="cluster-card baseline">
         <div class="panel-head"><h2>HPA + Local Karpenter Baseline</h2><span id="baselineRole">baseline</span></div>
         <div id="baselineMetrics" class="metric-grid"></div>
-        <div class="signal-band"><span>HPA reaction</span><b id="baselineHpa">n/a</b><span>capacity state</span><b id="baselineWarm">n/a</b></div>
+        <div class="signal-band"><span>baseline controller</span><b id="baselineController">HPA + local Karpenter</b><span>capacity state</span><b id="baselineWarm">n/a</b></div>
       </article>
     </section>
 
-    <section class="panel insight-panel">
-      <div class="panel-head"><h2>Behavior Difference Ledger</h2><span>experimental minus baseline</span></div>
-      <div id="differenceLedger" class="ledger"></div>
+    <section class="panel thesis-panel">
+      <div class="panel-head"><h2>Research Objective Evidence</h2><span>safety, efficiency, admission, learning</span></div>
+      <div id="objectiveEvidence" class="objective-grid"></div>
     </section>
 
     <section class="chart-grid primary-charts">
       <article class="panel chart-card wide">
-        <div class="panel-head"><h2>Pressure Timeline</h2><span>pending pods, CPU, memory, HPA replicas</span></div>
+        <div class="panel-head"><h2>Control Pressure Timeline</h2><span>five-minute objective window</span></div>
         <canvas id="timelineCanvas" width="1700" height="620"></canvas>
         <p id="timelineWindow" class="chart-note">waiting for comparison samples</p>
         <div id="timelineLegend" class="legend"></div>
       </article>
-      <article class="panel chart-card">
-        <div class="panel-head"><h2>Live Resource Mix</h2><span>kubectl top</span></div>
-        <div id="resourceMixPanel" class="resource-mix-panel"></div>
-      </article>
-      <article class="panel chart-card">
-        <div class="panel-head"><h2>Capacity Matrix</h2><span>request headroom / live use</span></div>
-        <div id="capacityPanel" class="capacity-panel" aria-live="polite"></div>
-      </article>
     </section>
 
-    <section class="chart-grid secondary-charts">
-      <article class="panel chart-card">
-        <div class="panel-head"><h2>Pod Phase Mix</h2><span>running, pending, completed</span></div>
-        <canvas id="phaseCanvas" width="760" height="360"></canvas>
-      </article>
-      <article class="panel chart-card">
-        <div class="panel-head"><h2>Namespace Distribution</h2><span>where work is concentrated</span></div>
-        <canvas id="namespaceCanvas" width="760" height="360"></canvas>
-      </article>
-      <article class="panel chart-card">
-        <div class="panel-head"><h2>Controller Reactions</h2><span>Agent A/B/C vs HPA/Karpenter</span></div>
-        <div id="reactionPanel" class="reaction-panel"></div>
-      </article>
+    <section class="panel agent-panel">
+      <div class="panel-head"><h2>Agent Goal Matrix</h2><span>what each controller is trying to optimize</span></div>
+      <div id="agentGoalMatrix" class="agent-goal-grid"></div>
     </section>
 
-    <section class="panel details node-section">
-      <div>
-        <div class="panel-head"><h2>Experimental Nodes</h2><span>capacity, usage, scheduling</span></div>
-        <div id="experimentalNodes" class="table node-table"></div>
-      </div>
-      <div>
-        <div class="panel-head"><h2>Baseline Nodes</h2><span>active/warm and usage</span></div>
-        <div id="baselineNodes" class="table node-table"></div>
-      </div>
-    </section>
-
-    <section class="panel details workload-section">
-      <div>
-        <div class="panel-head"><h2>Workload Inventory</h2><span>deployments, daemonsets, jobs</span></div>
-        <div id="workloadInventory" class="table compact-table"></div>
-      </div>
-      <div>
-        <div class="panel-head"><h2>Baseline Autoscalers</h2><span>real HPA and local Karpenter</span></div>
-        <div id="hpaTable" class="table compact-table"></div>
-        <div id="karpenterState" class="table compact-table"></div>
-      </div>
+    <section class="panel controller-panel">
+      <div class="panel-head"><h2>Controller Response Narrative</h2><span>same stimulus, different control philosophy</span></div>
+      <div id="reactionPanel" class="reaction-panel"></div>
     </section>
 
     <section class="panel note-panel">
@@ -102,6 +64,6 @@
       <p id="errors" class="error-line"></p>
     </section>
   </main>
-  <script src="app.js?v=202605081725"></script>
+  <script src="app.js?v=202605081900"></script>
 </body>
 </html>
