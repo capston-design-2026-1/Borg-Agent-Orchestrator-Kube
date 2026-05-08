@@ -93,6 +93,142 @@ function axes(ctx, w, h, pad, max, label) {
   }
   ctx.textAlign = 'center'; ctx.fillText(label, pad.left + (w - pad.left - pad.right) / 2, h - 12);
 }
+function scaledMax(values, floor = 1) {
+  const realValues = values.map(num).filter(v => v !== null);
+  const raw = Math.max(floor, ...realValues);
+  if (raw <= 5) return Math.ceil(raw + 1);
+  if (raw <= 25) return Math.ceil(raw / 5) * 5;
+  if (raw <= 100) return Math.ceil(raw / 10) * 10;
+  return Math.ceil(raw / 25) * 25;
+}
+function drawAxisTicks(ctx, panel, scale, side) {
+  ctx.strokeStyle = palette.grid;
+  ctx.fillStyle = 'rgba(16,32,26,.62)';
+  ctx.font = '11px Avenir Next, sans-serif';
+  ctx.textAlign = side === 'right' ? 'left' : 'right';
+  for (let i = 0; i <= 3; i++) {
+    const ratio = i / 3;
+    const y = panel.y + ratio * panel.h;
+    const value = scale.max - ratio * (scale.max - scale.min);
+    ctx.beginPath();
+    ctx.moveTo(panel.x, y);
+    ctx.lineTo(panel.x + panel.w, y);
+    ctx.stroke();
+    const labelX = side === 'right' ? panel.x + panel.w + 10 : panel.x - 10;
+    ctx.fillText(value.toFixed(value >= 10 ? 0 : 1), labelX, y + 4);
+  }
+}
+function drawPanelSeries(ctx, rows, panel, scale, series) {
+  const xFor = index => rows.length <= 1 ? panel.x + panel.w / 2 : panel.x + (index / (rows.length - 1)) * panel.w;
+  const yFor = value => panel.y + panel.h - ((Number(value || 0) - scale.min) / (scale.max - scale.min || 1)) * panel.h;
+  series.forEach(item => {
+    ctx.strokeStyle = item.color;
+    ctx.lineWidth = item.width || 2.8;
+    ctx.setLineDash(item.dash || []);
+    ctx.beginPath();
+    rows.forEach((row, index) => {
+      const value = num(row[item.key]);
+      const x = xFor(index), y = yFor(value ?? 0);
+      if (index === 0) {
+        ctx.moveTo(x, y);
+      } else if (item.stepped) {
+        const previous = num(rows[index - 1][item.key]) ?? 0;
+        ctx.lineTo(x, yFor(previous));
+        ctx.lineTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    });
+    ctx.stroke();
+    ctx.setLineDash([]);
+  });
+}
+function drawPressureTimeline(canvasId, sourceRows) {
+  const canvas = $(canvasId); if (!canvas) return;
+  const { ctx, w, h } = setupCanvas(canvas);
+  const rows = downsample(sourceRows);
+  const left = 68, right = 86, top = 24, bottom = 50, gap = 34;
+  const plotW = w - left - right;
+  const panelH = (h - top - bottom - gap * 2) / 3;
+  const panels = [
+    {
+      title: 'Backlog pressure',
+      unit: 'pending pods',
+      side: 'left',
+      y: top,
+      series: [
+        { key:'experimentalPending', color:palette.experimental, label:'experimental pending pods', width:3 },
+        { key:'baselinePending', color:palette.baseline, label:'baseline pending pods', width:3 },
+      ],
+      maxFloor: 5,
+    },
+    {
+      title: 'Resource utilization',
+      unit: 'percent',
+      side: 'right',
+      y: top + panelH + gap,
+      series: [
+        { key:'experimentalCpu', color:palette.blue, label:'experimental CPU %' },
+        { key:'baselineCpu', color:palette.red, label:'baseline CPU %' },
+        { key:'experimentalMem', color:'#72b79b', label:'experimental memory %' },
+        { key:'baselineMem', color:'#e0a64d', label:'baseline memory %' },
+      ],
+      maxFloor: 10,
+    },
+    {
+      title: 'Baseline HPA replica state',
+      unit: 'replicas',
+      side: 'right',
+      y: top + (panelH + gap) * 2,
+      series: [
+        { key:'baselineHpaCurrent', color:'#111f1a', label:'baseline HPA current replicas', width:2.8, stepped:true },
+        { key:'baselineHpaDesired', color:'#8d6d2d', label:'baseline HPA desired replicas', width:2.8, dash:[8, 6], stepped:true },
+        { key:'baselineHpaMax', color:'rgba(16,32,26,.28)', label:'baseline HPA max replicas', width:1.8, dash:[2, 6], stepped:true },
+      ],
+      maxFloor: 5,
+    },
+  ];
+
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle = 'rgba(255,255,255,.48)';
+  ctx.fillRect(left, top, plotW, h - top - bottom);
+  panels.forEach(item => {
+    const panel = { x:left, y:item.y, w:plotW, h:panelH };
+    const values = rows.flatMap(row => item.series.map(seriesItem => row[seriesItem.key]));
+    const max = scaledMax(values, item.maxFloor);
+    const scale = { min:0, max };
+    ctx.fillStyle = 'rgba(255,255,255,.34)';
+    ctx.fillRect(panel.x, panel.y, panel.w, panel.h);
+    drawAxisTicks(ctx, panel, scale, item.side);
+    ctx.fillStyle = palette.ink;
+    ctx.font = '800 13px Avenir Next, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(item.title, panel.x + 8, panel.y + 17);
+    ctx.fillStyle = palette.muted;
+    ctx.font = '10px Avenir Next, sans-serif';
+    ctx.fillText(item.unit, panel.x + 8, panel.y + 32);
+    if (rows.length) drawPanelSeries(ctx, rows, panel, scale, item.series);
+  });
+  if (rows.length) {
+    const bottomPanel = { x:left, y:top + (panelH + gap) * 2, w:plotW, h:panelH };
+    const xFor = index => rows.length <= 1 ? bottomPanel.x + bottomPanel.w / 2 : bottomPanel.x + (index / (rows.length - 1)) * bottomPanel.w;
+    const ticks = [0, Math.floor((rows.length - 1) / 2), rows.length - 1];
+    ctx.fillStyle = 'rgba(16,32,26,.58)';
+    ctx.font = '11px Avenir Next, sans-serif';
+    ticks.forEach(index => {
+      const row = rows[index];
+      const x = xFor(index);
+      ctx.textAlign = index === 0 ? 'left' : index === rows.length - 1 ? 'right' : 'center';
+      ctx.fillText(displayTime(row.time), x, h - 27);
+    });
+  }
+  ctx.fillStyle = 'rgba(16,32,26,.68)';
+  ctx.font = '12px Avenir Next, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('retained live samples', left + plotW / 2, h - 9);
+  const legendSeries = panels.flatMap(panel => panel.series);
+  $('timelineLegend').innerHTML = legendSeries.map(item => `<span><b style="color:${item.color}">■</b> ${esc(item.label)}</span>`).join('');
+}
 function drawLineChart(canvasId, series, label, sourceRows) {
   const canvas = $(canvasId); if (!canvas) return;
   const { ctx, w, h } = setupCanvas(canvas);
@@ -291,16 +427,7 @@ function drawNamespace(payload) {
   ctx.fillStyle = palette.baseline; ctx.fillText('■ baseline', pad.left + 124, h - 8);
 }
 function drawCharts(payload, chartHistory) {
-  drawLineChart('timelineCanvas', [
-    { key:'experimentalPending', color:palette.experimental, label:'experimental pending pods', width:3 },
-    { key:'baselinePending', color:palette.baseline, label:'baseline pending pods', width:3 },
-    { key:'experimentalCpu', color:palette.blue, label:'experimental CPU %' },
-    { key:'baselineCpu', color:palette.red, label:'baseline CPU %' },
-    { key:'experimentalMem', color:'#72b79b', label:'experimental memory %' },
-    { key:'baselineMem', color:'#e0a64d', label:'baseline memory %' },
-    { key:'baselineHpaCurrent', color:'#111f1a', label:'baseline HPA current replicas', width:2.4, dash:[8, 6] },
-    { key:'baselineHpaDesired', color:'#8d6d2d', label:'baseline HPA desired replicas', width:2.4, dash:[3, 6] },
-  ], 'retained live samples', chartHistory);
+  drawPressureTimeline('timelineCanvas', chartHistory);
   renderResourceMix(payload);
   renderCapacityPanel(payload);
   drawPhase(payload);
