@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
 import json
 import subprocess
+import time
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
@@ -28,6 +30,10 @@ class ComparisonDashboardHandler(SimpleHTTPRequestHandler):
     experimental_event_dir = Path("orchestrator_stack/runtime/visualization-experimental")
     karpenter_state_path = Path("orchestrator_stack/runtime/comparison/local_karpenter_state.json")
     shared_stimulus_path = Path("orchestrator_stack/runtime/comparison/shared_stimulus.json")
+    sample_history: list[dict[str, Any]] = []
+    last_sample_epoch = 0.0
+    max_history_samples = 7200
+    min_history_interval_seconds = 1.0
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, directory=str(self.dashboard_dir), **kwargs)
@@ -285,6 +291,7 @@ class ComparisonDashboardHandler(SimpleHTTPRequestHandler):
     def _hpa_summary(cls, hpas: list[dict[str, Any]]) -> list[dict[str, Any]]:
         rows: list[dict[str, Any]] = []
         for item in hpas:
+            spec = item.get("spec", {})
             status = item.get("status", {})
             metrics = status.get("currentMetrics", [])
             cpu_utilization = None
@@ -295,20 +302,28 @@ class ComparisonDashboardHandler(SimpleHTTPRequestHandler):
                     current = resource.get("current", {})
                     cpu_utilization = current.get("averageUtilization")
                     cpu_average_value = current.get("averageValue")
+            target_cpu_utilization = None
+            for metric in spec.get("metrics", []):
+                resource = metric.get("resource", {})
+                target = resource.get("target", {})
+                if resource.get("name") == "cpu":
+                    target_cpu_utilization = target.get("averageUtilization")
             desired = status.get("desiredReplicas")
             current = status.get("currentReplicas")
             rows.append(
                 {
                     "namespace": item.get("metadata", {}).get("namespace"),
                     "name": item.get("metadata", {}).get("name"),
-                    "target": item.get("spec", {}).get("scaleTargetRef", {}).get("name"),
-                    "min": item.get("spec", {}).get("minReplicas"),
-                    "max": item.get("spec", {}).get("maxReplicas"),
+                    "target": spec.get("scaleTargetRef", {}).get("name"),
+                    "min": spec.get("minReplicas"),
+                    "max": spec.get("maxReplicas"),
                     "current": current,
                     "desired": desired,
                     "delta": (desired - current) if isinstance(desired, int) and isinstance(current, int) else None,
                     "cpu_utilization": cpu_utilization,
                     "cpu_average_value": cpu_average_value,
+                    "target_cpu_utilization": target_cpu_utilization,
+                    "last_scale_time": status.get("lastScaleTime"),
                     "conditions": [
                         {"type": condition.get("type"), "status": condition.get("status"), "reason": condition.get("reason")}
                         for condition in status.get("conditions", [])
@@ -408,6 +423,32 @@ class ComparisonDashboardHandler(SimpleHTTPRequestHandler):
             return float(value)
         return None
 
+    @staticmethod
+    def _sum_int(rows: list[dict[str, Any]], key: str) -> int:
+        return sum(int(item.get(key) or 0) for item in rows)
+
+    @classmethod
+    def _hpa_reaction_label(cls, baseline: dict[str, Any]) -> str:
+        hpas = baseline.get("hpa", [])
+        if not hpas:
+            return "HPA not installed"
+        current = cls._sum_int(hpas, "current")
+        desired = cls._sum_int(hpas, "desired")
+        maximum = cls._sum_int(hpas, "max")
+        first = hpas[0]
+        cpu = first.get("cpu_utilization")
+        target = first.get("target_cpu_utilization")
+        if maximum and current >= maximum and desired >= maximum:
+            mode = f"maxed {current}/{maximum}"
+        elif desired > current:
+            mode = f"up {current}->{desired}/{maximum}" if maximum else f"up {current}->{desired}"
+        elif desired < current:
+            mode = f"down {current}->{desired}/{maximum}" if maximum else f"down {current}->{desired}"
+        else:
+            mode = f"stable {current}/{maximum}" if maximum else f"stable {current}"
+        cpu_text = f", cpu {cpu}/{target}%" if cpu is not None and target is not None else ""
+        return f"HPA {mode}{cpu_text}"
+
     @classmethod
     def _difference_rows(cls, experimental: dict[str, Any], baseline: dict[str, Any]) -> list[dict[str, Any]]:
         def get(path: tuple[str, ...], source: dict[str, Any]) -> Any:
@@ -445,8 +486,6 @@ class ComparisonDashboardHandler(SimpleHTTPRequestHandler):
         base_pending = baseline.get("pending_pods", 0)
         exp_cpu = experimental.get("resource_totals", {}).get("usage_cpu_percent")
         base_cpu = baseline.get("resource_totals", {}).get("usage_cpu_percent")
-        hpa_desired = sum(int(item.get("desired") or 0) for item in baseline.get("hpa", []))
-        hpa_current = sum(int(item.get("current") or 0) for item in baseline.get("hpa", []))
         karpenter = baseline.get("karpenter", {})
         return [
             {
@@ -464,7 +503,7 @@ class ComparisonDashboardHandler(SimpleHTTPRequestHandler):
             {
                 "label": "Replica reaction",
                 "experimental": experimental_state.get("decision", {}).get("action_label") or "n/a",
-                "baseline": f"HPA {hpa_current}->{hpa_desired}",
+                "baseline": cls._hpa_reaction_label(baseline),
                 "interpretation": "Experimental side chooses Agent A/B/C actions; baseline reacts through HPA desired replicas.",
             },
             {
@@ -474,6 +513,38 @@ class ComparisonDashboardHandler(SimpleHTTPRequestHandler):
                 "interpretation": "Local Karpenter emulation activates pre-created Kind workers; experimental workers remain directly visible to the orchestrator.",
             },
         ]
+
+    @classmethod
+    def _append_history(cls, payload: dict[str, Any]) -> list[dict[str, Any]]:
+        now = time.time()
+        if cls.sample_history and now - cls.last_sample_epoch < cls.min_history_interval_seconds:
+            return list(cls.sample_history)
+        experimental = payload.get("experimental", {})
+        baseline = payload.get("baseline", {})
+        exp_res = experimental.get("resource_totals", {})
+        base_res = baseline.get("resource_totals", {})
+        hpas = baseline.get("hpa", [])
+        first_hpa = hpas[0] if hpas else {}
+        sample = {
+            "time": datetime.now(timezone.utc).isoformat(),
+            "experimentalPending": experimental.get("pending_pods", 0),
+            "baselinePending": baseline.get("pending_pods", 0),
+            "experimentalSchedulable": experimental.get("schedulable_nodes", 0),
+            "baselineSchedulable": baseline.get("schedulable_nodes", 0),
+            "experimentalCpu": exp_res.get("usage_cpu_percent", 0),
+            "baselineCpu": base_res.get("usage_cpu_percent", 0),
+            "experimentalMem": exp_res.get("usage_memory_percent", 0),
+            "baselineMem": base_res.get("usage_memory_percent", 0),
+            "baselineHpaCurrent": cls._sum_int(hpas, "current"),
+            "baselineHpaDesired": cls._sum_int(hpas, "desired"),
+            "baselineHpaMax": cls._sum_int(hpas, "max"),
+            "baselineHpaCpu": first_hpa.get("cpu_utilization"),
+            "baselineHpaTargetCpu": first_hpa.get("target_cpu_utilization"),
+        }
+        cls.sample_history.append(sample)
+        cls.sample_history = cls.sample_history[-cls.max_history_samples :]
+        cls.last_sample_epoch = now
+        return list(cls.sample_history)
 
     @classmethod
     def comparison_payload(cls) -> dict[str, Any]:
@@ -503,7 +574,7 @@ class ComparisonDashboardHandler(SimpleHTTPRequestHandler):
             "ray": experimental_state.get("ray", {}),
             "optuna": experimental_state.get("optuna", {}),
         }
-        return {
+        payload = {
             "experimental": experimental,
             "baseline": baseline,
             "differences": cls._difference_rows(experimental, baseline),
@@ -517,6 +588,12 @@ class ComparisonDashboardHandler(SimpleHTTPRequestHandler):
                 "Metrics marked from kubectl top come from Metrics Server and are live cluster observations.",
             ],
         }
+        payload["history"] = cls._append_history(payload)
+        payload["history_retention"] = {
+            "max_samples": cls.max_history_samples,
+            "min_interval_seconds": cls.min_history_interval_seconds,
+        }
+        return payload
 
     def do_GET(self) -> None:  # noqa: N802
         path = urlparse(self.path).path
