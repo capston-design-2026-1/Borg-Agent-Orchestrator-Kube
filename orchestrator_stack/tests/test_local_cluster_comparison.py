@@ -80,11 +80,16 @@ def test_comparison_dashboard_exposes_expected_api_and_signals():
     assert "drawPressureTimeline" in app
     assert "PRESSURE_TIMELINE_WINDOW_MS" in app
     assert "pressureWindowRows" in app
-    assert "Baseline HPA replica state" in app
+    assert "Agent A risk forecast" in app
+    assert "Agent C queue length" in app
+    assert "experimental weighted reward" in app
+    assert "objectiveStatus" in app
+    assert "renderAgentGoalMatrix" in app
     assert "timelineCanvas" in app
-    assert "resourceMixPanel" in app
-    assert "capacityPanel" in app
+    assert "objectiveEvidence" in app
+    assert "agentGoalMatrix" in app
     assert "_append_history" in server
     assert "history_retention" in server
-    assert "Capacity Matrix" in Path("orchestrator_stack/comparison_dashboard/index.html").read_text(encoding="utf-8")
+    assert "Research Objective Evidence" in Path("orchestrator_stack/comparison_dashboard/index.html").read_text(encoding="utf-8")
+    assert "Agent Goal Matrix" in Path("orchestrator_stack/comparison_dashboard/index.html").read_text(encoding="utf-8")
     assert "shared intentional stimulus" in app
