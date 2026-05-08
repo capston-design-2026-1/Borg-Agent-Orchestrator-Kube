@@ -444,6 +444,8 @@ http://127.0.0.1:8876
 
 It compares `borg-experimental` against `borg-baseline` through `GET /api/comparison`.
 
+Both clusters now receive the same shared `borg-comparison-workload` application, Service, and load generator. Differences in that namespace should come from controller behavior: baseline HPA replica movement/local Karpenter activation versus experimental Agent A/B/C orchestration. The old baseline-only `borg-baseline` workload namespace is removed by the comparison setup script on rerun.
+
 | Section | Meaning |
 |---|---|
 | Behavior scorecards | Queue pressure, CPU utilization, replica reaction, and capacity reaction as paired experimental/baseline summaries. |
