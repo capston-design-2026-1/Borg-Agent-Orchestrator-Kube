@@ -130,7 +130,7 @@ The comparison dashboard is designed to show behavioral differences, not just wh
 | Difference ledger | experimental value, baseline value, and experimental-minus-baseline delta | makes the comparison auditable instead of visual-only |
 | Pressure timeline | pending pods, CPU percent, memory percent, and schedulable workers over recent samples | shows whether one system is accumulating backlog or absorbing load |
 | Live resource mix | `kubectl top` CPU and memory for each cluster | separates actual usage from declared requests |
-| Capacity and demand | pod CPU/memory requests versus allocatable cluster capacity | shows scheduling pressure before pods become pending |
+| Capacity matrix | separate CPU request, memory request, and live CPU usage rows with experimental/baseline gauges and percentage-point deltas | separates scheduler demand from actual usage so capacity pressure is readable instead of compressed into one chart |
 | Pod phase mix | Running, Pending, Succeeded, Failed, and Unknown pod distribution | exposes admission and scheduling outcomes |
 | Namespace distribution | where pods are concentrated in each cluster | confirms whether pressure comes from experiment workloads, baseline HPA workloads, or system components |
 | Controller reactions | latest Agent A/B/C decision, proposals, Ray/Optuna status, HPA replica movement, and local Karpenter active/warm nodes | explains what each control plane is doing rather than only displaying cluster state |
