@@ -1,8 +1,15 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: borg-comparison-workload
+  labels:
+    app.kubernetes.io/part-of: borg-comparison-shared-workload
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: karpenter-surge
-  namespace: borg-baseline
+  namespace: borg-comparison-workload
   labels:
     app.kubernetes.io/name: karpenter-surge
     app.kubernetes.io/part-of: borg-baseline-hpa-karpenter
