@@ -274,6 +274,44 @@ def _randomized_phase(namespace: str, phase_index: int, *, seed: int | None = No
     )
 
 
+def select_exercise_phase(namespace: str, phase_index: int, *, randomize: bool = False, seed: int | None = None) -> ExercisePhase:
+    phases = exercise_phases(namespace)
+    return _randomized_phase(namespace, phase_index, seed=seed) if randomize else phases[phase_index % len(phases)]
+
+
+def _copy_phase_to_namespace(phase: ExercisePhase, namespace: str) -> ExercisePhase:
+    if phase.manifest is None:
+        return ExercisePhase(
+            name=phase.name,
+            detail=phase.detail,
+            operation=phase.operation,
+            intended_agent=phase.intended_agent,
+            intended_action=phase.intended_action,
+            rollout_timeout_seconds=phase.rollout_timeout_seconds,
+        )
+    return ExercisePhase(
+        name=phase.name,
+        detail=phase.detail,
+        manifest=_deployment_manifest(
+            namespace,
+            phase.name,
+            cpu=phase.cpu_request or "100m",
+            memory=phase.memory_request or "64Mi",
+            replicas=phase.replicas or 1,
+            node_selector=phase.node_selector,
+        ),
+        operation=phase.operation,
+        deployment=phase.deployment,
+        cpu_request=phase.cpu_request,
+        memory_request=phase.memory_request,
+        replicas=phase.replicas,
+        node_selector=phase.node_selector,
+        intended_agent=phase.intended_agent,
+        intended_action=phase.intended_action,
+        rollout_timeout_seconds=phase.rollout_timeout_seconds,
+    )
+
+
 def _run_kubectl(kubeconfig: str | Path, args: list[str], *, stdin: str | None = None) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         ["kubectl", "--kubeconfig", str(kubeconfig), *args],
@@ -312,8 +350,17 @@ def apply_exercise_phase(
     randomize: bool = False,
     seed: int | None = None,
 ) -> dict[str, Any]:
-    phases = exercise_phases(namespace)
-    phase = _randomized_phase(namespace, phase_index, seed=seed) if randomize else phases[phase_index % len(phases)]
+    phase = select_exercise_phase(namespace, phase_index, randomize=randomize, seed=seed)
+    return apply_selected_exercise_phase(kubeconfig, namespace, phase, randomized=randomize)
+
+
+def apply_selected_exercise_phase(
+    kubeconfig: str | Path,
+    namespace: str,
+    phase: ExercisePhase,
+    *,
+    randomized: bool = False,
+) -> dict[str, Any]:
     cleanup = cleanup_exercise_workloads(kubeconfig, namespace)
     result = {
         "phase": phase.name,
@@ -332,7 +379,7 @@ def apply_exercise_phase(
         "rollout_timeout_seconds": phase.rollout_timeout_seconds,
         "cleanup": cleanup,
         "applied": None,
-        "randomized": randomize,
+        "randomized": randomized,
     }
     if phase.manifest is not None:
         completed = _run_kubectl(kubeconfig, ["apply", "-f", "-"], stdin=phase.manifest)
@@ -353,3 +400,30 @@ def apply_exercise_phase(
             "stderr": rollout.stderr.strip(),
         }
     return result
+
+
+def apply_exercise_phase_to_clusters(
+    kubeconfig: str | Path,
+    namespace: str,
+    phase_index: int,
+    *,
+    mirror_kubeconfigs: list[str | Path] | None = None,
+    mirror_namespace: str | None = None,
+    randomize: bool = False,
+    seed: int | None = None,
+) -> dict[str, Any]:
+    phase = select_exercise_phase(namespace, phase_index, randomize=randomize, seed=seed)
+    primary = apply_selected_exercise_phase(kubeconfig, namespace, phase, randomized=randomize)
+    mirrors = []
+    for mirror_kubeconfig in mirror_kubeconfigs or []:
+        target_namespace = mirror_namespace or namespace
+        mirrored_phase = _copy_phase_to_namespace(phase, target_namespace)
+        mirrors.append(
+            {
+                "kubeconfig": str(Path(mirror_kubeconfig).expanduser()),
+                "result": apply_selected_exercise_phase(mirror_kubeconfig, target_namespace, mirrored_phase, randomized=randomize),
+            }
+        )
+    primary["mirrors"] = mirrors
+    primary["mirror_count"] = len(mirrors)
+    return primary
