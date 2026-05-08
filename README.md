@@ -123,6 +123,8 @@ http://127.0.0.1:8876
 
 Detailed local comparison guide: `docs/LOCAL_CLUSTER_COMPARISON.md`.
 
+Copy-paste operational runbook with startup, dashboard URLs, Prometheus URLs, k9s commands, and shutdown commands: `docs/LOCAL_DUAL_CLUSTER_RUNBOOK.md`.
+
 ## New Isolated Track: Codex Autonomy Runner
 
 An independent local agentic supervisor now exists at `codex_autonomy/`.
