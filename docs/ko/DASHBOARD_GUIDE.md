@@ -477,6 +477,8 @@ http://127.0.0.1:8876
 | Controller reactions | 최신 Agent A/B/C decision/proposals 및 Ray/Optuna 상태를 HPA replica movement와 local Karpenter active/warm node 상태와 비교한다. |
 | Node and workload inventory | node별 readiness/schedulability/resource와 두 cluster에서 발견된 Kubernetes workload controller를 보여준다. |
 
+`Controller reactions` 패널의 `shared intentional stimulus`는 두 cluster에 같이 적용된 최신 외부 exerciser operation을 의미한다. 이것은 비교를 위한 입력이며 controller output이 아니다. Agent A/B/C decision, Referee decision, HPA scaling, local Karpenter node activation은 각 cluster의 독립적인 반응이므로 mirror하지 않는다.
+
 이 dashboard는 local-only 비교용이다. HPA는 실제 Kubernetes HPA이고, Karpenter behavior는 upstream AWS Karpenter가 cloud provider API를 요구하기 때문에 Kind worker warm-node controller로 표현한다.
 
 ## 자주 헷갈리는 표시
