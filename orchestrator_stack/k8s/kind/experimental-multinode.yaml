@@ -1,0 +1,25 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: borg-experimental
+nodes:
+  - role: control-plane
+    labels:
+      borg.local/cluster-role: experimental-control-plane
+  - role: worker
+    labels:
+      borg.local/cluster-role: experimental-worker
+      borg.local/node-size: small
+      borg.local/node-index: "1"
+  - role: worker
+    labels:
+      borg.local/cluster-role: experimental-worker
+      borg.local/node-size: medium
+      borg.local/node-index: "2"
+  - role: worker
+    labels:
+      borg.local/cluster-role: experimental-worker
+      borg.local/node-size: large
+      borg.local/node-index: "3"
+networking:
+  disableDefaultCNI: false
+  kubeProxyMode: iptables

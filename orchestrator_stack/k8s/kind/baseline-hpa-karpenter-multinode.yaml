@@ -1,0 +1,28 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: borg-baseline
+nodes:
+  - role: control-plane
+    labels:
+      borg.local/cluster-role: baseline-control-plane
+  - role: worker
+    labels:
+      borg.local/cluster-role: baseline-worker
+      borg.local/node-size: small
+      borg.local/node-index: "1"
+      borg.local/provisioning-state: active
+  - role: worker
+    labels:
+      borg.local/cluster-role: baseline-worker
+      borg.local/node-size: medium
+      borg.local/node-index: "2"
+      borg.local/provisioning-state: warm
+  - role: worker
+    labels:
+      borg.local/cluster-role: baseline-worker
+      borg.local/node-size: large
+      borg.local/node-index: "3"
+      borg.local/provisioning-state: warm
+networking:
+  disableDefaultCNI: false
+  kubeProxyMode: iptables
