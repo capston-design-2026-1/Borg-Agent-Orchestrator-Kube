@@ -238,16 +238,20 @@ function renderAutoscaling(base) {
 }
 function renderReactions(exp, base) {
   const decision = exp.decision || {};
+  const stimulus = window.latestPayload?.shared_stimulus || {};
+  const mirrorCount = stimulus.mirror_count ?? (stimulus.mirrors || []).length ?? 0;
   const proposals = (decision.proposals || []).map(item => `<span class="pill">${esc(item.agent)} ${esc(item.kind)} score ${fmt(item.score)}</span>`).join('');
   const reward = exp.reward_summary || {};
   const ray = exp.ray || {}, optuna = exp.optuna || {};
   $('reactionPanel').innerHTML = `
+    <article class="reaction-card"><span>shared intentional stimulus</span><b>${esc(stimulus.phase || stimulus.message || 'n/a')}</b><small>${esc(stimulus.namespace || 'no namespace')} / operation ${esc(stimulus.operation || 'n/a')} / mirrored clusters ${esc(mirrorCount)}</small></article>
     <article class="reaction-card"><span>experimental decision</span><b>${esc(exp.last_decision || 'n/a')}</b><small>${esc(decision.reason || 'no reason recorded')}</small><div class="pill-row">${proposals || '<span class="pill">no proposals</span>'}</div></article>
     <article class="reaction-card"><span>experimental learning</span><b>Ray ${esc(ray.status || 'n/a')} / Optuna ${esc(optuna.status || 'n/a')}</b><small>reward avg ${fmt(reward.average_total)} / last ${fmt(reward.last_total)} / count ${esc(reward.count || 0)}</small></article>
     <article class="reaction-card"><span>baseline reaction</span><b>HPA ${hpaCurrent(base)} -> ${hpaDesired(base)} replicas</b><small>local Karpenter ${esc(base.karpenter?.active_nodes ?? 'n/a')} active workers / ${esc(base.karpenter?.warm_nodes ?? 'n/a')} warm workers</small></article>
   `;
 }
 function render(payload) {
+  window.latestPayload = payload;
   const exp = payload.experimental || {};
   const base = payload.baseline || {};
   const karp = base.karpenter || {};
