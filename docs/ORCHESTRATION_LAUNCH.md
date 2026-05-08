@@ -86,6 +86,29 @@ The dashboard shows:
 - generated artifacts, including trace/model/report/summary paths
 - live event log from the runtime JSONL stream
 
+## Local Multi-Node Comparison Mode
+
+For local thesis comparison without AWS, use the dedicated local comparison stack:
+
+```bash
+./orchestrator_stack/scripts/create_local_comparison_clusters.sh
+./orchestrator_stack/scripts/launch_experimental_multinode_orchestration.sh
+./orchestrator_stack/scripts/launch_cluster_comparison.sh
+```
+
+This creates two separate multi-node Kind clusters:
+
+- `borg-experimental`: the experimental orchestrator cluster.
+- `borg-baseline`: a baseline cluster with real Kubernetes HPA and a local Karpenter-style warm-node controller.
+
+The comparison dashboard runs at:
+
+```text
+http://127.0.0.1:8876
+```
+
+Full guide: `docs/LOCAL_CLUSTER_COMPARISON.md`.
+
 Runtime files:
 
 ```text

@@ -3,6 +3,34 @@
 1. Expand the current five-family policy gate suite with another full-phase AIOpsLab family when available.
 2. Replace calibrated utilization-derived energy watts with a direct measured node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
 
+## Latest Session Note (2026-05-08 KST, local dual-cluster comparison slice)
+
+- Created a fully local multi-node comparison setup without AWS:
+  - `borg-experimental`: 1 control-plane + 3 workers for the experimental orchestrator.
+  - `borg-baseline`: 1 control-plane + 3 workers for baseline HPA plus local Karpenter-style warm-node activation.
+- Added tracked Kind configs:
+  - `orchestrator_stack/k8s/kind/experimental-multinode.yaml`
+  - `orchestrator_stack/k8s/kind/baseline-hpa-karpenter-multinode.yaml`
+- Added baseline manifests:
+  - real Kubernetes `autoscaling/v2` HPA over `borg-baseline/hpa-web`
+  - `karpenter-surge` workload for triggering local warm-node activation.
+- Added local Karpenter-style controller:
+  - watches pending pods in `borg-baseline`
+  - activates warm Kind workers by uncordoning and removing `borg.local/capacity=warm:NoSchedule`
+  - records state at `orchestrator_stack/runtime/comparison/local_karpenter_state.json`
+- Added comparison dashboard at `http://127.0.0.1:8876` via `orchestrator_stack/scripts/launch_cluster_comparison.sh`.
+- Live local validation:
+  - both clusters created successfully with 4 nodes each.
+  - Metrics Server, Prometheus, and Node Exporter became healthy in both clusters.
+  - baseline HPA reached `20` replicas at about `45%/45%` CPU target.
+  - local Karpenter-style controller activated `borg-baseline-worker2` and `borg-baseline-worker3`.
+  - experimental live orchestration smoke ran for 2 iterations against the multi-node cluster.
+- Validation:
+  - script syntax checks: success
+  - Python compile checks: success
+  - `node --check orchestrator_stack/comparison_dashboard/app.js`: success
+  - `PYTHONPATH=orchestrator_stack ./.venv/bin/python -m pytest orchestrator_stack/tests -q`: success (`114 passed`)
+
 ## Latest Session Note (2026-05-06 KST, learning-progress dashboard slice)
 
 - Added a dedicated `Learning Progress` dashboard panel.

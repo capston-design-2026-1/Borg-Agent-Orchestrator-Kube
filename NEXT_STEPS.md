@@ -74,7 +74,8 @@ Read Agents.md, NEXT_STEPS.md, MAS_ARCHITECTURE.md, and README.md, inspect the l
 - Follow-up implementation on 2026-05-05 KST: live SLA pressure reward now uses bounded log scaling, so intentional Agent C backlog phases remain visible without driving Agent A to thousands of negative reward points; Optuna charts now use filled/point-highlighted traces with end labels.
 - Follow-up implementation on 2026-05-05 KST: the dashboard Optuna panel now exports all completed persistent trials from `visualized_orchestrator_reward_weights` instead of only the latest bootstrap callbacks; the local study currently shows `21` completed trials (`T0` through `T20`), and both objective/weight graphs use persisted trial IDs on the x-axis.
 - Follow-up implementation on 2026-05-06 KST: the dashboard now has a `Learning Progress` panel with a green best-so-far Optuna staircase, orange raw objective exploration trace, new-best event rail, best-so-far lift, and latest Ray/RLlib PPO reward mean so learning progress is visible without interpreting raw Optuna alone.
-- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `111 passed`.
+- Follow-up implementation on 2026-05-08 KST: local dual-cluster comparison now exists without AWS. `borg-experimental` and `borg-baseline` are both multi-node Kind clusters; the baseline runs real Kubernetes HPA plus a local Karpenter-style warm-node controller, and `orchestrator_stack/comparison_dashboard/` compares both clusters.
+- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `114 passed`.
 
 ## Pipeline Status
 

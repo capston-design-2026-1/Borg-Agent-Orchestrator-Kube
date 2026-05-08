@@ -75,6 +75,39 @@ Dashboard field-by-field documentation:
 - English: `docs/en/DASHBOARD_GUIDE.md`
 - Korean: `docs/ko/DASHBOARD_GUIDE.md`
 
+### Local Multi-Node HPA/Karpenter Comparison
+
+Create two local multi-node Kind clusters for side-by-side evaluation:
+
+```bash
+./orchestrator_stack/scripts/create_local_comparison_clusters.sh
+```
+
+This creates:
+
+- `borg-experimental`: the experimental multi-agent orchestrator cluster
+- `borg-baseline`: a baseline cluster with real Kubernetes HPA plus local Karpenter-style warm-node provisioning/consolidation over pre-created Kind workers
+
+Launch the experimental live orchestrator:
+
+```bash
+./orchestrator_stack/scripts/launch_experimental_multinode_orchestration.sh
+```
+
+Launch the comparison dashboard:
+
+```bash
+./orchestrator_stack/scripts/launch_cluster_comparison.sh
+```
+
+Default comparison dashboard URL:
+
+```text
+http://127.0.0.1:8876
+```
+
+Detailed local comparison guide: `docs/LOCAL_CLUSTER_COMPARISON.md`.
+
 ## New Isolated Track: Codex Autonomy Runner
 
 An independent local agentic supervisor now exists at `codex_autonomy/`.
