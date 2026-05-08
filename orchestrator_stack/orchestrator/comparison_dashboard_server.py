@@ -331,7 +331,9 @@ class ComparisonDashboardHandler(SimpleHTTPRequestHandler):
         workers = [node for node in nodes if not cls._is_control_plane(node)]
         pending = [pod for pod in pods if pod.get("status", {}).get("phase") == "Pending"]
         running = [pod for pod in pods if pod.get("status", {}).get("phase") == "Running"]
-        baseline_pods = [pod for pod in pods if pod.get("metadata", {}).get("namespace") == "borg-baseline"]
+        comparison_workload_pods = [
+            pod for pod in pods if pod.get("metadata", {}).get("namespace") == "borg-comparison-workload"
+        ]
         node_rows, resource_totals = cls._node_summary(nodes, node_metrics)
         pod_summary = cls._pod_summary(pods, workers)
         hpa = cls._hpa_summary(hpas)
@@ -356,7 +358,7 @@ class ComparisonDashboardHandler(SimpleHTTPRequestHandler):
             "pods": len(pods),
             "running_pods": len(running),
             "pending_pods": len(pending),
-            "baseline_pods": len(baseline_pods),
+            "comparison_workload_pods": len(comparison_workload_pods),
             "resource_totals": resource_totals,
             "pod_summary": pod_summary,
             "node_rows": node_rows,
