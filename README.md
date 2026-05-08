@@ -42,25 +42,32 @@ Run the whole orchestration path and the dashboard together from the repository 
 
 This starts the dashboard at `http://127.0.0.1:8765`, opens it on macOS, runs trace loading, XGBoost brains, multi-agent/referee rewards, Ray/RLlib PPO, and Optuna reward tuning, then streams state to `orchestrator_stack/runtime/visualization/`.
 
-For the continuous Kubernetes/AIOpsLab-style control loop, launch live mode:
+For the continuous Kubernetes/AIOpsLab-style control loop, use the multi-node local cluster path:
 
 ```bash
 cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator
 
-LIVE_K8S=1 \
-KUBECONFIG=~/Documents/aiopslab_validation_env/kubeconfig \
-./orchestrator_stack/scripts/launch_orchestration.sh
+./orchestrator_stack/scripts/create_local_comparison_clusters.sh
+./orchestrator_stack/scripts/launch_experimental_multinode_orchestration.sh
 ```
 
 One-line copy-paste version:
 
 ```bash
-cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && LIVE_K8S=1 KUBECONFIG=~/Documents/aiopslab_validation_env/kubeconfig ./orchestrator_stack/scripts/launch_orchestration.sh
+cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && ./orchestrator_stack/scripts/create_local_comparison_clusters.sh && ./orchestrator_stack/scripts/launch_experimental_multinode_orchestration.sh
 ```
 
 Do not type `\./orchestrator_stack/...`; the `\` is only a line-continuation marker and must be separated from the next command path by a newline.
 
 This keeps observing Kubernetes through `kubectl`, selecting Agent A/B/C/referee actions, computing rewards, appending a live trace, and refreshing the dashboard until stopped.
+
+The older AIOpsLab validation kubeconfig can also be made multi-node locally. Recreate it with:
+
+```bash
+RECREATE=1 ./orchestrator_stack/scripts/setup_kind_cluster.sh
+```
+
+That produces one control-plane plus three Kind worker nodes under `~/Documents/aiopslab_validation_env/kubeconfig`.
 
 In `LIVE_K8S=1` mode, the launcher now bootstraps the in-cluster observability path by default: Metrics Server in `kube-system`, Prometheus in `observe`, Node Exporter on the Kind node, and a local Prometheus port-forward at `http://127.0.0.1:19090`. The live trace collector receives this Prometheus URL automatically, so rows should include `prometheus_node_exporter` in `telemetry_sources` when the stack is healthy.
 
