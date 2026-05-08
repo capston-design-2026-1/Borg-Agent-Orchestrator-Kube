@@ -133,16 +133,10 @@ The comparison dashboard is designed to show behavioral differences, not just wh
 
 | Area | What it shows | Why it matters |
 |---|---|---|
-| Behavior scorecards | queue pressure, CPU utilization, replica reaction, capacity reaction | summarizes the immediate control behavior of both systems |
-| Difference ledger | experimental value, baseline value, and experimental-minus-baseline delta | makes the comparison auditable instead of visual-only |
-| Pressure timeline | rolling five-minute view with three synchronized lanes: pending pods, CPU/memory utilization percent, and HPA current/desired/max replicas | avoids putting counts, percentages, and replica counts on one biased y-axis while keeping the view focused on the current operating window |
-| Live resource mix | `kubectl top` CPU/memory plus requested CPU/memory for each cluster | separates actual usage from declared requests without mixing incompatible units in one chart |
-| Capacity matrix | separate CPU request, memory request, and live CPU usage rows with experimental/baseline gauges and percentage-point deltas | separates scheduler demand from actual usage so capacity pressure is readable instead of compressed into one chart |
-| Pod phase mix | Running, Pending, Succeeded, Failed, and Unknown pod distribution | exposes admission and scheduling outcomes |
-| Namespace distribution | where pods are concentrated in each cluster | confirms whether pressure comes from experiment workloads, baseline HPA workloads, or system components |
-| Controller reactions | latest Agent A/B/C decision, proposals, Ray/Optuna status, HPA replica movement, and local Karpenter active/warm nodes | explains what each control plane is doing rather than only displaying cluster state |
-| Node inventory | per-node readiness, schedulability, active/warm state, allocatable resources, and live usage | verifies that the comparison is truly multi-node and shows where work lands |
-| Workload inventory | Deployments, DaemonSets, StatefulSets, and Jobs discovered in both clusters | confirms which workload controllers are driving the observed behavior |
+| Research objective evidence | objective-specific cards with semantic `healthy`, `watch`, or `mirrored` status | avoids misleading raw `experimental - baseline` coloring where a negative value can mean the experimental system is better |
+| Agent goal matrix | Agent A safety, Agent B efficiency, and Agent C admission goals, trigger rules, proposals, selected control, reward, and baseline analogue | makes the experimental architecture explainable as three independent controllers rather than one opaque action label |
+| Control pressure timeline | rolling five-minute objective window for Agent A risk/SLA, Agent C queue/pending pressure, Agent B estimated watts, and weighted reward | removes the static HPA replica line and focuses the graph on the signals the experimental architecture is trying to optimize |
+| Controller response narrative | shared intentional stimulus, experimental decision/proposals/learning state, and baseline HPA/local-Karpenter response | explains the same input perturbation and the two different controller reactions |
 
 The API behind the dashboard is `GET /api/comparison`. It reads both kubeconfigs live with `kubectl`, uses Metrics Server through `kubectl top`, and joins that with the experimental orchestration state file:
 
@@ -150,9 +144,9 @@ The API behind the dashboard is `GET /api/comparison`. It reads both kubeconfigs
 orchestrator_stack/runtime/visualization-experimental/state.json
 ```
 
-The comparison API also retains up to `7200` samples in server memory while the dashboard server is running. The visible pressure timeline intentionally filters that retained history to the most recent five minutes so the graph stays readable during long runs.
+The comparison API also retains up to `7200` samples in server memory while the dashboard server is running. The visible control pressure timeline intentionally filters that retained history to the most recent five minutes so the graph stays readable during long runs.
 
-If the HPA display says `stable at N replicas`, that does not mean HPA did nothing. It means `currentReplicas == desiredReplicas` at the latest sample. Use the dedicated HPA replica lane in the pressure timeline and the `Baseline Autoscalers` table to see earlier scale movement, CPU target, replica headroom, and last scale time.
+The old raw difference ledger was removed from the main view. A raw negative delta is not inherently bad: fewer pending pods, fewer restarts, lower requests, or lower energy can be a better outcome. The dashboard now uses objective-specific status labels instead of coloring every negative number red.
 
 If Metrics Server is unhealthy, the dashboard still renders Kubernetes object state, but the live CPU/memory sections show warnings in the `Interpretation Boundary` panel.
 
