@@ -455,6 +455,8 @@ It compares `borg-experimental` against `borg-baseline` through `GET /api/compar
 | Controller reactions | Latest Agent A/B/C decision/proposals plus Ray/Optuna status versus HPA replica movement and local Karpenter active/warm nodes. |
 | Node and workload inventory | Per-node readiness/schedulability/resources and the Kubernetes workload controllers discovered in both clusters. |
 
+The `Controller reactions` panel also shows `shared intentional stimulus`. This is the latest external exerciser operation applied to both clusters. It is the comparison input, not a controller output. Agent A/B/C decisions, Referee decisions, HPA scale changes, and local Karpenter node activation are separate reactions and are not mirrored.
+
 This dashboard is local-only. HPA is real Kubernetes HPA; Karpenter behavior is represented by the local Kind warm-node controller because upstream AWS Karpenter requires cloud provider APIs.
 
 ## Common Misreadings
