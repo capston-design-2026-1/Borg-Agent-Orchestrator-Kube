@@ -1,5 +1,7 @@
 # Local Multi-Node Cluster Comparison
 
+For copy-paste startup, Prometheus links, dashboard links, k9s commands, and shutdown commands, use `docs/LOCAL_DUAL_CLUSTER_RUNBOOK.md`.
+
 This repository supports a fully local comparison between:
 
 1. `borg-experimental`: a multi-node Kind cluster used by the experimental Borg orchestration architecture.
