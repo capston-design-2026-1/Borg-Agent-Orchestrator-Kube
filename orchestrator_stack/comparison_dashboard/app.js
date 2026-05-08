@@ -4,6 +4,7 @@ const palette = {
   experimental: '#16835f', baseline: '#d48a20', blue: '#2f6f9f', red: '#b44634', ink: '#10201a', muted: '#65756e', grid: 'rgba(16,32,26,.14)', panel: 'rgba(255,255,255,.58)'
 };
 const phaseColors = { Running:'#16835f', Pending:'#d48a20', Succeeded:'#2f6f9f', Failed:'#b44634', Unknown:'#65756e' };
+const PRESSURE_TIMELINE_WINDOW_MS = 5 * 60 * 1000;
 
 function esc(value) { return String(value ?? 'n/a').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch])); }
 function num(value) { const n = Number(value); return Number.isFinite(n) ? n : null; }
@@ -67,6 +68,17 @@ function downsample(rows, maxPoints = 1100) {
   if (!Array.isArray(rows) || rows.length <= maxPoints) return rows || [];
   const step = Math.ceil(rows.length / maxPoints);
   return rows.filter((_, index) => index % step === 0 || index === rows.length - 1);
+}
+function pressureWindowRows(rows, windowMs = PRESSURE_TIMELINE_WINDOW_MS) {
+  if (!Array.isArray(rows) || rows.length <= 1) return rows || [];
+  const latestMs = Math.max(...rows.map(row => new Date(row.time).getTime()).filter(Number.isFinite));
+  if (!Number.isFinite(latestMs)) return rows;
+  const startMs = latestMs - windowMs;
+  const visible = rows.filter(row => {
+    const t = new Date(row.time).getTime();
+    return Number.isFinite(t) && t >= startMs;
+  });
+  return visible.length ? visible : rows.slice(-1);
 }
 
 function setupCanvas(canvas) {
@@ -225,7 +237,7 @@ function drawPressureTimeline(canvasId, sourceRows) {
   ctx.fillStyle = 'rgba(16,32,26,.68)';
   ctx.font = '12px Avenir Next, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('retained live samples', left + plotW / 2, h - 9);
+  ctx.fillText('last 5 minutes', left + plotW / 2, h - 9);
   const legendSeries = panels.flatMap(panel => panel.series);
   $('timelineLegend').innerHTML = legendSeries.map(item => `<span><b style="color:${item.color}">■</b> ${esc(item.label)}</span>`).join('');
 }
@@ -553,11 +565,12 @@ function render(payload) {
     if (historyRows.length > 7200) historyRows.shift();
   }
   const chartHistory = serverHistory.length ? serverHistory : historyRows;
-  const first = chartHistory[0], last = chartHistory[chartHistory.length - 1];
-  $('timelineWindow').textContent = chartHistory.length
-    ? `${chartHistory.length} retained samples from ${displayTime(first.time)} to ${displayTime(last.time)}; HPA lines show current and desired replicas so a stable ${hpa.current ?? 'n/a'} -> ${hpa.desired ?? 'n/a'} state does not hide earlier scale movement.`
+  const pressureHistory = pressureWindowRows(chartHistory);
+  const first = pressureHistory[0], last = pressureHistory[pressureHistory.length - 1];
+  $('timelineWindow').textContent = pressureHistory.length
+    ? `Showing ${pressureHistory.length} samples from the past 5 minutes (${displayTime(first.time)} to ${displayTime(last.time)}); ${chartHistory.length} retained total samples remain available while the server runs.`
     : 'waiting for comparison samples';
-  drawCharts(payload, chartHistory);
+  drawCharts(payload, pressureHistory);
 }
 async function tick() {
   try {
