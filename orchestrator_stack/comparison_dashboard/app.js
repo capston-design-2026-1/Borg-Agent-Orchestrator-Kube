@@ -78,30 +78,52 @@ function drawDonut(ctx, cx, cy, radius, values, colors, label, sublabel) {
     start += angle;
   });
   ctx.fillStyle = palette.ink;
-  ctx.font = '700 20px Avenir Next, sans-serif';
+  ctx.font = `800 ${Math.max(13, Math.min(17, radius * 0.27))}px Avenir Next, sans-serif`;
   ctx.textAlign = 'center';
-  ctx.fillText(label, cx, cy - 4);
+  ctx.fillText(label, cx, cy - 4, radius * 1.65);
   ctx.fillStyle = palette.muted;
-  ctx.font = '12px Avenir Next, sans-serif';
-  ctx.fillText(sublabel, cx, cy + 18);
+  ctx.font = `700 ${Math.max(10, Math.min(12, radius * 0.19))}px Avenir Next, sans-serif`;
+  ctx.fillText(sublabel, cx, cy + 18, radius * 1.85);
 }
 function drawResourcePie(payload) {
   const { ctx, w, h } = setupCanvas($('resourcePieCanvas'));
   ctx.clearRect(0,0,w,h);
   const exp = payload.experimental || {}, base = payload.baseline || {};
   const expRes = exp.resource_totals || {}, baseRes = base.resource_totals || {};
-  drawDonut(ctx, w * .30, h * .43, Math.min(w, h) * .19, [expRes.usage_cpu_m, expRes.usage_memory_mi], [palette.experimental, palette.blue], 'Experimental', 'CPU m / memory Mi');
-  drawDonut(ctx, w * .70, h * .43, Math.min(w, h) * .19, [baseRes.usage_cpu_m, baseRes.usage_memory_mi], [palette.baseline, palette.red], 'Baseline', 'CPU m / memory Mi');
-  ctx.fillStyle = palette.muted;
-  ctx.font = '13px Avenir Next, sans-serif';
-  ctx.textAlign = 'left';
+  const compact = w < 440;
+  const radius = compact ? Math.max(38, Math.min(54, w * 0.13, h * 0.13)) : Math.max(46, Math.min(68, w * 0.14, h * 0.17));
+  const centers = compact
+    ? [[w * 0.50, 78], [w * 0.50, 198]]
+    : [[w * 0.30, 118], [w * 0.70, 118]];
+  drawDonut(ctx, centers[0][0], centers[0][1], radius, [expRes.usage_cpu_m, expRes.usage_memory_mi], [palette.experimental, palette.blue], 'Experimental', compact ? '' : 'CPU m / memory Mi');
+  drawDonut(ctx, centers[1][0], centers[1][1], radius, [baseRes.usage_cpu_m, baseRes.usage_memory_mi], [palette.baseline, palette.red], 'Baseline', compact ? '' : 'CPU m / memory Mi');
+  if (compact) {
+    ctx.fillStyle = palette.muted;
+    ctx.font = '700 11px Avenir Next, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('CPU m / memory Mi', centers[0][0], centers[0][1] + radius + 24, radius * 2.4);
+    ctx.fillText('CPU m / memory Mi', centers[1][0], centers[1][1] + radius + 24, radius * 2.4);
+  }
   const rows = [
     ['Experimental CPU', `${fmt(expRes.usage_cpu_m, 1)}m`, palette.experimental],
     ['Experimental Memory', `${fmt(expRes.usage_memory_mi, 1)}Mi`, palette.blue],
     ['Baseline CPU', `${fmt(baseRes.usage_cpu_m, 1)}m`, palette.baseline],
     ['Baseline Memory', `${fmt(baseRes.usage_memory_mi, 1)}Mi`, palette.red],
   ];
-  rows.forEach((row, i) => { const y = h - 82 + i * 18; ctx.fillStyle = row[2]; ctx.fillText('■', 22, y); ctx.fillStyle = palette.muted; ctx.fillText(`${row[0]} ${row[1]}`, 42, y); });
+  const legendTop = compact ? Math.min(h - 92, 260) : Math.max(220, h - 94);
+  const colW = compact ? w - 44 : (w - 62) / 2;
+  ctx.textAlign = 'left';
+  ctx.font = '700 12px Avenir Next, sans-serif';
+  rows.forEach((row, i) => {
+    const col = compact ? 0 : i % 2;
+    const line = compact ? i : Math.floor(i / 2);
+    const x = 22 + col * (colW + 18);
+    const y = legendTop + line * 28;
+    ctx.fillStyle = row[2];
+    ctx.fillText('■', x, y);
+    ctx.fillStyle = palette.muted;
+    ctx.fillText(`${row[0]} ${row[1]}`, x + 20, y, colW - 20);
+  });
 }
 function drawCapacity(payload) {
   const { ctx, w, h } = setupCanvas($('capacityCanvas'));
@@ -114,18 +136,19 @@ function drawCapacity(payload) {
     ['Experimental CPU used', payload.experimental?.resource_totals?.usage_cpu_percent, '#72b79b'],
     ['Baseline CPU used', payload.baseline?.resource_totals?.usage_cpu_percent, '#e0a64d'],
   ];
-  const pad = { left: 186, right: 42, top: 34, bottom: 24 };
+  const pad = { left: Math.min(186, Math.max(118, w * 0.36)), right: 42, top: 34, bottom: 24 };
   const barH = 26;
   ctx.font = '13px Avenir Next, sans-serif';
   rows.forEach((row, index) => {
     const y = pad.top + index * 48;
     const value = Math.max(0, Math.min(150, Number(row[1]) || 0));
     const width = (w - pad.left - pad.right) * Math.min(value, 100) / 100;
-    ctx.fillStyle = palette.muted; ctx.textAlign = 'right'; ctx.fillText(row[0], pad.left - 12, y + 18);
+    ctx.fillStyle = palette.muted; ctx.textAlign = 'right'; ctx.fillText(row[0], pad.left - 12, y + 18, pad.left - 22);
     ctx.fillStyle = 'rgba(16,32,26,.08)'; ctx.fillRect(pad.left, y, w - pad.left - pad.right, barH);
     ctx.fillStyle = row[2]; ctx.fillRect(pad.left, y, width, barH);
     if (value > 100) { ctx.fillStyle = 'rgba(180,70,52,.25)'; ctx.fillRect(pad.left + w - pad.left - pad.right - 8, y, 8, barH); }
-    ctx.fillStyle = palette.ink; ctx.textAlign = 'left'; ctx.fillText(pct(row[1]), pad.left + width + 8, y + 18);
+    const valueX = Math.min(w - pad.right - 34, pad.left + width + 8);
+    ctx.fillStyle = palette.ink; ctx.textAlign = 'left'; ctx.fillText(pct(row[1]), valueX, y + 18);
   });
 }
 function drawPhase(payload) {
