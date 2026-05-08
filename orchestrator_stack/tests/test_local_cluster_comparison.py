@@ -78,6 +78,8 @@ def test_comparison_dashboard_exposes_expected_api_and_signals():
     assert "hpaDesired" in app
     assert "hpaReaction" in app
     assert "drawPressureTimeline" in app
+    assert "PRESSURE_TIMELINE_WINDOW_MS" in app
+    assert "pressureWindowRows" in app
     assert "Baseline HPA replica state" in app
     assert "timelineCanvas" in app
     assert "resourceMixPanel" in app
