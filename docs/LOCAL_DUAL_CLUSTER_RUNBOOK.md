@@ -2,6 +2,38 @@
 
 This is the copy-paste runbook for the local comparison setup.
 
+## Top One-Liners
+
+Start everything from one terminal: creates or reuses both local multi-node clusters, starts observability, launches experimental Agent A/B/C orchestration, launches the comparison dashboard, and opens the dashboards on macOS.
+
+```bash
+cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && ./orchestrator_stack/scripts/start_local_dual_cluster_stack.sh
+```
+
+Stop everything, including the local Kind Docker node containers for both comparison clusters:
+
+```bash
+cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && ./orchestrator_stack/scripts/stop_local_dual_cluster_stack.sh
+```
+
+Stop only host-side runtime helpers while keeping the clusters:
+
+```bash
+cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && KEEP_CLUSTERS=1 ./orchestrator_stack/scripts/stop_local_dual_cluster_stack.sh
+```
+
+Open k9s for the experimental cluster:
+
+```bash
+KUBECONFIG=~/Documents/borg_orchestrator_clusters/kubeconfig-experimental k9s
+```
+
+Open k9s for the HPA/local-Karpenter baseline cluster:
+
+```bash
+KUBECONFIG=~/Documents/borg_orchestrator_clusters/kubeconfig-baseline k9s
+```
+
 It starts and observes two local Kind clusters:
 
 | Cluster | Purpose | Kubeconfig |
@@ -195,7 +227,17 @@ kubectl --kubeconfig "$BASELINE_KUBECONFIG" -n borg-baseline get hpa,pods -o wid
 
 ## 8. Stop Runtime Processes
 
-This section only stops host-side launchers, dashboard servers, local Karpenter controller, and Prometheus port-forwards. It does not stop the Kind node Docker containers.
+The normal stop command removes both comparison clusters, which also removes their Kind node Docker containers:
+
+```bash
+cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && ./orchestrator_stack/scripts/stop_local_dual_cluster_stack.sh
+```
+
+To stop only host-side launchers, dashboard servers, local Karpenter controller, and Prometheus port-forwards while keeping the Kind node Docker containers:
+
+```bash
+cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && KEEP_CLUSTERS=1 ./orchestrator_stack/scripts/stop_local_dual_cluster_stack.sh
+```
 
 Preferred stop method:
 
@@ -274,29 +316,10 @@ kind delete cluster --name borg-aiopslab
 
 ## 11. Quick Full Startup Sequence
 
-Use this exact sequence when starting from a clean terminal:
+Use this one-liner when starting from a clean terminal:
 
 ```bash
-cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator
-export EXPERIMENTAL_KUBECONFIG=~/Documents/borg_orchestrator_clusters/kubeconfig-experimental
-export BASELINE_KUBECONFIG=~/Documents/borg_orchestrator_clusters/kubeconfig-baseline
-./orchestrator_stack/scripts/create_local_comparison_clusters.sh
-```
-
-Then start these in separate terminals:
-
-```bash
-cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator
-./orchestrator_stack/scripts/launch_experimental_multinode_orchestration.sh
-```
-
-```bash
-cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator
-./orchestrator_stack/scripts/launch_cluster_comparison.sh
-```
-
-```bash
-kubectl --kubeconfig ~/Documents/borg_orchestrator_clusters/kubeconfig-baseline -n observe port-forward svc/prometheus-server 19091:80
+cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && ./orchestrator_stack/scripts/start_local_dual_cluster_stack.sh
 ```
 
 Open:
