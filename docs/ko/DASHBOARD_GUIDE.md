@@ -472,7 +472,7 @@ http://127.0.0.1:8876
 | Behavior difference ledger | ready worker, pending pod, restart, live resource usage, requested resource에 대해 experimental value, baseline value, experimental-minus-baseline delta를 보여준다. |
 | Pressure timeline | 두 cluster의 pending pod, CPU percent, memory percent 최근 sample 흐름을 보여준다. |
 | Live resource mix | Metrics Server 기반 `kubectl top` CPU/memory usage를 cluster별로 보여준다. |
-| Capacity and demand | CPU/memory request가 allocatable cluster resource 대비 어느 정도인지 보여준다. |
+| Capacity matrix | CPU request pressure, memory request pressure, live CPU usage를 각각 별도 experimental/baseline gauge row로 나누고 percentage-point delta를 함께 보여준다. scheduler demand와 actual usage를 한 차트에 압축하지 않기 위한 구조다. |
 | Pod phase and namespace charts | pod scheduling/admission 결과와 workload pressure가 어느 namespace에 집중되는지 보여준다. |
 | Controller reactions | 최신 Agent A/B/C decision/proposals 및 Ray/Optuna 상태를 HPA replica movement와 local Karpenter active/warm node 상태와 비교한다. |
 | Node and workload inventory | node별 readiness/schedulability/resource와 두 cluster에서 발견된 Kubernetes workload controller를 보여준다. |
