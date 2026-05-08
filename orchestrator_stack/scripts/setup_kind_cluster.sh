@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 CLUSTER_NAME="${AIOPSLAB_CLUSTER_NAME:-borg-aiopslab}"
 KUBECONFIG_PATH="${AIOPSLAB_KUBECONFIG:-$HOME/Documents/aiopslab_validation_env/kubeconfig}"
+KIND_CONFIG="${AIOPSLAB_KIND_CONFIG:-$ROOT/orchestrator_stack/k8s/kind/aiopslab-multinode.yaml}"
+RECREATE="${RECREATE:-0}"
 
 if ! command -v docker >/dev/null 2>&1; then
   echo "docker not found; install/start Docker Desktop first" >&2
@@ -22,10 +25,13 @@ if ! command -v kind >/dev/null 2>&1; then
 fi
 
 mkdir -p "$(dirname "$KUBECONFIG_PATH")"
+if [[ "$RECREATE" == "1" ]] && kind get clusters | grep -qx "$CLUSTER_NAME"; then
+  kind delete cluster --name "$CLUSTER_NAME"
+fi
 if ! kind get clusters | grep -qx "$CLUSTER_NAME"; then
-  kind create cluster --name "$CLUSTER_NAME" --kubeconfig "$KUBECONFIG_PATH"
+  kind create cluster --name "$CLUSTER_NAME" --config "$KIND_CONFIG" --kubeconfig "$KUBECONFIG_PATH"
 else
   kind export kubeconfig --name "$CLUSTER_NAME" --kubeconfig "$KUBECONFIG_PATH"
 fi
-kubectl --kubeconfig "$KUBECONFIG_PATH" wait --for=condition=Ready "node/$CLUSTER_NAME-control-plane" --timeout=180s
-kubectl --kubeconfig "$KUBECONFIG_PATH" get nodes
+kubectl --kubeconfig "$KUBECONFIG_PATH" wait --for=condition=Ready nodes --all --timeout=180s
+kubectl --kubeconfig "$KUBECONFIG_PATH" get nodes -L borg.local/cluster-role,borg.local/node-size,borg.local/node-index
