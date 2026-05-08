@@ -1,7 +1,31 @@
 # Orchestrator Stack Next Steps
 
-1. Expand the current five-family policy gate suite with another full-phase AIOpsLab family when available.
-2. Replace calibrated utilization-derived energy watts with a direct measured node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
+1. Add a local dual-cluster experiment runner that applies a fixed sequence of mirrored stimuli, records per-stimulus windows, and exports timestamped comparison evidence.
+2. Persist comparison dashboard time-series history to JSON/CSV so thesis evidence survives browser refresh and can be cited.
+3. Add automatic baseline Prometheus port-forward support beside the comparison dashboard launcher.
+4. Replace calibrated utilization-derived energy watts with a direct measured node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
+5. Expand the current five-family policy gate suite with another full-phase AIOpsLab family when available.
+
+## Latest Session Note (2026-05-08 KST, continuity handoff)
+
+- Durable handoff report created:
+  - `reports/milestones/202605081138_local_dual_cluster_handoff.md`
+- The report records:
+  - completed local dual-cluster implementation work
+  - exact startup/shutdown commands
+  - current dashboard and Prometheus URLs
+  - mirrored stimulus semantics
+  - validation status
+  - next engineering, thesis/evaluation, fidelity, and documentation jobs
+- Current validation:
+  - `PYTHONPATH=orchestrator_stack ./.venv/bin/python -m pytest orchestrator_stack/tests -q`
+  - result: `115 passed`
+- Recommended resume files for a new Codex session:
+  - `Agents.md`
+  - `NEXT_STEPS.md`
+  - `orchestrator_stack/NEXT_STEPS.md`
+  - `docs/LOCAL_DUAL_CLUSTER_RUNBOOK.md`
+  - `reports/milestones/202605081138_local_dual_cluster_handoff.md`
 
 ## Latest Session Note (2026-05-08 KST, mirrored comparison stimulus slice)
 
