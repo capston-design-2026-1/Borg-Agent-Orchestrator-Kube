@@ -472,7 +472,7 @@ http://127.0.0.1:8876
 |---|---|
 | Behavior scorecards | queue pressure, CPU utilization, replica reaction, capacity reaction을 experimental/baseline 쌍으로 요약한다. |
 | Behavior difference ledger | ready worker, pending pod, restart, live resource usage, requested resource에 대해 experimental value, baseline value, experimental-minus-baseline delta를 보여준다. |
-| Pressure timeline | pending pod, CPU/memory utilization percent, baseline HPA current/desired/max replica를 세 개의 synchronized lane으로 나누어 보여준다. dashboard server가 살아 있는 동안 몇 시간 단위의 context를 유지하면서 서로 단위가 다른 값을 하나의 biased y-axis에 섞지 않는다. |
+| Pressure timeline | 최근 5분 rolling window를 세 개의 synchronized lane으로 나누어 보여준다: pending pod, CPU/memory utilization percent, baseline HPA current/desired/max replica. dashboard server는 더 긴 history를 유지하지만, 화면의 graph는 현재 operating window에 집중한다. |
 | Live resource mix | Metrics Server 기반 CPU/memory usage와 requested CPU/memory를 cluster별 bar로 나누어 보여준다. CPU millicore와 memory MiB를 하나의 donut에 섞지 않기 위한 구조다. |
 | Capacity matrix | CPU request pressure, memory request pressure, live CPU usage를 각각 별도 experimental/baseline gauge row로 나누고 percentage-point delta를 함께 보여준다. scheduler demand와 actual usage를 한 차트에 압축하지 않기 위한 구조다. |
 | Pod phase and namespace charts | pod scheduling/admission 결과와 workload pressure가 어느 namespace에 집중되는지 보여준다. |
