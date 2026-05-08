@@ -33,6 +33,17 @@ Do not write `\./orchestrator_stack/...`; the backslash must end the previous li
 
 The launcher uses `~/Documents/borg_orchestrator_clusters/kubeconfig-experimental`, which is a local Kind cluster with one control-plane and three workers. `LIVE_K8S=1` keeps capturing real Kubernetes snapshots, selecting Agent A/B/C/referee actions, scoring rewards, appending `live_kubernetes_trace.json`, and refreshing the dashboard until you press `Ctrl-C`.
 
+For exact local comparison, `launch_experimental_multinode_orchestration.sh` also mirrors each intentional exercise phase to `~/Documents/borg_orchestrator_clusters/kubeconfig-baseline`. Only the external stimulus is mirrored. Controller reactions are intentionally not mirrored:
+
+- mirrored: exerciser workload create/delete operations, CPU/memory request, replica count, node selector, and namespace
+- not mirrored: Agent A/B/C actions, Referee decisions, HPA scaling, and local Karpenter warm-node activation/consolidation
+
+Manual shared stimulus command:
+
+```bash
+PHASE_INDEX=3 ./orchestrator_stack/scripts/apply_comparison_stimulus.sh
+```
+
 If you specifically need the older AIOpsLab validation kubeconfig, recreate it as multi-node before use:
 
 ```bash
