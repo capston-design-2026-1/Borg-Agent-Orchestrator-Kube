@@ -450,6 +450,35 @@ Event Log는 `events.jsonl`의 최근 event를 표시한다. Flow diagram 아래
 | `orchestrator_stack/runtime/dashboard/server.log` | dashboard HTTP server log. |
 | `orchestrator_stack/runtime/dashboard/run.log` | launcher/orchestrator process log. |
 
+## 비교 Dashboard
+
+별도 local comparison dashboard는 다음 명령으로 실행한다.
+
+```bash
+./orchestrator_stack/scripts/launch_cluster_comparison.sh
+```
+
+기본 URL은 다음과 같다.
+
+```text
+http://127.0.0.1:8876
+```
+
+이 dashboard는 `GET /api/comparison`을 통해 `borg-experimental`과 `borg-baseline`을 비교한다.
+
+| 섹션 | 의미 |
+|---|---|
+| Behavior scorecards | queue pressure, CPU utilization, replica reaction, capacity reaction을 experimental/baseline 쌍으로 요약한다. |
+| Behavior difference ledger | ready worker, pending pod, restart, live resource usage, requested resource에 대해 experimental value, baseline value, experimental-minus-baseline delta를 보여준다. |
+| Pressure timeline | 두 cluster의 pending pod, CPU percent, memory percent 최근 sample 흐름을 보여준다. |
+| Live resource mix | Metrics Server 기반 `kubectl top` CPU/memory usage를 cluster별로 보여준다. |
+| Capacity and demand | CPU/memory request가 allocatable cluster resource 대비 어느 정도인지 보여준다. |
+| Pod phase and namespace charts | pod scheduling/admission 결과와 workload pressure가 어느 namespace에 집중되는지 보여준다. |
+| Controller reactions | 최신 Agent A/B/C decision/proposals 및 Ray/Optuna 상태를 HPA replica movement와 local Karpenter active/warm node 상태와 비교한다. |
+| Node and workload inventory | node별 readiness/schedulability/resource와 두 cluster에서 발견된 Kubernetes workload controller를 보여준다. |
+
+이 dashboard는 local-only 비교용이다. HPA는 실제 Kubernetes HPA이고, Karpenter behavior는 upstream AWS Karpenter가 cloud provider API를 요구하기 때문에 Kind worker warm-node controller로 표현한다.
+
 ## 자주 헷갈리는 표시
 
 | 표시 | 정확한 해석 |
