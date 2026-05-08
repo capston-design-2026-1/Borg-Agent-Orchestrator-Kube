@@ -14,13 +14,14 @@ These instructions apply to work performed in this repository.
 - Always commit after making meaningful changes in this repository.
 - Always push committed changes to the remote branch for this repository.
 - Do not ask the user for permission before committing or pushing.
-- Split changes into small, specific, logically separated commits.
-- Split commits more aggressively than usual: when practical, separate Python code, documentation, handoff files, config/examples, and workflow-policy changes into different commits.
-- For orchestrator implementation work, default to near per-file-per-commit granularity (for example: simulator, predictor, referee, each in separate commits).
-- Only group files in one commit when they are truly minor and tightly coupled (e.g., `__init__.py` plus a tiny companion change).
-- Do not bundle unrelated file classes together in one commit just because they were edited in the same session.
-- If one session touches multiple concerns, stage and commit each concern independently in the order they were validated.
-- Prefer the smallest defensible commit that leaves the repository in a coherent state.
+- Commit every tracked file independently by default: one changed file means one commit, and ten changed files means ten separate commits.
+- Stage exactly one tracked file path per commit unless a listed exception below applies.
+- Do not use broad staging commands such as `git add .`, `git add -A`, or directory-wide `git add <dir>` for a commit. Stage explicit file paths only.
+- Before every commit, verify the staged set with `git diff --cached --name-only`; if more than one file is staged, unstage and split the commit.
+- After every commit, verify the commit shape with `git show --name-only --oneline --stat HEAD` and make sure the commit contains only the intended file.
+- Only group multiple files in one commit when they are mechanically inseparable and the repository would be invalid or misleading if committed separately, such as a generated lockfile with its manifest, a package metadata file with its generated checksum, or an `__init__.py` required solely to expose the same new module. Mention the exception in the commit message or final handoff.
+- Do not group files because they share a feature, were edited together, are both documentation, are both tests, or because many commits feel inconvenient.
+- If one session touches multiple concerns, stage, commit, validate, and push each file independently in the order those files were validated.
 - When working in a single file, still shard commits by function, feature slice, or behavior change where practical.
 - Use clear commit messages that describe the specific unit of work.
 
