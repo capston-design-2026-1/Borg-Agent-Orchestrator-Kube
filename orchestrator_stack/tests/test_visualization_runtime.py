@@ -118,6 +118,10 @@ def test_live_kubernetes_run_cli_accepts_continuous_options():
             "--exercise-randomize",
             "--exercise-seed",
             "17",
+            "--mirror-exercise-kubeconfig",
+            "/tmp/baseline-kubeconfig",
+            "--mirror-exercise-namespace",
+            "demo-exercise",
         ]
     )
 
@@ -133,6 +137,8 @@ def test_live_kubernetes_run_cli_accepts_continuous_options():
     assert args.exercise_interval_iterations == 4
     assert args.exercise_randomize is True
     assert args.exercise_seed == 17
+    assert args.mirror_exercise_kubeconfig == ["/tmp/baseline-kubeconfig"]
+    assert args.mirror_exercise_namespace == "demo-exercise"
 
 
 def test_visualization_state_writes_state_and_events(tmp_path: Path):
