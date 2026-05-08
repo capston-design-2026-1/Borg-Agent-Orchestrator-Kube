@@ -53,11 +53,12 @@
 - Added tracked Kind configs:
   - `orchestrator_stack/k8s/kind/experimental-multinode.yaml`
   - `orchestrator_stack/k8s/kind/baseline-hpa-karpenter-multinode.yaml`
-- Added baseline manifests:
-  - real Kubernetes `autoscaling/v2` HPA over `borg-baseline/hpa-web`
-  - `karpenter-surge` workload for triggering local warm-node activation.
+- Added comparison workload and baseline manifests:
+  - identical `borg-comparison-workload/comparison-web` app, Service, and load generator are applied to both clusters.
+  - real Kubernetes `autoscaling/v2` HPA targets the shared `comparison-web` workload only in the baseline cluster.
+  - baseline-only `karpenter-surge` workload remains available for triggering local warm-node activation.
 - Added local Karpenter-style controller:
-  - watches pending pods in `borg-baseline`
+  - watches pending pods in `borg-comparison-workload`
   - activates warm Kind workers by uncordoning and removing `borg.local/capacity=warm:NoSchedule`
   - records state at `orchestrator_stack/runtime/comparison/local_karpenter_state.json`
 - Added comparison dashboard at `http://127.0.0.1:8876` via `orchestrator_stack/scripts/launch_cluster_comparison.sh`.
