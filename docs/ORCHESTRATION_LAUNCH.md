@@ -14,25 +14,32 @@ This is the finite thesis demo mode. It runs one full pass over the configured t
 
 ## Copy-Paste Live Kubernetes Launch
 
-Use this exact block from any terminal. It includes `cd`, so it does not depend on your current directory:
+Use this exact block from any terminal. It includes `cd`, so it does not depend on your current directory. This is the preferred multi-node local launch path:
 
 ```bash
 cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator
 
-LIVE_K8S=1 \
-KUBECONFIG=~/Documents/aiopslab_validation_env/kubeconfig \
-./orchestrator_stack/scripts/launch_orchestration.sh
+./orchestrator_stack/scripts/create_local_comparison_clusters.sh
+./orchestrator_stack/scripts/launch_experimental_multinode_orchestration.sh
 ```
 
 One-line version:
 
 ```bash
-cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && LIVE_K8S=1 KUBECONFIG=~/Documents/aiopslab_validation_env/kubeconfig ./orchestrator_stack/scripts/launch_orchestration.sh
+cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && ./orchestrator_stack/scripts/create_local_comparison_clusters.sh && ./orchestrator_stack/scripts/launch_experimental_multinode_orchestration.sh
 ```
 
 Do not write `\./orchestrator_stack/...`; the backslash must end the previous line, not touch the command path.
 
-`LIVE_K8S=1` keeps capturing real Kubernetes snapshots, selecting Agent A/B/C/referee actions, scoring rewards, appending `live_kubernetes_trace.json`, and refreshing the dashboard until you press `Ctrl-C`.
+The launcher uses `~/Documents/borg_orchestrator_clusters/kubeconfig-experimental`, which is a local Kind cluster with one control-plane and three workers. `LIVE_K8S=1` keeps capturing real Kubernetes snapshots, selecting Agent A/B/C/referee actions, scoring rewards, appending `live_kubernetes_trace.json`, and refreshing the dashboard until you press `Ctrl-C`.
+
+If you specifically need the older AIOpsLab validation kubeconfig, recreate it as multi-node before use:
+
+```bash
+RECREATE=1 ./orchestrator_stack/scripts/setup_kind_cluster.sh
+```
+
+That writes `~/Documents/aiopslab_validation_env/kubeconfig` for a local Kind cluster with one control-plane and three workers.
 
 By default, live mode also bootstraps in-cluster observability before the control loop starts:
 
@@ -262,7 +269,7 @@ Important: upstream AIOpsLab problem sessions are bounded tasks, so the infinite
 Before live mode, verify the cluster once:
 
 ```bash
-orchestrator_stack/scripts/setup_kind_cluster.sh
+RECREATE=1 orchestrator_stack/scripts/setup_kind_cluster.sh
 orchestrator_stack/scripts/setup_aiopslab_env.sh
 
 KUBECONFIG=~/Documents/aiopslab_validation_env/kubeconfig \
