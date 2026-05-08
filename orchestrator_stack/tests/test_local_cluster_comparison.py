@@ -77,6 +77,8 @@ def test_comparison_dashboard_exposes_expected_api_and_signals():
     assert "baselinePending" in app
     assert "hpaDesired" in app
     assert "hpaReaction" in app
+    assert "drawPressureTimeline" in app
+    assert "Baseline HPA replica state" in app
     assert "timelineCanvas" in app
     assert "resourceMixPanel" in app
     assert "capacityPanel" in app
