@@ -43,7 +43,13 @@ def test_comparison_dashboard_exposes_expected_api_and_signals():
     assert "/api/comparison" in server
     assert "experimental" in server
     assert "baseline" in server
+    assert "_difference_rows" in server
+    assert "resource_totals" in server
+    assert "pod_summary" in server
     assert "HPA + Local Karpenter" in Path("orchestrator_stack/comparison_dashboard/index.html").read_text(encoding="utf-8")
     assert "experimentalPending" in app
     assert "baselinePending" in app
     assert "hpaDesired" in app
+    assert "timelineCanvas" in app
+    assert "resourcePieCanvas" in app
+    assert "capacityCanvas" in app
