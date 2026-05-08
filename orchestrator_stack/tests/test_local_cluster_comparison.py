@@ -76,8 +76,11 @@ def test_comparison_dashboard_exposes_expected_api_and_signals():
     assert "experimentalPending" in app
     assert "baselinePending" in app
     assert "hpaDesired" in app
+    assert "hpaReaction" in app
     assert "timelineCanvas" in app
-    assert "resourcePieCanvas" in app
+    assert "resourceMixPanel" in app
     assert "capacityPanel" in app
+    assert "_append_history" in server
+    assert "history_retention" in server
     assert "Capacity Matrix" in Path("orchestrator_stack/comparison_dashboard/index.html").read_text(encoding="utf-8")
     assert "shared intentional stimulus" in app
