@@ -450,14 +450,16 @@ Both clusters now receive the same shared `borg-comparison-workload` application
 |---|---|
 | Behavior scorecards | Queue pressure, CPU utilization, replica reaction, and capacity reaction as paired experimental/baseline summaries. |
 | Behavior difference ledger | Experimental value, baseline value, and experimental-minus-baseline delta for ready workers, pending pods, restarts, live resource usage, and requested resources. |
-| Pressure timeline | Recent samples for pending pods, CPU percent, and memory percent across both clusters. |
-| Live resource mix | Metrics Server-backed `kubectl top` CPU and memory usage for each cluster. |
+| Pressure timeline | Server-retained samples for pending pods, CPU percent, memory percent, and baseline HPA current/desired replicas. It keeps several hours of context while the dashboard server is running. |
+| Live resource mix | Metrics Server-backed CPU/memory usage and requested CPU/memory for each cluster, rendered as separate bars so CPU millicores and memory MiB are not blended into one misleading donut. |
 | Capacity matrix | CPU request pressure, memory request pressure, and live CPU usage are sharded into separate experimental/baseline gauge rows with percentage-point deltas. This avoids mixing scheduler demand and actual usage in one compressed chart. |
 | Pod phase and namespace charts | Scheduling/admission outcomes and where workload pressure is concentrated. |
 | Controller reactions | Latest Agent A/B/C decision/proposals plus Ray/Optuna status versus HPA replica movement and local Karpenter active/warm nodes. |
 | Node and workload inventory | Per-node readiness/schedulability/resources and the Kubernetes workload controllers discovered in both clusters. |
 
 The `Controller reactions` panel also shows `shared intentional stimulus`. This is the latest external exerciser operation applied to both clusters. It is the comparison input, not a controller output. Agent A/B/C decisions, Referee decisions, HPA scale changes, and local Karpenter node activation are separate reactions and are not mirrored.
+
+If HPA reads `stable at N replicas`, HPA is not broken. It means the latest `currentReplicas` and `desiredReplicas` match after HPA has already reacted. Use the pressure timeline HPA replica lines plus the `Baseline Autoscalers` table to see earlier scale movement, CPU target, replica headroom, and last scale time.
 
 This dashboard is local-only. HPA is real Kubernetes HPA; Karpenter behavior is represented by the local Kind warm-node controller because upstream AWS Karpenter requires cloud provider APIs.
 
