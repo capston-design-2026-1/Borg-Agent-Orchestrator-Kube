@@ -6,6 +6,7 @@ def test_local_comparison_cluster_assets_are_tracked():
         "orchestrator_stack/k8s/kind/experimental-multinode.yaml",
         "orchestrator_stack/k8s/kind/baseline-hpa-karpenter-multinode.yaml",
         "orchestrator_stack/k8s/kind/aiopslab-multinode.yaml",
+        "orchestrator_stack/k8s/comparison/shared-workload.yaml",
         "orchestrator_stack/k8s/baseline/hpa-workload.yaml",
         "orchestrator_stack/k8s/baseline/karpenter-surge-workload.yaml",
         "orchestrator_stack/scripts/create_local_comparison_clusters.sh",
@@ -25,19 +26,27 @@ def test_local_comparison_cluster_assets_are_tracked():
 
 def test_baseline_manifest_uses_real_hpa_and_local_karpenter_boundary():
     hpa = Path("orchestrator_stack/k8s/baseline/hpa-workload.yaml").read_text(encoding="utf-8")
+    shared = Path("orchestrator_stack/k8s/comparison/shared-workload.yaml").read_text(encoding="utf-8")
     controller = Path("orchestrator_stack/scripts/local_karpenter_controller.py").read_text(encoding="utf-8")
     guide = Path("docs/LOCAL_CLUSTER_COMPARISON.md").read_text(encoding="utf-8")
     setup = Path("orchestrator_stack/scripts/setup_kind_cluster.sh").read_text(encoding="utf-8")
+    comparison_setup = Path("orchestrator_stack/scripts/create_local_comparison_clusters.sh").read_text(encoding="utf-8")
 
     assert "kind: HorizontalPodAutoscaler" in hpa
     assert "autoscaling/v2" in hpa
-    assert "registry.k8s.io/hpa-example" in hpa
+    assert "name: comparison-web" in hpa
+    assert "namespace: borg-comparison-workload" in hpa
+    assert "registry.k8s.io/hpa-example" in shared
+    assert "comparison-load-generator" in shared
     assert "local-kind-karpenter-emulation" in controller
     assert "borg.local/provisioning-state=active" in controller
     assert "borg.local/capacity=warm:NoSchedule" in controller
+    assert "borg-comparison-workload" in controller
     assert "This is not real AWS Karpenter" in guide
     assert "aiopslab-multinode.yaml" in setup
     assert "RECREATE" in setup
+    assert "SHARED_WORKLOAD_MANIFEST" in comparison_setup
+    assert "LEGACY_BASELINE_NAMESPACE" in comparison_setup
 
 
 def test_local_comparison_docs_expose_one_line_lifecycle_commands():
