@@ -135,8 +135,8 @@ The comparison dashboard is designed to show behavioral differences, not just wh
 |---|---|---|
 | Behavior scorecards | queue pressure, CPU utilization, replica reaction, capacity reaction | summarizes the immediate control behavior of both systems |
 | Difference ledger | experimental value, baseline value, and experimental-minus-baseline delta | makes the comparison auditable instead of visual-only |
-| Pressure timeline | pending pods, CPU percent, memory percent, and schedulable workers over recent samples | shows whether one system is accumulating backlog or absorbing load |
-| Live resource mix | `kubectl top` CPU and memory for each cluster | separates actual usage from declared requests |
+| Pressure timeline | pending pods, CPU percent, memory percent, and HPA current/desired replicas over retained server-side samples | shows whether one system is accumulating backlog or absorbing load over a longer run, and keeps HPA scale history visible after it reaches a stable state |
+| Live resource mix | `kubectl top` CPU/memory plus requested CPU/memory for each cluster | separates actual usage from declared requests without mixing incompatible units in one chart |
 | Capacity matrix | separate CPU request, memory request, and live CPU usage rows with experimental/baseline gauges and percentage-point deltas | separates scheduler demand from actual usage so capacity pressure is readable instead of compressed into one chart |
 | Pod phase mix | Running, Pending, Succeeded, Failed, and Unknown pod distribution | exposes admission and scheduling outcomes |
 | Namespace distribution | where pods are concentrated in each cluster | confirms whether pressure comes from experiment workloads, baseline HPA workloads, or system components |
@@ -149,6 +149,10 @@ The API behind the dashboard is `GET /api/comparison`. It reads both kubeconfigs
 ```text
 orchestrator_stack/runtime/visualization-experimental/state.json
 ```
+
+The comparison API also retains up to `7200` samples in server memory while the dashboard server is running. At the default polling cadence this gives several hours of pressure timeline context instead of only the latest short browser window.
+
+If the HPA display says `stable at N replicas`, that does not mean HPA did nothing. It means `currentReplicas == desiredReplicas` at the latest sample. Use the HPA current/desired lines in the pressure timeline and the `Baseline Autoscalers` table to see earlier scale movement, CPU target, replica headroom, and last scale time.
 
 If Metrics Server is unhealthy, the dashboard still renders Kubernetes object state, but the live CPU/memory sections show warnings in the `Interpretation Boundary` panel.
 
