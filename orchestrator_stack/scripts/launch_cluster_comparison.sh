@@ -13,6 +13,7 @@ PYTHON_BIN="${PYTHON_BIN:-$ROOT/.venv/bin/python}"
 OPEN_BROWSER="${OPEN_BROWSER:-1}"
 RUN_LOCAL_KARPENTER="${RUN_LOCAL_KARPENTER:-1}"
 KARPENTER_STATE="${KARPENTER_STATE:-orchestrator_stack/runtime/comparison/local_karpenter_state.json}"
+SHARED_STIMULUS_STATE="${SHARED_STIMULUS_STATE:-orchestrator_stack/runtime/comparison/shared_stimulus.json}"
 KARPENTER_LOG="${KARPENTER_LOG:-orchestrator_stack/runtime/comparison/local-karpenter.log}"
 SERVER_LOG="${SERVER_LOG:-orchestrator_stack/runtime/comparison/server.log}"
 
@@ -44,6 +45,7 @@ PYTHONPATH="orchestrator_stack${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON_BIN" -m orch
   --baseline-kubeconfig "$BASELINE_KUBECONFIG" \
   --experimental-event-dir "$EXPERIMENTAL_EVENT_DIR" \
   --karpenter-state "$KARPENTER_STATE" \
+  --shared-stimulus "$SHARED_STIMULUS_STATE" \
   > "$SERVER_LOG" 2>&1 &
 SERVER_PID=$!
 
@@ -53,6 +55,7 @@ echo "experimental kubeconfig: $EXPERIMENTAL_KUBECONFIG"
 echo "baseline kubeconfig: $BASELINE_KUBECONFIG"
 echo "experimental event dir: $EXPERIMENTAL_EVENT_DIR"
 echo "local karpenter state: $KARPENTER_STATE"
+echo "shared stimulus state: $SHARED_STIMULUS_STATE"
 
 if [[ "$OPEN_BROWSER" == "1" && "$(uname -s)" == "Darwin" ]]; then
   open "$URL" >/dev/null 2>&1 || true
