@@ -12,6 +12,7 @@ PORT="${PORT:-8876}"
 PYTHON_BIN="${PYTHON_BIN:-$ROOT/.venv/bin/python}"
 OPEN_BROWSER="${OPEN_BROWSER:-1}"
 RUN_LOCAL_KARPENTER="${RUN_LOCAL_KARPENTER:-1}"
+BASELINE_WORKLOAD_NAMESPACE="${BASELINE_WORKLOAD_NAMESPACE:-borg-comparison-workload}"
 KARPENTER_STATE="${KARPENTER_STATE:-orchestrator_stack/runtime/comparison/local_karpenter_state.json}"
 SHARED_STIMULUS_STATE="${SHARED_STIMULUS_STATE:-orchestrator_stack/runtime/comparison/shared_stimulus.json}"
 KARPENTER_LOG="${KARPENTER_LOG:-orchestrator_stack/runtime/comparison/local-karpenter.log}"
@@ -34,7 +35,7 @@ if [[ "$RUN_LOCAL_KARPENTER" == "1" ]]; then
   "$PYTHON_BIN" orchestrator_stack/scripts/local_karpenter_controller.py \
     --kubeconfig "$BASELINE_KUBECONFIG" \
     --state-out "$KARPENTER_STATE" \
-    --namespace borg-baseline \
+    --namespace "$BASELINE_WORKLOAD_NAMESPACE" \
     > "$KARPENTER_LOG" 2>&1 &
   KARPENTER_PID=$!
 fi
