@@ -145,6 +145,8 @@ This creates two separate multi-node Kind clusters:
 - `borg-experimental`: the experimental orchestrator cluster.
 - `borg-baseline`: a baseline cluster with real Kubernetes HPA and a local Karpenter-style warm-node controller.
 
+Both clusters receive the same `borg-comparison-workload` app, Service, and load generator. HPA objects, HPA-driven replica changes, local Karpenter activation, and Agent A/B/C decisions remain the intentionally different controller reactions.
+
 The comparison dashboard runs at:
 
 ```text
