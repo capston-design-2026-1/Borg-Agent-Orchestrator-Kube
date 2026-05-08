@@ -9,12 +9,15 @@ def test_local_comparison_cluster_assets_are_tracked():
         "orchestrator_stack/k8s/baseline/hpa-workload.yaml",
         "orchestrator_stack/k8s/baseline/karpenter-surge-workload.yaml",
         "orchestrator_stack/scripts/create_local_comparison_clusters.sh",
+        "orchestrator_stack/scripts/start_local_dual_cluster_stack.sh",
+        "orchestrator_stack/scripts/stop_local_dual_cluster_stack.sh",
         "orchestrator_stack/scripts/local_karpenter_controller.py",
         "orchestrator_stack/scripts/apply_comparison_stimulus.sh",
         "orchestrator_stack/scripts/launch_cluster_comparison.sh",
         "orchestrator_stack/scripts/launch_experimental_multinode_orchestration.sh",
         "orchestrator_stack/comparison_dashboard/index.html",
         "docs/LOCAL_CLUSTER_COMPARISON.md",
+        "docs/LOCAL_DUAL_CLUSTER_RUNBOOK.md",
     ]
     for path in expected:
         assert Path(path).exists(), path
@@ -35,6 +38,18 @@ def test_baseline_manifest_uses_real_hpa_and_local_karpenter_boundary():
     assert "This is not real AWS Karpenter" in guide
     assert "aiopslab-multinode.yaml" in setup
     assert "RECREATE" in setup
+
+
+def test_local_comparison_docs_expose_one_line_lifecycle_commands():
+    runbook = Path("docs/LOCAL_DUAL_CLUSTER_RUNBOOK.md").read_text(encoding="utf-8")
+    comparison = Path("docs/LOCAL_CLUSTER_COMPARISON.md").read_text(encoding="utf-8")
+    launch = Path("docs/ORCHESTRATION_LAUNCH.md").read_text(encoding="utf-8")
+
+    for doc in (runbook, comparison, launch):
+        assert "start_local_dual_cluster_stack.sh" in doc
+        assert "stop_local_dual_cluster_stack.sh" in doc
+        assert "kubeconfig-experimental k9s" in doc
+        assert "kubeconfig-baseline k9s" in doc
 
 
 def test_comparison_dashboard_exposes_expected_api_and_signals():
