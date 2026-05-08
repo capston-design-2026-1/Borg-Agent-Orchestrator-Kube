@@ -3,6 +3,24 @@
 1. Expand the current five-family policy gate suite with another full-phase AIOpsLab family when available.
 2. Replace calibrated utilization-derived energy watts with a direct measured node-power source when available; Prometheus/node-exporter now supplies CPU and memory utilization but not hardware wattmeter readings.
 
+## Latest Session Note (2026-05-08 KST, mirrored comparison stimulus slice)
+
+- Enforced exact comparison input semantics for the local dual-cluster setup:
+  - intentional exerciser phases are now selected once and applied to both `borg-experimental` and `borg-baseline`.
+  - mirrored fields include operation, deployment, namespace, CPU request, memory request, replica count, node selector, and phase identity.
+  - Agent A/B/C decisions, Referee choices, HPA scaling, and local Karpenter active/warm node changes remain independent reactions and are not mirrored.
+- Added `orchestrator_stack/scripts/apply_comparison_stimulus.sh` for manual shared-stimulus application.
+- `orchestrator_stack/scripts/launch_experimental_multinode_orchestration.sh` now mirrors live exercise phases into the baseline kubeconfig by default.
+- Comparison dashboard now reads `orchestrator_stack/runtime/comparison/shared_stimulus.json` and displays the latest shared intentional stimulus separately from controller reactions.
+- Live smoke:
+  - applied `PHASE_INDEX=1` shared stimulus.
+  - verified both clusters had `borg-orchestrator-exercise/light-dvfs` with `replicas=1`, `cpu=2200m`, and `memory=256Mi`.
+- Validation:
+  - Python compile checks: success
+  - shell syntax checks: success
+  - `node --check orchestrator_stack/comparison_dashboard/app.js`: success
+  - targeted tests for exerciser, CLI, and comparison dashboard: success
+
 ## Latest Session Note (2026-05-08 KST, local dual-cluster comparison slice)
 
 - Created a fully local multi-node comparison setup without AWS:
