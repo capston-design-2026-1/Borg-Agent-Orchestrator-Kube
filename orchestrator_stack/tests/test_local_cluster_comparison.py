@@ -10,6 +10,7 @@ def test_local_comparison_cluster_assets_are_tracked():
         "orchestrator_stack/k8s/baseline/karpenter-surge-workload.yaml",
         "orchestrator_stack/scripts/create_local_comparison_clusters.sh",
         "orchestrator_stack/scripts/local_karpenter_controller.py",
+        "orchestrator_stack/scripts/apply_comparison_stimulus.sh",
         "orchestrator_stack/scripts/launch_cluster_comparison.sh",
         "orchestrator_stack/scripts/launch_experimental_multinode_orchestration.sh",
         "orchestrator_stack/comparison_dashboard/index.html",
@@ -43,6 +44,7 @@ def test_comparison_dashboard_exposes_expected_api_and_signals():
     assert "/api/comparison" in server
     assert "experimental" in server
     assert "baseline" in server
+    assert "shared_stimulus" in server
     assert "_difference_rows" in server
     assert "resource_totals" in server
     assert "pod_summary" in server
@@ -53,3 +55,4 @@ def test_comparison_dashboard_exposes_expected_api_and_signals():
     assert "timelineCanvas" in app
     assert "resourcePieCanvas" in app
     assert "capacityCanvas" in app
+    assert "shared intentional stimulus" in app
