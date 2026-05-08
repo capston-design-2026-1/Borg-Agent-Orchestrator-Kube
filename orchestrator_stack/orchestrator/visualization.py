@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from orchestrator.config import OrchestratorConfig
-from orchestrator.layer1.kubernetes_exerciser import apply_exercise_phase
+from orchestrator.layer1.kubernetes_exerciser import apply_exercise_phase_to_clusters
 from orchestrator.layer1.kubernetes_trace import capture_kubernetes_trace_row, load_power_calibration, write_kubernetes_trace
 from orchestrator.layer1.trace_ingestor import load_trace_rows
 from orchestrator.layer2.simulator import AIOpsLabBackend, TraceDrivenTwinBackend
@@ -302,6 +302,8 @@ def run_live_kubernetes_orchestration(
     exercise_interval_iterations: int = 3,
     exercise_randomize: bool = False,
     exercise_seed: int | None = None,
+    mirror_exercise_kubeconfigs: tuple[str | Path, ...] = (),
+    mirror_exercise_namespace: str | None = None,
 ) -> dict[str, Any]:
     state = VisualizationState(event_dir)
     config = OrchestratorConfig.load(config_path)
@@ -319,6 +321,8 @@ def run_live_kubernetes_orchestration(
             "exercise_namespace": exercise_namespace if exercise_cluster else None,
             "exercise_randomize": exercise_randomize if exercise_cluster else None,
             "exercise_seed": exercise_seed if exercise_cluster else None,
+            "mirror_exercise_kubeconfigs": [str(Path(path).expanduser()) for path in mirror_exercise_kubeconfigs] if exercise_cluster else [],
+            "mirror_exercise_namespace": mirror_exercise_namespace if exercise_cluster and mirror_exercise_kubeconfigs else None,
         }
     )
     if exercise_cluster and exercise_namespace not in namespace_prefixes:
@@ -374,10 +378,12 @@ def run_live_kubernetes_orchestration(
         repeat_count = 0
         while max_iterations is None or iteration < max_iterations:
             if exercise_cluster and iteration % max(1, exercise_interval_iterations) == 0:
-                phase = apply_exercise_phase(
+                phase = apply_exercise_phase_to_clusters(
                     kubeconfig=kubeconfig_path,
                     namespace=exercise_namespace,
                     phase_index=iteration // max(1, exercise_interval_iterations),
+                    mirror_kubeconfigs=[Path(path).expanduser() for path in mirror_exercise_kubeconfigs],
+                    mirror_namespace=mirror_exercise_namespace,
                     randomize=exercise_randomize,
                     seed=exercise_seed,
                 )
@@ -393,6 +399,8 @@ def run_live_kubernetes_orchestration(
                     cleanup=phase.get("cleanup"),
                     applied=phase.get("applied"),
                     rollout=phase.get("rollout"),
+                    mirrors=phase.get("mirrors"),
+                    mirror_count=phase.get("mirror_count", 0),
                 )
             row = capture_kubernetes_trace_row(
                 kubeconfig=kubeconfig_path,
