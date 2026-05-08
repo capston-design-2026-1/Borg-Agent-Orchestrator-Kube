@@ -180,7 +180,7 @@ Useful namespaces to inspect in k9s:
 | Namespace | Meaning |
 |---|---|
 | `borg-orchestrator-exercise` | mirrored intentional stimuli |
-| `borg-baseline` | HPA baseline workload and surge workload |
+| `borg-comparison-workload` | shared app/load-generator in both clusters; baseline also has HPA and optional surge here |
 | `observe` | Prometheus and Node Exporter |
 | `kube-system` | Metrics Server and Kubernetes system pods |
 
@@ -222,7 +222,7 @@ KUBECONFIG="$BASELINE_KUBECONFIG" REPLICAS=0 ./orchestrator_stack/scripts/apply_
 Inspect HPA:
 
 ```bash
-kubectl --kubeconfig "$BASELINE_KUBECONFIG" -n borg-baseline get hpa,pods -o wide
+kubectl --kubeconfig "$BASELINE_KUBECONFIG" -n borg-comparison-workload get hpa,pods -o wide
 ```
 
 ## 8. Stop Runtime Processes
@@ -290,7 +290,7 @@ kubectl --kubeconfig "$BASELINE_KUBECONFIG" -n borg-orchestrator-exercise delete
 Scale baseline surge down:
 
 ```bash
-kubectl --kubeconfig "$BASELINE_KUBECONFIG" -n borg-baseline scale deployment/karpenter-surge --replicas=0
+kubectl --kubeconfig "$BASELINE_KUBECONFIG" -n borg-comparison-workload scale deployment/karpenter-surge --replicas=0
 ```
 
 Optionally delete the exercise namespaces:
