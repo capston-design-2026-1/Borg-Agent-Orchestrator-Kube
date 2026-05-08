@@ -68,6 +68,31 @@ The dashboard compares:
 | orchestration | active stage, reward, risk, decision | HPA desired replicas and local Karpenter state |
 | capacity | all Kind workers are available | workers start as active/warm to emulate Karpenter provisioning |
 
+## Dashboard Interpretation
+
+The comparison dashboard is designed to show behavioral differences, not just whether both clusters are alive.
+
+| Area | What it shows | Why it matters |
+|---|---|---|
+| Behavior scorecards | queue pressure, CPU utilization, replica reaction, capacity reaction | summarizes the immediate control behavior of both systems |
+| Difference ledger | experimental value, baseline value, and experimental-minus-baseline delta | makes the comparison auditable instead of visual-only |
+| Pressure timeline | pending pods, CPU percent, memory percent, and schedulable workers over recent samples | shows whether one system is accumulating backlog or absorbing load |
+| Live resource mix | `kubectl top` CPU and memory for each cluster | separates actual usage from declared requests |
+| Capacity and demand | pod CPU/memory requests versus allocatable cluster capacity | shows scheduling pressure before pods become pending |
+| Pod phase mix | Running, Pending, Succeeded, Failed, and Unknown pod distribution | exposes admission and scheduling outcomes |
+| Namespace distribution | where pods are concentrated in each cluster | confirms whether pressure comes from experiment workloads, baseline HPA workloads, or system components |
+| Controller reactions | latest Agent A/B/C decision, proposals, Ray/Optuna status, HPA replica movement, and local Karpenter active/warm nodes | explains what each control plane is doing rather than only displaying cluster state |
+| Node inventory | per-node readiness, schedulability, active/warm state, allocatable resources, and live usage | verifies that the comparison is truly multi-node and shows where work lands |
+| Workload inventory | Deployments, DaemonSets, StatefulSets, and Jobs discovered in both clusters | confirms which workload controllers are driving the observed behavior |
+
+The API behind the dashboard is `GET /api/comparison`. It reads both kubeconfigs live with `kubectl`, uses Metrics Server through `kubectl top`, and joins that with the experimental orchestration state file:
+
+```text
+orchestrator_stack/runtime/visualization-experimental/state.json
+```
+
+If Metrics Server is unhealthy, the dashboard still renders Kubernetes object state, but the live CPU/memory sections show warnings in the `Interpretation Boundary` panel.
+
 ## Trigger Baseline Karpenter-Style Provisioning
 
 ```bash
