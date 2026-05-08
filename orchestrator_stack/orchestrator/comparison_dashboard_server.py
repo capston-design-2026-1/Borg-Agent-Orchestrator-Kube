@@ -482,35 +482,42 @@ class ComparisonDashboardHandler(SimpleHTTPRequestHandler):
 
     @classmethod
     def _scorecards(cls, experimental: dict[str, Any], baseline: dict[str, Any], experimental_state: dict[str, Any]) -> list[dict[str, Any]]:
+        exp_cluster = experimental_state.get("cluster", {})
+        exp_reward = experimental_state.get("reward_summary", {})
+        exp_decision = experimental_state.get("decision", {})
         exp_pending = experimental.get("pending_pods", 0)
         base_pending = baseline.get("pending_pods", 0)
-        exp_cpu = experimental.get("resource_totals", {}).get("usage_cpu_percent")
-        base_cpu = baseline.get("resource_totals", {}).get("usage_cpu_percent")
+        base_summary = baseline.get("pod_summary", {})
+        base_phases = base_summary.get("phase_counts", {})
         karpenter = baseline.get("karpenter", {})
+        hpas = baseline.get("hpa", [])
+        first_hpa = hpas[0] if hpas else {}
+        optuna = experimental_state.get("optuna", {})
+        ray = experimental_state.get("ray", {})
         return [
             {
-                "label": "Queue pressure",
-                "experimental": exp_pending,
-                "baseline": base_pending,
-                "interpretation": "Experimental controller exposes admission pressure directly; HPA baseline should reduce pending pods after scaling and warm-node activation.",
+                "label": "Safety objective",
+                "experimental": f"risk {cls._safe_number(exp_cluster.get('max_risk')) or 0:.3f}, SLA {exp_cluster.get('sla_violations', 0)}",
+                "baseline": f"failed {base_phases.get('Failed', 0)}, restarts {base_summary.get('restarts', 0)}",
+                "interpretation": "Agent A is judged on proactive risk mitigation and task survival; the baseline only exposes reactive failure and restart evidence.",
             },
             {
-                "label": "CPU utilization",
-                "experimental": exp_cpu,
-                "baseline": base_cpu,
-                "interpretation": "Shows actual live resource consumption rather than only requested resources.",
-            },
-            {
-                "label": "Replica reaction",
-                "experimental": experimental_state.get("decision", {}).get("action_label") or "n/a",
+                "label": "Efficiency objective",
+                "experimental": f"{cls._safe_number(exp_cluster.get('energy_watts')) or 0:.1f}W, demand {cls._safe_number(exp_cluster.get('min_demand')) or 0:.3f}",
                 "baseline": cls._hpa_reaction_label(baseline),
-                "interpretation": "Experimental side chooses Agent A/B/C actions; baseline reacts through HPA desired replicas.",
+                "interpretation": "Agent B is judged on energy-aware consolidation decisions; HPA/Karpenter reacts through replica and capacity movement.",
             },
             {
-                "label": "Capacity reaction",
-                "experimental": f"{experimental.get('schedulable_nodes', 0)} schedulable workers",
-                "baseline": f"{karpenter.get('active_nodes', 0)} active / {karpenter.get('warm_nodes', 0)} warm",
-                "interpretation": "Local Karpenter emulation activates pre-created Kind workers; experimental workers remain directly visible to the orchestrator.",
+                "label": "Admission objective",
+                "experimental": f"queue {exp_cluster.get('queue_length', 0)}, pending {exp_pending}",
+                "baseline": f"pending {base_pending}, unscheduled {base_summary.get('unscheduled', 0)}",
+                "interpretation": "Agent C is judged on queue protection and overload admission, not just final pod count.",
+            },
+            {
+                "label": "Control adaptation",
+                "experimental": f"{exp_decision.get('action_label') or 'n/a'}, reward avg {cls._safe_number(exp_reward.get('average_total')) or 0:.2f}",
+                "baseline": f"HPA target {first_hpa.get('target_cpu_utilization', 'n/a')}%, {karpenter.get('active_nodes', 0)} active / {karpenter.get('warm_nodes', 0)} warm",
+                "interpretation": f"Experimental control is adaptive: Ray {ray.get('status', 'n/a')} and Optuna {optuna.get('completed_trials', 0)} completed trials; baseline policy is fixed controller logic.",
             },
         ]
 
@@ -523,23 +530,22 @@ class ComparisonDashboardHandler(SimpleHTTPRequestHandler):
         baseline = payload.get("baseline", {})
         exp_res = experimental.get("resource_totals", {})
         base_res = baseline.get("resource_totals", {})
-        hpas = baseline.get("hpa", [])
-        first_hpa = hpas[0] if hpas else {}
         sample = {
             "time": datetime.now(timezone.utc).isoformat(),
             "experimentalPending": experimental.get("pending_pods", 0),
             "baselinePending": baseline.get("pending_pods", 0),
+            "experimentalQueue": experimental.get("queue_length", 0),
+            "experimentalRisk": experimental.get("max_risk", 0),
+            "experimentalSla": experimental.get("sla_violations", 0),
+            "experimentalEnergy": experimental.get("energy_watts", 0),
+            "experimentalReward": experimental.get("last_reward", 0),
+            "experimentalMinDemand": experimental.get("min_demand", 0),
             "experimentalSchedulable": experimental.get("schedulable_nodes", 0),
             "baselineSchedulable": baseline.get("schedulable_nodes", 0),
             "experimentalCpu": exp_res.get("usage_cpu_percent", 0),
             "baselineCpu": base_res.get("usage_cpu_percent", 0),
             "experimentalMem": exp_res.get("usage_memory_percent", 0),
             "baselineMem": base_res.get("usage_memory_percent", 0),
-            "baselineHpaCurrent": cls._sum_int(hpas, "current"),
-            "baselineHpaDesired": cls._sum_int(hpas, "desired"),
-            "baselineHpaMax": cls._sum_int(hpas, "max"),
-            "baselineHpaCpu": first_hpa.get("cpu_utilization"),
-            "baselineHpaTargetCpu": first_hpa.get("target_cpu_utilization"),
         }
         cls.sample_history.append(sample)
         cls.sample_history = cls.sample_history[-cls.max_history_samples :]
@@ -566,6 +572,14 @@ class ComparisonDashboardHandler(SimpleHTTPRequestHandler):
             "avg_reward": exp_reward.get("average_total"),
             "reward_summary": exp_reward,
             "max_risk": exp_cluster.get("max_risk"),
+            "max_risk_node": exp_cluster.get("max_risk_node"),
+            "min_demand": exp_cluster.get("min_demand"),
+            "min_demand_node": exp_cluster.get("min_demand_node"),
+            "avg_cpu": exp_cluster.get("avg_cpu"),
+            "avg_mem": exp_cluster.get("avg_mem"),
+            "queue_length": exp_cluster.get("queue_length"),
+            "sla_violations": exp_cluster.get("sla_violations"),
+            "completed_tasks": exp_cluster.get("completed_tasks"),
             "energy_watts": exp_cluster.get("energy_watts"),
             "power_metric_kind": exp_cluster.get("power_metric_kind"),
             "telemetry_sources": exp_cluster.get("telemetry_sources", []),
