@@ -13,9 +13,15 @@ EXPERIMENTAL_CONFIG="${EXPERIMENTAL_CONFIG:-orchestrator_stack/k8s/kind/experime
 BASELINE_CONFIG="${BASELINE_CONFIG:-orchestrator_stack/k8s/kind/baseline-hpa-karpenter-multinode.yaml}"
 EXPERIMENTAL_KUBECONFIG="${EXPERIMENTAL_KUBECONFIG:-$CLUSTER_ROOT/kubeconfig-experimental}"
 BASELINE_KUBECONFIG="${BASELINE_KUBECONFIG:-$CLUSTER_ROOT/kubeconfig-baseline}"
+SHARED_WORKLOAD_MANIFEST="${SHARED_WORKLOAD_MANIFEST:-orchestrator_stack/k8s/comparison/shared-workload.yaml}"
+BASELINE_HPA_MANIFEST="${BASELINE_HPA_MANIFEST:-orchestrator_stack/k8s/baseline/hpa-workload.yaml}"
+BASELINE_SURGE_MANIFEST="${BASELINE_SURGE_MANIFEST:-orchestrator_stack/k8s/baseline/karpenter-surge-workload.yaml}"
+COMPARISON_WORKLOAD_NAMESPACE="${COMPARISON_WORKLOAD_NAMESPACE:-borg-comparison-workload}"
+LEGACY_BASELINE_NAMESPACE="${LEGACY_BASELINE_NAMESPACE:-borg-baseline}"
 OBSERVABILITY_WAIT_TIMEOUT="${OBSERVABILITY_WAIT_TIMEOUT:-240s}"
 OBSERVABILITY_STRICT_TOP="${OBSERVABILITY_STRICT_TOP:-0}"
 BOOTSTRAP_OBSERVABILITY="${BOOTSTRAP_OBSERVABILITY:-1}"
+APPLY_SHARED_WORKLOAD="${APPLY_SHARED_WORKLOAD:-1}"
 APPLY_BASELINE_WORKLOAD="${APPLY_BASELINE_WORKLOAD:-1}"
 RECREATE="${RECREATE:-0}"
 
@@ -105,10 +111,17 @@ label_baseline_nodes "$BASELINE_KUBECONFIG"
 bootstrap_observability "$EXPERIMENTAL_KUBECONFIG" "$EXPERIMENTAL_CLUSTER"
 bootstrap_observability "$BASELINE_KUBECONFIG" "$BASELINE_CLUSTER"
 
+if [[ "$APPLY_SHARED_WORKLOAD" == "1" ]]; then
+  echo "shared workload: applying identical comparison workload to both clusters"
+  "$KUBECTL" --kubeconfig "$EXPERIMENTAL_KUBECONFIG" apply -f "$SHARED_WORKLOAD_MANIFEST"
+  "$KUBECTL" --kubeconfig "$BASELINE_KUBECONFIG" apply -f "$SHARED_WORKLOAD_MANIFEST"
+fi
+
 if [[ "$APPLY_BASELINE_WORKLOAD" == "1" ]]; then
-  echo "baseline: applying HPA workload and surge workload"
-  "$KUBECTL" --kubeconfig "$BASELINE_KUBECONFIG" apply -f orchestrator_stack/k8s/baseline/hpa-workload.yaml
-  "$KUBECTL" --kubeconfig "$BASELINE_KUBECONFIG" apply -f orchestrator_stack/k8s/baseline/karpenter-surge-workload.yaml
+  echo "baseline: applying HPA controller and local Karpenter surge target"
+  "$KUBECTL" --kubeconfig "$BASELINE_KUBECONFIG" apply -f "$BASELINE_HPA_MANIFEST"
+  "$KUBECTL" --kubeconfig "$BASELINE_KUBECONFIG" apply -f "$BASELINE_SURGE_MANIFEST"
+  "$KUBECTL" --kubeconfig "$BASELINE_KUBECONFIG" delete namespace "$LEGACY_BASELINE_NAMESPACE" --ignore-not-found --wait=false >/dev/null
 fi
 
 cat <<INFO
@@ -116,6 +129,7 @@ cat <<INFO
 local comparison clusters are ready
 experimental kubeconfig: $EXPERIMENTAL_KUBECONFIG
 baseline kubeconfig:     $BASELINE_KUBECONFIG
+shared workload ns:      $COMPARISON_WORKLOAD_NAMESPACE
 
 experimental nodes:
 $($KUBECTL --kubeconfig "$EXPERIMENTAL_KUBECONFIG" get nodes -o wide)
