@@ -6,6 +6,8 @@ cd "$ROOT"
 
 CLUSTER_ROOT="${CLUSTER_ROOT:-$HOME/Documents/borg_orchestrator_clusters}"
 export KUBECONFIG="${KUBECONFIG:-$CLUSTER_ROOT/kubeconfig-experimental}"
+export MIRROR_EXERCISE_KUBECONFIG="${MIRROR_EXERCISE_KUBECONFIG:-$CLUSTER_ROOT/kubeconfig-baseline}"
+export MIRROR_EXERCISE_NAMESPACE="${MIRROR_EXERCISE_NAMESPACE:-borg-orchestrator-exercise}"
 export LIVE_K8S="${LIVE_K8S:-1}"
 export EVENT_DIR="${EVENT_DIR:-orchestrator_stack/runtime/visualization-experimental}"
 export TRACE_OUT="${TRACE_OUT:-orchestrator_stack/runtime/visualization-experimental/live_kubernetes_trace.json}"
