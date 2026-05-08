@@ -2,6 +2,32 @@
 
 Project scaffold for a Borg-inspired multi-agent scheduling and cluster optimization system.
 
+## Top Local Orchestration One-Liners
+
+Start everything for the local experimental-vs-baseline orchestration stack:
+
+```bash
+cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && ./orchestrator_stack/scripts/start_local_dual_cluster_stack.sh
+```
+
+Stop everything, including the local Kind Docker node containers:
+
+```bash
+cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && ./orchestrator_stack/scripts/stop_local_dual_cluster_stack.sh
+```
+
+Open k9s for the experimental Agent A/B/C cluster:
+
+```bash
+KUBECONFIG=~/Documents/borg_orchestrator_clusters/kubeconfig-experimental k9s
+```
+
+Open k9s for the HPA/local-Karpenter baseline cluster:
+
+```bash
+KUBECONFIG=~/Documents/borg_orchestrator_clusters/kubeconfig-baseline k9s
+```
+
 ## Bilingual Documentation
 
 Repository-level companion documents now live under:
