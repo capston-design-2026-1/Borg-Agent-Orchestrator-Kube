@@ -466,6 +466,8 @@ http://127.0.0.1:8876
 
 이 dashboard는 `GET /api/comparison`을 통해 `borg-experimental`과 `borg-baseline`을 비교한다.
 
+두 cluster에는 이제 동일한 `borg-comparison-workload` application, Service, load generator가 배포된다. 이 namespace 안의 차이는 baseline HPA replica movement/local Karpenter activation과 experimental Agent A/B/C orchestration 같은 controller behavior에서 나와야 한다. 예전 baseline-only `borg-baseline` workload namespace는 comparison setup script를 다시 실행하면 삭제된다.
+
 | 섹션 | 의미 |
 |---|---|
 | Behavior scorecards | queue pressure, CPU utilization, replica reaction, capacity reaction을 experimental/baseline 쌍으로 요약한다. |
