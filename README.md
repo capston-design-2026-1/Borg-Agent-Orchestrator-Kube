@@ -101,6 +101,14 @@ Launch the experimental live orchestrator:
 ./orchestrator_stack/scripts/launch_experimental_multinode_orchestration.sh
 ```
 
+This mirrors intentional exercise stimuli into the baseline cluster by default, while leaving Agent A/B/C, HPA, and local Karpenter reactions independent.
+
+Apply one shared stimulus manually:
+
+```bash
+PHASE_INDEX=3 ./orchestrator_stack/scripts/apply_comparison_stimulus.sh
+```
+
 Launch the comparison dashboard:
 
 ```bash
