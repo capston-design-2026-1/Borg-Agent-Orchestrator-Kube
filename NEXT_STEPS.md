@@ -75,7 +75,9 @@ Read Agents.md, NEXT_STEPS.md, MAS_ARCHITECTURE.md, and README.md, inspect the l
 - Follow-up implementation on 2026-05-05 KST: the dashboard Optuna panel now exports all completed persistent trials from `visualized_orchestrator_reward_weights` instead of only the latest bootstrap callbacks; the local study currently shows `21` completed trials (`T0` through `T20`), and both objective/weight graphs use persisted trial IDs on the x-axis.
 - Follow-up implementation on 2026-05-06 KST: the dashboard now has a `Learning Progress` panel with a green best-so-far Optuna staircase, orange raw objective exploration trace, new-best event rail, best-so-far lift, and latest Ray/RLlib PPO reward mean so learning progress is visible without interpreting raw Optuna alone.
 - Follow-up implementation on 2026-05-08 KST: local dual-cluster comparison now exists without AWS. `borg-experimental` and `borg-baseline` are both multi-node Kind clusters; the baseline runs real Kubernetes HPA plus a local Karpenter-style warm-node controller, and `orchestrator_stack/comparison_dashboard/` compares both clusters.
-- Current orchestrator validation: `PYTHONPATH=orchestrator_stack .venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `114 passed`.
+- Follow-up implementation on 2026-05-08 KST: mirrored stimulus semantics are now enforced for exact comparison input. Intentional exerciser operations are selected once and applied to both clusters; Agent A/B/C, Referee, HPA, and local Karpenter actions remain independent reactions.
+- Follow-up reporting on 2026-05-08 KST: local dual-cluster continuity report is recorded at `reports/milestones/202605081138_local_dual_cluster_handoff.md`. Use it with `docs/LOCAL_DUAL_CLUSTER_RUNBOOK.md` when resuming comparison work in a new Codex session.
+- Current orchestrator validation: `PYTHONPATH=orchestrator_stack ./.venv/bin/python -m pytest orchestrator_stack/tests -q` passes with `115 passed`.
 
 ## Pipeline Status
 
