@@ -27,6 +27,7 @@ class ComparisonDashboardHandler(SimpleHTTPRequestHandler):
     baseline_kubeconfig = Path("~/Documents/borg_orchestrator_clusters/kubeconfig-baseline").expanduser()
     experimental_event_dir = Path("orchestrator_stack/runtime/visualization-experimental")
     karpenter_state_path = Path("orchestrator_stack/runtime/comparison/local_karpenter_state.json")
+    shared_stimulus_path = Path("orchestrator_stack/runtime/comparison/shared_stimulus.json")
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, directory=str(self.dashboard_dir), **kwargs)
@@ -384,6 +385,22 @@ class ComparisonDashboardHandler(SimpleHTTPRequestHandler):
         return json.loads(path.read_text(encoding="utf-8"))
 
     @staticmethod
+    def _latest_event(path: Path, kind: str) -> dict[str, Any]:
+        if not path.exists():
+            return {}
+        latest: dict[str, Any] = {}
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if event.get("kind") == kind:
+                latest = event
+        return latest
+
+    @staticmethod
     def _safe_number(value: Any) -> float | None:
         if isinstance(value, (int, float)):
             return float(value)
@@ -459,6 +476,8 @@ class ComparisonDashboardHandler(SimpleHTTPRequestHandler):
     @classmethod
     def comparison_payload(cls) -> dict[str, Any]:
         experimental_state = cls._read_json(cls.experimental_event_dir / "state.json")
+        latest_exercise = cls._latest_event(cls.experimental_event_dir / "events.jsonl", "exercise")
+        manual_stimulus = cls._read_json(cls.shared_stimulus_path)
         karpenter_state = cls._read_json(cls.karpenter_state_path)
         experimental = cls._cluster_summary(cls.experimental_kubeconfig, name="borg-experimental", role="experimental-orchestrator")
         baseline = cls._cluster_summary(cls.baseline_kubeconfig, name="borg-baseline", role="hpa-local-karpenter")
@@ -487,6 +506,9 @@ class ComparisonDashboardHandler(SimpleHTTPRequestHandler):
             "baseline": baseline,
             "differences": cls._difference_rows(experimental, baseline),
             "scorecards": cls._scorecards(experimental, baseline, experimental_state),
+            "shared_stimulus": manual_stimulus or latest_exercise,
+            "live_loop_stimulus": latest_exercise,
+            "manual_stimulus": manual_stimulus,
             "notes": [
                 "Baseline uses real Kubernetes HPA plus local Kind warm-node provisioning emulation.",
                 "This is intentionally local-only; upstream AWS Karpenter requires AWS/EKS cloud APIs to create real nodes.",
@@ -510,11 +532,13 @@ def main() -> None:
     parser.add_argument("--baseline-kubeconfig", default="~/Documents/borg_orchestrator_clusters/kubeconfig-baseline")
     parser.add_argument("--experimental-event-dir", default="orchestrator_stack/runtime/visualization-experimental")
     parser.add_argument("--karpenter-state", default="orchestrator_stack/runtime/comparison/local_karpenter_state.json")
+    parser.add_argument("--shared-stimulus", default="orchestrator_stack/runtime/comparison/shared_stimulus.json")
     args = parser.parse_args()
     ComparisonDashboardHandler.experimental_kubeconfig = Path(args.experimental_kubeconfig).expanduser()
     ComparisonDashboardHandler.baseline_kubeconfig = Path(args.baseline_kubeconfig).expanduser()
     ComparisonDashboardHandler.experimental_event_dir = Path(args.experimental_event_dir)
     ComparisonDashboardHandler.karpenter_state_path = Path(args.karpenter_state)
+    ComparisonDashboardHandler.shared_stimulus_path = Path(args.shared_stimulus)
     server = ThreadingHTTPServer((args.host, args.port), ComparisonDashboardHandler)
     print(f"comparison_dashboard=http://{args.host}:{args.port}", flush=True)
     server.serve_forever()
