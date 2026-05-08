@@ -450,7 +450,7 @@ It compares `borg-experimental` against `borg-baseline` through `GET /api/compar
 | Behavior difference ledger | Experimental value, baseline value, and experimental-minus-baseline delta for ready workers, pending pods, restarts, live resource usage, and requested resources. |
 | Pressure timeline | Recent samples for pending pods, CPU percent, and memory percent across both clusters. |
 | Live resource mix | Metrics Server-backed `kubectl top` CPU and memory usage for each cluster. |
-| Capacity and demand | CPU/memory requests compared with allocatable cluster resources. |
+| Capacity matrix | CPU request pressure, memory request pressure, and live CPU usage are sharded into separate experimental/baseline gauge rows with percentage-point deltas. This avoids mixing scheduler demand and actual usage in one compressed chart. |
 | Pod phase and namespace charts | Scheduling/admission outcomes and where workload pressure is concentrated. |
 | Controller reactions | Latest Agent A/B/C decision/proposals plus Ray/Optuna status versus HPA replica movement and local Karpenter active/warm nodes. |
 | Node and workload inventory | Per-node readiness/schedulability/resources and the Kubernetes workload controllers discovered in both clusters. |
