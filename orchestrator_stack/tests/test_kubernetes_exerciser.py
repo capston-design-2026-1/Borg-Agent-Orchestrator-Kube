@@ -87,3 +87,34 @@ def test_apply_exercise_phase_can_randomize_workload_shape(monkeypatch):
         assert "cpu=" in result["detail"]
         assert "memory=" in result["detail"]
         assert any("resources:" in call["stdin"] for call in calls if call["stdin"])
+
+
+def test_apply_exercise_phase_to_clusters_mirrors_same_selected_operation(monkeypatch):
+    calls = []
+
+    def fake_run(kubeconfig, args, *, stdin=None):
+        calls.append({"kubeconfig": kubeconfig, "args": args, "stdin": stdin})
+
+        class Completed:
+            returncode = 0
+            stdout = "ok"
+            stderr = ""
+
+        return Completed()
+
+    monkeypatch.setattr(kubernetes_exerciser, "_run_kubectl", fake_run)
+
+    result = kubernetes_exerciser.apply_exercise_phase_to_clusters(
+        "/tmp/experimental",
+        "demo",
+        2,
+        mirror_kubeconfigs=["/tmp/baseline"],
+        mirror_namespace="demo",
+    )
+
+    assert result["phase"] == "moderate-memory"
+    assert result["mirror_count"] == 1
+    assert result["mirrors"][0]["result"]["phase"] == "moderate-memory"
+    assert result["mirrors"][0]["result"]["resources"] == result["resources"]
+    assert any(call["kubeconfig"] == "/tmp/experimental" and "moderate-memory" in (call["stdin"] or "") for call in calls)
+    assert any(call["kubeconfig"] == "/tmp/baseline" and "moderate-memory" in (call["stdin"] or "") for call in calls)
