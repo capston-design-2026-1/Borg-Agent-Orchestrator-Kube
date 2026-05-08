@@ -13,10 +13,61 @@ function pct(value) { const n = num(value); return n === null ? 'n/a' : `${n.toF
 function pctPoints(value) { const n = num(value); return n === null ? 'n/a' : `${n >= 0 ? '+' : ''}${n.toFixed(1)} pts`; }
 function hpaDesired(cluster) { return (cluster.hpa || []).reduce((sum, item) => sum + Number(item.desired ?? item.current ?? item.min ?? 0), 0); }
 function hpaCurrent(cluster) { return (cluster.hpa || []).reduce((sum, item) => sum + Number(item.current ?? 0), 0); }
+function hpaMax(cluster) { return (cluster.hpa || []).reduce((sum, item) => sum + Number(item.max ?? 0), 0); }
+function hpaFirst(cluster) { return (cluster.hpa || [])[0] || {}; }
+function hpaReaction(cluster) {
+  const items = cluster.hpa || [];
+  if (!items.length) return { label: 'HPA not installed', detail: 'No autoscaling/v2 object was returned by the baseline cluster.', state: 'unknown' };
+  const current = hpaCurrent(cluster);
+  const desired = hpaDesired(cluster);
+  const max = hpaMax(cluster);
+  const first = hpaFirst(cluster);
+  const cpu = num(first.cpu_utilization);
+  const target = num(first.target_cpu_utilization);
+  const lastScale = first.last_scale_time ? new Date(first.last_scale_time).toLocaleTimeString() : 'not recorded';
+  let state = 'steady';
+  let label = `stable at ${current} replicas`;
+  if (max && current >= max && desired >= max) {
+    state = 'saturated';
+    label = `maxed at ${current}/${max} replicas`;
+  } else if (desired > current) {
+    state = 'scale-up';
+    label = `scaling up ${current} -> ${desired} replicas`;
+  } else if (desired < current) {
+    state = 'scale-down';
+    label = `scaling down ${current} -> ${desired} replicas`;
+  }
+  const headroom = max ? `${Math.max(0, max - current)} replica headroom` : 'max unknown';
+  const cpuText = cpu === null || target === null ? 'CPU metric pending' : `CPU ${cpu.toFixed(0)}% / target ${target.toFixed(0)}%`;
+  return { label: `HPA ${label}`, detail: `${cpuText}; ${headroom}; last scale ${lastScale}`, state, current, desired, max, cpu, target, lastScale };
+}
 function metricHtml(rows) { return rows.map(([k, v]) => `<div><b>${esc(v)}</b><span>${esc(k)}</span></div>`).join(''); }
 function valueClass(value) { const n = num(value); if (n === null || Math.abs(n) < 0.001) return 'delta-neutral'; return n > 0 ? 'delta-positive' : 'delta-negative'; }
 function topEntries(obj, limit = 7) { return Object.entries(obj || {}).sort((a,b) => Number(b[1]) - Number(a[1]) || a[0].localeCompare(b[0])).slice(0, limit); }
 function latest() { return historyRows[historyRows.length - 1] || {}; }
+function compactAction(value) {
+  const text = String(value || 'n/a');
+  const parts = text.split(':');
+  if (parts.length >= 3) return `${parts[0]}:${parts[2]}`;
+  return text;
+}
+function compactNamespace(value) {
+  const text = String(value || 'unknown');
+  return text
+    .replace('borg-orchestrator-exercise', 'borg-exercise')
+    .replace('borg-comparison-workload', 'comparison-workload')
+    .replace('local-path-storage', 'local-path');
+}
+function displayTime(value) {
+  if (!value) return 'waiting';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+function downsample(rows, maxPoints = 1100) {
+  if (!Array.isArray(rows) || rows.length <= maxPoints) return rows || [];
+  const step = Math.ceil(rows.length / maxPoints);
+  return rows.filter((_, index) => index % step === 0 || index === rows.length - 1);
+}
 
 function setupCanvas(canvas) {
   const ctx = canvas.getContext('2d');
@@ -42,11 +93,12 @@ function axes(ctx, w, h, pad, max, label) {
   }
   ctx.textAlign = 'center'; ctx.fillText(label, pad.left + (w - pad.left - pad.right) / 2, h - 12);
 }
-function drawLineChart(canvasId, series, label) {
+function drawLineChart(canvasId, series, label, sourceRows) {
   const canvas = $(canvasId); if (!canvas) return;
   const { ctx, w, h } = setupCanvas(canvas);
   const pad = { left: 58, right: 26, top: 24, bottom: 42 };
-  const rows = historyRows.slice(-120);
+  const allRows = Array.isArray(sourceRows) ? sourceRows : historyRows;
+  const rows = downsample(allRows);
   const values = rows.flatMap(row => series.map(item => num(row[item.key]))).filter(v => v !== null);
   const max = Math.max(1, ...values) * 1.12;
   const plotW = w - pad.left - pad.right;
@@ -54,77 +106,73 @@ function drawLineChart(canvasId, series, label) {
   const yFor = value => h - pad.bottom - (Number(value || 0) / max) * plotH;
   const xFor = index => rows.length <= 1 ? pad.left + plotW / 2 : pad.left + (index / (rows.length - 1)) * plotW;
   axes(ctx, w, h, pad, max, label);
+  if (rows.length) {
+    const ticks = [0, Math.floor((rows.length - 1) / 2), rows.length - 1];
+    ctx.fillStyle = 'rgba(16,32,26,.58)';
+    ctx.font = '11px Avenir Next, sans-serif';
+    ticks.forEach(index => {
+      const row = rows[index];
+      const x = xFor(index);
+      ctx.textAlign = index === 0 ? 'left' : index === rows.length - 1 ? 'right' : 'center';
+      ctx.fillText(displayTime(row.time), x, h - 28);
+    });
+  }
   series.forEach(item => {
     ctx.strokeStyle = item.color;
     ctx.lineWidth = item.width || 2.6;
+    ctx.setLineDash(item.dash || []);
     ctx.beginPath();
     rows.forEach((row, index) => {
       const x = xFor(index), y = yFor(row[item.key]);
       if (index === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     });
     ctx.stroke();
+    ctx.setLineDash([]);
   });
   $('timelineLegend').innerHTML = series.map(item => `<span><b style="color:${item.color}">■</b> ${esc(item.label)}</span>`).join('');
 }
-function drawDonut(ctx, cx, cy, radius, values, colors, label, sublabel) {
-  const total = values.reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0) || 1;
-  let start = -Math.PI / 2;
-  values.forEach((value, index) => {
-    const angle = (Math.max(0, Number(value) || 0) / total) * Math.PI * 2;
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius, start, start + angle);
-    ctx.lineWidth = radius * 0.28;
-    ctx.strokeStyle = colors[index];
-    ctx.stroke();
-    start += angle;
-  });
-  ctx.fillStyle = palette.ink;
-  ctx.font = `800 ${Math.max(13, Math.min(17, radius * 0.27))}px Avenir Next, sans-serif`;
-  ctx.textAlign = 'center';
-  ctx.fillText(label, cx, cy - 4, radius * 1.65);
-  ctx.fillStyle = palette.muted;
-  ctx.font = `700 ${Math.max(10, Math.min(12, radius * 0.19))}px Avenir Next, sans-serif`;
-  ctx.fillText(sublabel, cx, cy + 18, radius * 1.85);
+function resourcePercent(used, allocatable) {
+  const u = num(used), a = num(allocatable);
+  return u === null || a === null || a <= 0 ? null : (u / a) * 100;
 }
-function drawResourcePie(payload) {
-  const { ctx, w, h } = setupCanvas($('resourcePieCanvas'));
-  ctx.clearRect(0,0,w,h);
-  const exp = payload.experimental || {}, base = payload.baseline || {};
-  const expRes = exp.resource_totals || {}, baseRes = base.resource_totals || {};
-  const compact = w < 440;
-  const radius = compact ? Math.max(38, Math.min(54, w * 0.13, h * 0.13)) : Math.max(46, Math.min(68, w * 0.14, h * 0.17));
-  const centers = compact
-    ? [[w * 0.50, 78], [w * 0.50, 198]]
-    : [[w * 0.30, 118], [w * 0.70, 118]];
-  drawDonut(ctx, centers[0][0], centers[0][1], radius, [expRes.usage_cpu_m, expRes.usage_memory_mi], [palette.experimental, palette.blue], 'Experimental', compact ? '' : 'CPU m / memory Mi');
-  drawDonut(ctx, centers[1][0], centers[1][1], radius, [baseRes.usage_cpu_m, baseRes.usage_memory_mi], [palette.baseline, palette.red], 'Baseline', compact ? '' : 'CPU m / memory Mi');
-  if (compact) {
-    ctx.fillStyle = palette.muted;
-    ctx.font = '700 11px Avenir Next, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('CPU m / memory Mi', centers[0][0], centers[0][1] + radius + 24, radius * 2.4);
-    ctx.fillText('CPU m / memory Mi', centers[1][0], centers[1][1] + radius + 24, radius * 2.4);
-  }
-  const rows = [
-    ['Experimental CPU', `${fmt(expRes.usage_cpu_m, 1)}m`, palette.experimental],
-    ['Experimental Memory', `${fmt(expRes.usage_memory_mi, 1)}Mi`, palette.blue],
-    ['Baseline CPU', `${fmt(baseRes.usage_cpu_m, 1)}m`, palette.baseline],
-    ['Baseline Memory', `${fmt(baseRes.usage_memory_mi, 1)}Mi`, palette.red],
-  ];
-  const legendTop = compact ? Math.min(h - 92, 260) : Math.max(220, h - 94);
-  const colW = compact ? w - 44 : (w - 62) / 2;
-  ctx.textAlign = 'left';
-  ctx.font = '700 12px Avenir Next, sans-serif';
-  rows.forEach((row, i) => {
-    const col = compact ? 0 : i % 2;
-    const line = compact ? i : Math.floor(i / 2);
-    const x = 22 + col * (colW + 18);
-    const y = legendTop + line * 28;
-    ctx.fillStyle = row[2];
-    ctx.fillText('■', x, y);
-    ctx.fillStyle = palette.muted;
-    ctx.fillText(`${row[0]} ${row[1]}`, x + 20, y, colW - 20);
-  });
+function resourceMetric(label, value, unit, percent, color) {
+  const width = percent === null ? 0 : Math.max(0, Math.min(100, percent));
+  return `
+    <div class="resource-row">
+      <div>
+        <span>${esc(label)}</span>
+        <b>${fmt(value, 1)}${esc(unit)}</b>
+      </div>
+      <em>${pct(percent)}</em>
+      <i><strong style="width:${width}%;background:${esc(color)}"></strong></i>
+    </div>
+  `;
+}
+function resourceClusterCard(label, cluster, tone) {
+  const res = cluster.resource_totals || {};
+  const pod = cluster.pod_summary || {};
+  const cpuUsedPct = num(res.usage_cpu_percent) ?? resourcePercent(res.usage_cpu_m, res.allocatable_cpu_m);
+  const memUsedPct = num(res.usage_memory_percent) ?? resourcePercent(res.usage_memory_mi, res.allocatable_memory_mi);
+  const cpuReqPct = num(pod.request_cpu_percent) ?? resourcePercent(pod.request_cpu_m, res.allocatable_cpu_m);
+  const memReqPct = num(pod.request_memory_percent) ?? resourcePercent(pod.request_memory_mi, res.allocatable_memory_mi);
+  return `
+    <article class="resource-card ${tone}">
+      <header>
+        <span>${esc(label)}</span>
+        <b>${esc(cluster.running_pods ?? 0)} running pods</b>
+      </header>
+      ${resourceMetric('CPU used', res.usage_cpu_m, 'm', cpuUsedPct, tone === 'experimental' ? palette.experimental : palette.baseline)}
+      ${resourceMetric('Memory used', res.usage_memory_mi, 'Mi', memUsedPct, tone === 'experimental' ? palette.blue : palette.red)}
+      ${resourceMetric('CPU requested', pod.request_cpu_m, 'm', cpuReqPct, tone === 'experimental' ? '#72b79b' : '#e0a64d')}
+      ${resourceMetric('Memory requested', pod.request_memory_mi, 'Mi', memReqPct, tone === 'experimental' ? '#6298bd' : '#c96957')}
+    </article>
+  `;
+}
+function renderResourceMix(payload) {
+  $('resourceMixPanel').innerHTML = `
+    ${resourceClusterCard('Experimental', payload.experimental || {}, 'experimental')}
+    ${resourceClusterCard('Baseline', payload.baseline || {}, 'baseline')}
+  `;
 }
 function pressureLabel(value) {
   const n = num(value);
@@ -229,20 +277,20 @@ function drawNamespace(payload) {
   const baseEntries = topEntries(payload.baseline?.pod_summary?.namespace_counts, 5);
   const keys = Array.from(new Set([...expEntries, ...baseEntries].map(([key]) => key))).slice(0, 7);
   const max = Math.max(1, ...keys.flatMap(key => [payload.experimental?.pod_summary?.namespace_counts?.[key] || 0, payload.baseline?.pod_summary?.namespace_counts?.[key] || 0]));
-  const pad = { left: 138, right: 34, top: 24, bottom: 24 };
+  const pad = { left: Math.min(210, Math.max(148, w * 0.34)), right: 34, top: 24, bottom: 24 };
   const rowH = (h - pad.top - pad.bottom) / Math.max(1, keys.length);
   keys.forEach((key, i) => {
     const y = pad.top + i * rowH + 5;
     const expVal = Number(payload.experimental?.pod_summary?.namespace_counts?.[key] || 0);
     const baseVal = Number(payload.baseline?.pod_summary?.namespace_counts?.[key] || 0);
-    ctx.fillStyle = palette.muted; ctx.font = '12px Avenir Next, sans-serif'; ctx.textAlign = 'right'; ctx.fillText(key, pad.left - 12, y + 16);
+    ctx.fillStyle = palette.muted; ctx.font = '12px Avenir Next, sans-serif'; ctx.textAlign = 'right'; ctx.fillText(compactNamespace(key), pad.left - 12, y + 16, pad.left - 24);
     ctx.fillStyle = palette.experimental; ctx.fillRect(pad.left, y, (w - pad.left - pad.right) * expVal / max, 12);
     ctx.fillStyle = palette.baseline; ctx.fillRect(pad.left, y + 16, (w - pad.left - pad.right) * baseVal / max, 12);
   });
   ctx.fillStyle = palette.experimental; ctx.fillText('■ experimental', pad.left, h - 8);
   ctx.fillStyle = palette.baseline; ctx.fillText('■ baseline', pad.left + 124, h - 8);
 }
-function drawCharts(payload) {
+function drawCharts(payload, chartHistory) {
   drawLineChart('timelineCanvas', [
     { key:'experimentalPending', color:palette.experimental, label:'experimental pending pods', width:3 },
     { key:'baselinePending', color:palette.baseline, label:'baseline pending pods', width:3 },
@@ -250,8 +298,10 @@ function drawCharts(payload) {
     { key:'baselineCpu', color:palette.red, label:'baseline CPU %' },
     { key:'experimentalMem', color:'#72b79b', label:'experimental memory %' },
     { key:'baselineMem', color:'#e0a64d', label:'baseline memory %' },
-  ], 'live comparison samples');
-  drawResourcePie(payload);
+    { key:'baselineHpaCurrent', color:'#111f1a', label:'baseline HPA current replicas', width:2.4, dash:[8, 6] },
+    { key:'baselineHpaDesired', color:'#8d6d2d', label:'baseline HPA desired replicas', width:2.4, dash:[3, 6] },
+  ], 'retained live samples', chartHistory);
+  renderResourceMix(payload);
   renderCapacityPanel(payload);
   drawPhase(payload);
   drawNamespace(payload);
@@ -262,7 +312,7 @@ function renderScorecards(payload) {
     <article class="score-card">
       <span>${esc(card.label)}</span>
       <div class="score-values">
-        <div><span>experimental</span><b>${esc(card.experimental)}</b></div>
+        <div><span>experimental</span><b title="${esc(card.experimental)}">${esc(card.label === 'Replica reaction' ? compactAction(card.experimental) : card.experimental)}</b></div>
         <div><span>baseline</span><b>${esc(card.baseline)}</b></div>
       </div>
       <small>${esc(card.interpretation)}</small>
@@ -299,10 +349,12 @@ function renderWorkloads(exp, base) {
 }
 function renderAutoscaling(base) {
   const karp = base.karpenter || {};
+  const reaction = hpaReaction(base);
   $('hpaTable').innerHTML = (base.hpa || []).map(item => `
-    <div><span>${esc(item.namespace)}/${esc(item.name)}</span><b>target ${esc(item.target)} / replicas ${esc(item.current)} -> ${esc(item.desired)} / min ${esc(item.min)} max ${esc(item.max)} / cpu ${esc(item.cpu_utilization ?? item.cpu_average_value ?? 'n/a')}</b></div>
+    <div><span>${esc(item.namespace)}/${esc(item.name)}</span><b>target ${esc(item.target)} / replicas ${esc(item.current)} -> ${esc(item.desired)} / min ${esc(item.min)} max ${esc(item.max)} / cpu ${esc(item.cpu_utilization ?? 'n/a')}% target ${esc(item.target_cpu_utilization ?? 'n/a')}% / last scale ${esc(item.last_scale_time || 'n/a')}</b></div>
   `).join('') || '<div><span>hpa</span><b>not installed or not ready</b></div>';
   $('karpenterState').innerHTML = [
+    `<div><span>hpa mode</span><b>${esc(reaction.label)} / ${esc(reaction.detail)}</b></div>`,
     `<div><span>mode</span><b>${esc(karp.mode || 'n/a')}</b></div>`,
     `<div><span>last action</span><b>${esc((karp.actions || []).map(a => `${a.action}:${a.node}`).join(', ') || 'none')}</b></div>`,
     `<div><span>nodes</span><b>${esc((karp.nodes || []).map(n => `${n.name}:${n.state}`).join(', ') || 'n/a')}</b></div>`,
@@ -315,11 +367,12 @@ function renderReactions(exp, base) {
   const proposals = (decision.proposals || []).map(item => `<span class="pill">${esc(item.agent)} ${esc(item.kind)} score ${fmt(item.score)}</span>`).join('');
   const reward = exp.reward_summary || {};
   const ray = exp.ray || {}, optuna = exp.optuna || {};
+  const hpa = hpaReaction(base);
   $('reactionPanel').innerHTML = `
     <article class="reaction-card"><span>shared intentional stimulus</span><b>${esc(stimulus.phase || stimulus.message || 'n/a')}</b><small>${esc(stimulus.namespace || 'no namespace')} / operation ${esc(stimulus.operation || 'n/a')} / mirrored clusters ${esc(mirrorCount)}</small></article>
     <article class="reaction-card"><span>experimental decision</span><b>${esc(exp.last_decision || 'n/a')}</b><small>${esc(decision.reason || 'no reason recorded')}</small><div class="pill-row">${proposals || '<span class="pill">no proposals</span>'}</div></article>
     <article class="reaction-card"><span>experimental learning</span><b>Ray ${esc(ray.status || 'n/a')} / Optuna ${esc(optuna.status || 'n/a')}</b><small>reward avg ${fmt(reward.average_total)} / last ${fmt(reward.last_total)} / count ${esc(reward.count || 0)}</small></article>
-    <article class="reaction-card"><span>baseline reaction</span><b>HPA ${hpaCurrent(base)} -> ${hpaDesired(base)} replicas</b><small>local Karpenter ${esc(base.karpenter?.active_nodes ?? 'n/a')} active workers / ${esc(base.karpenter?.warm_nodes ?? 'n/a')} warm workers</small></article>
+    <article class="reaction-card hpa-${esc(hpa.state)}"><span>baseline reaction</span><b>${esc(hpa.label)}</b><small>${esc(hpa.detail)} / local Karpenter ${esc(base.karpenter?.active_nodes ?? 'n/a')} active workers / ${esc(base.karpenter?.warm_nodes ?? 'n/a')} warm workers</small></article>
   `;
 }
 function render(payload) {
@@ -327,9 +380,11 @@ function render(payload) {
   const exp = payload.experimental || {};
   const base = payload.baseline || {};
   const karp = base.karpenter || {};
+  const hpa = hpaReaction(base);
   const expRes = exp.resource_totals || {}, baseRes = base.resource_totals || {};
   $('updatedAt').textContent = new Date().toLocaleTimeString();
-  $('sampleCount').textContent = `${historyRows.length + 1} samples`;
+  const serverHistory = Array.isArray(payload.history) ? payload.history : [];
+  $('sampleCount').textContent = `${serverHistory.length || historyRows.length + 1} samples`;
   $('experimentalRole').textContent = exp.role || 'experimental';
   $('baselineRole').textContent = base.role || 'baseline';
   $('experimentalMetrics').innerHTML = metricHtml([
@@ -339,8 +394,10 @@ function render(payload) {
     ['nodes', `${base.ready_nodes ?? 0}/${base.nodes ?? 0}`], ['workers', `${base.ready_workers ?? 0}/${base.worker_nodes ?? 0}`], ['pending', base.pending_pods], ['CPU used', pct(baseRes.usage_cpu_percent)], ['mem used', pct(baseRes.usage_memory_percent)], ['HPA objects', (base.hpa || []).length], ['active nodes', karp.active_nodes], ['warm nodes', karp.warm_nodes]
   ]);
   $('experimentalRisk').textContent = fmt(exp.max_risk);
-  $('experimentalDecision').textContent = exp.last_decision || 'n/a';
-  $('baselineHpa').textContent = `${hpaCurrent(base)} -> ${hpaDesired(base)} replicas`;
+  $('experimentalDecision').textContent = compactAction(exp.last_decision);
+  $('experimentalDecision').title = exp.last_decision || 'n/a';
+  $('baselineHpa').textContent = hpa.label;
+  $('baselineHpa').title = hpa.detail;
   $('baselineWarm').textContent = `${karp.active_nodes ?? 'n/a'} active / ${karp.warm_nodes ?? 'n/a'} warm`;
   renderScorecards(payload);
   renderLedger(payload);
@@ -352,18 +409,28 @@ function render(payload) {
   $('notes').textContent = (payload.notes || []).join(' ');
   const errors = [...(exp.errors || []), ...(base.errors || [])];
   $('errors').textContent = errors.length ? `API/metrics warnings: ${errors.join(' | ')}` : '';
-  historyRows.push({
-    experimentalPending: exp.pending_pods || 0,
-    baselinePending: base.pending_pods || 0,
-    experimentalNodes: exp.schedulable_nodes || 0,
-    baselineNodes: base.schedulable_nodes || 0,
-    experimentalCpu: expRes.usage_cpu_percent || 0,
-    baselineCpu: baseRes.usage_cpu_percent || 0,
-    experimentalMem: expRes.usage_memory_percent || 0,
-    baselineMem: baseRes.usage_memory_percent || 0,
-  });
-  if (historyRows.length > 240) historyRows.shift();
-  drawCharts(payload);
+  if (!serverHistory.length) {
+    historyRows.push({
+      time: new Date().toISOString(),
+      experimentalPending: exp.pending_pods || 0,
+      baselinePending: base.pending_pods || 0,
+      experimentalSchedulable: exp.schedulable_nodes || 0,
+      baselineSchedulable: base.schedulable_nodes || 0,
+      experimentalCpu: expRes.usage_cpu_percent || 0,
+      baselineCpu: baseRes.usage_cpu_percent || 0,
+      experimentalMem: expRes.usage_memory_percent || 0,
+      baselineMem: baseRes.usage_memory_percent || 0,
+      baselineHpaCurrent: hpa.current || 0,
+      baselineHpaDesired: hpa.desired || 0,
+    });
+    if (historyRows.length > 7200) historyRows.shift();
+  }
+  const chartHistory = serverHistory.length ? serverHistory : historyRows;
+  const first = chartHistory[0], last = chartHistory[chartHistory.length - 1];
+  $('timelineWindow').textContent = chartHistory.length
+    ? `${chartHistory.length} retained samples from ${displayTime(first.time)} to ${displayTime(last.time)}; HPA lines show current and desired replicas so a stable ${hpa.current ?? 'n/a'} -> ${hpa.desired ?? 'n/a'} state does not hide earlier scale movement.`
+    : 'waiting for comparison samples';
+  drawCharts(payload, chartHistory);
 }
 async function tick() {
   try {
@@ -374,6 +441,6 @@ async function tick() {
     $('errors').textContent = `dashboard fetch failed: ${err}`;
   }
 }
-window.addEventListener('resize', () => { if (latest()) tick(); });
+window.addEventListener('resize', () => { if (window.latestPayload || latest()) tick(); });
 tick();
 setInterval(tick, 2500);
