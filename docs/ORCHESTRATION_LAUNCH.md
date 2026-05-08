@@ -2,6 +2,32 @@
 
 This repository now has one launch shell for the whole implemented orchestration path plus live visualization.
 
+## Top One-Liners
+
+Start the full local dual-cluster orchestration and comparison stack:
+
+```bash
+cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && ./orchestrator_stack/scripts/start_local_dual_cluster_stack.sh
+```
+
+Stop the full local dual-cluster stack, including the Kind Docker node containers:
+
+```bash
+cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && ./orchestrator_stack/scripts/stop_local_dual_cluster_stack.sh
+```
+
+Open k9s for the experimental cluster:
+
+```bash
+KUBECONFIG=~/Documents/borg_orchestrator_clusters/kubeconfig-experimental k9s
+```
+
+Open k9s for the HPA/local-Karpenter baseline cluster:
+
+```bash
+KUBECONFIG=~/Documents/borg_orchestrator_clusters/kubeconfig-baseline k9s
+```
+
 ## One Command
 
 From repository root:
