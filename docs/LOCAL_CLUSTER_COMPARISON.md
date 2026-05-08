@@ -47,6 +47,30 @@ orchestrator_stack/runtime/visualization-experimental/state.json
 orchestrator_stack/runtime/visualization-experimental/events.jsonl
 ```
 
+By default, this launcher mirrors every intentional exercise phase to the baseline cluster through:
+
+```text
+MIRROR_EXERCISE_KUBECONFIG=~/Documents/borg_orchestrator_clusters/kubeconfig-baseline
+MIRROR_EXERCISE_NAMESPACE=borg-orchestrator-exercise
+```
+
+That means the input stimulus is shared, while the reactions remain independent:
+
+- mirrored: intentional exerciser workload creation/deletion, request size, replica count, node selector, and namespace
+- not mirrored: Agent A/B/C decisions, Referee choices, HPA replica changes, and local Karpenter active/warm node changes
+
+Apply one shared stimulus manually:
+
+```bash
+PHASE_INDEX=3 ./orchestrator_stack/scripts/apply_comparison_stimulus.sh
+```
+
+Randomized but reproducible shared stimulus:
+
+```bash
+PHASE_INDEX=3 EXERCISE_RANDOMIZE=1 EXERCISE_SEED=17 ./orchestrator_stack/scripts/apply_comparison_stimulus.sh
+```
+
 ## Launch Comparison Dashboard
 
 ```bash
