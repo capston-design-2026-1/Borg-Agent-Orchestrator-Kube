@@ -120,6 +120,7 @@ This creates:
 
 - `borg-experimental`: the experimental multi-agent orchestrator cluster
 - `borg-baseline`: a baseline cluster with real Kubernetes HPA plus local Karpenter-style warm-node provisioning/consolidation over pre-created Kind workers
+- identical `borg-comparison-workload` app, Service, and load generator objects in both clusters; HPA and local Karpenter reactions remain baseline-specific
 
 Launch the experimental live orchestrator:
 
