@@ -450,7 +450,7 @@ Both clusters now receive the same shared `borg-comparison-workload` application
 |---|---|
 | Behavior scorecards | Queue pressure, CPU utilization, replica reaction, and capacity reaction as paired experimental/baseline summaries. |
 | Behavior difference ledger | Experimental value, baseline value, and experimental-minus-baseline delta for ready workers, pending pods, restarts, live resource usage, and requested resources. |
-| Pressure timeline | Server-retained samples split into three synchronized lanes: pending pods, CPU/memory utilization percent, and baseline HPA current/desired/max replicas. It keeps several hours of context while avoiding one biased y-axis for incompatible units. |
+| Pressure timeline | Rolling five-minute view split into three synchronized lanes: pending pods, CPU/memory utilization percent, and baseline HPA current/desired/max replicas. The server retains longer history, but the visible chart stays focused on the current operating window. |
 | Live resource mix | Metrics Server-backed CPU/memory usage and requested CPU/memory for each cluster, rendered as separate bars so CPU millicores and memory MiB are not blended into one misleading donut. |
 | Capacity matrix | CPU request pressure, memory request pressure, and live CPU usage are sharded into separate experimental/baseline gauge rows with percentage-point deltas. This avoids mixing scheduler demand and actual usage in one compressed chart. |
 | Pod phase and namespace charts | Scheduling/admission outcomes and where workload pressure is concentrated. |
