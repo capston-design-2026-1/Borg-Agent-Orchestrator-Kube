@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Borg Orchestrator Comparison</title>
-  <link rel="stylesheet" href="styles.css?v=202605081610" />
+  <link rel="stylesheet" href="styles.css?v=202605081645" />
 </head>
 <body>
   <main class="shell">
@@ -52,8 +52,8 @@
         <canvas id="resourcePieCanvas" width="760" height="420"></canvas>
       </article>
       <article class="panel chart-card">
-        <div class="panel-head"><h2>Capacity And Demand</h2><span>requests vs allocatable</span></div>
-        <canvas id="capacityCanvas" width="760" height="420"></canvas>
+        <div class="panel-head"><h2>Capacity Matrix</h2><span>request headroom / live use</span></div>
+        <div id="capacityPanel" class="capacity-panel" aria-live="polite"></div>
       </article>
     </section>
 
@@ -101,6 +101,6 @@
       <p id="errors" class="error-line"></p>
     </section>
   </main>
-  <script src="app.js?v=202605081610"></script>
+  <script src="app.js?v=202605081645"></script>
 </body>
 </html>
