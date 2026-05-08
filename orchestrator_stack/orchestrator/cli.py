@@ -220,6 +220,7 @@ def cmd_live_kubernetes_run(args: argparse.Namespace) -> None:
         raise _missing_dependency(exc, "loading live Kubernetes visualization runtime") from exc
 
     prefixes = tuple(prefix.strip() for prefix in args.namespace_prefixes.split(",") if prefix.strip())
+    mirror_kubeconfigs = tuple(path.strip() for path in args.mirror_exercise_kubeconfig or [] if path.strip())
     result = run_live_kubernetes_orchestration(
         args.config,
         event_dir=args.event_dir,
@@ -238,6 +239,8 @@ def cmd_live_kubernetes_run(args: argparse.Namespace) -> None:
         exercise_interval_iterations=args.exercise_interval_iterations,
         exercise_randomize=args.exercise_randomize,
         exercise_seed=args.exercise_seed,
+        mirror_exercise_kubeconfigs=mirror_kubeconfigs,
+        mirror_exercise_namespace=args.mirror_exercise_namespace,
     )
     print(json.dumps(result, indent=2))
 
@@ -408,6 +411,8 @@ def build_parser() -> argparse.ArgumentParser:
     p_live.add_argument("--exercise-interval-iterations", type=int, default=3)
     p_live.add_argument("--exercise-randomize", action="store_true", help="Randomize exercise phase selection and workload request sizes")
     p_live.add_argument("--exercise-seed", type=int, help="Optional deterministic seed for randomized exercise phases")
+    p_live.add_argument("--mirror-exercise-kubeconfig", action="append", help="Apply the exact same intentional exercise phase to another kubeconfig")
+    p_live.add_argument("--mirror-exercise-namespace", help="Namespace to use for mirrored exercise workloads; defaults to the primary exercise namespace")
     p_live.set_defaults(func=cmd_live_kubernetes_run)
 
     p_arch = sub.add_parser("architecture-status")
