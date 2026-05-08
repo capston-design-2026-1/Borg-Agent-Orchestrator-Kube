@@ -195,6 +195,8 @@ kubectl --kubeconfig "$BASELINE_KUBECONFIG" -n borg-baseline get hpa,pods -o wid
 
 ## 8. Stop Runtime Processes
 
+This section only stops host-side launchers, dashboard servers, local Karpenter controller, and Prometheus port-forwards. It does not stop the Kind node Docker containers.
+
 Preferred stop method:
 
 ```text
@@ -214,6 +216,24 @@ pkill -f 'orchestrator.dashboard_server' || true
 pkill -f 'orchestrator.comparison_dashboard_server' || true
 pkill -f 'local_karpenter_controller.py' || true
 pkill -f 'port-forward svc/prometheus-server' || true
+```
+
+One-liner for runtime helpers:
+
+```bash
+pkill -f '[l]aunch_orchestration.sh|[l]aunch_experimental_multinode_orchestration.sh|[l]aunch_cluster_comparison.sh|[o]rchestrator.dashboard_server|[o]rchestrator.comparison_dashboard_server|[o]rchestrator_stack/run.py live-kubernetes-run|[l]ocal_karpenter_controller.py|[k]ubectl .*port-forward svc/prometheus-server' || true
+```
+
+One-liner to stop runtime helpers and remove the two Kind cluster Docker node containers:
+
+```bash
+pkill -f '[l]aunch_orchestration.sh|[l]aunch_experimental_multinode_orchestration.sh|[l]aunch_cluster_comparison.sh|[o]rchestrator.dashboard_server|[o]rchestrator.comparison_dashboard_server|[o]rchestrator_stack/run.py live-kubernetes-run|[l]ocal_karpenter_controller.py|[k]ubectl .*port-forward svc/prometheus-server' || true; kind delete cluster --name borg-experimental; kind delete cluster --name borg-baseline
+```
+
+If the older AIOpsLab validation cluster is also running and should be removed:
+
+```bash
+pkill -f '[l]aunch_orchestration.sh|[l]aunch_experimental_multinode_orchestration.sh|[l]aunch_cluster_comparison.sh|[o]rchestrator.dashboard_server|[o]rchestrator.comparison_dashboard_server|[o]rchestrator_stack/run.py live-kubernetes-run|[l]ocal_karpenter_controller.py|[k]ubectl .*port-forward svc/prometheus-server' || true; kind delete cluster --name borg-experimental; kind delete cluster --name borg-baseline; kind delete cluster --name borg-aiopslab
 ```
 
 ## 9. Clear Workloads But Keep Clusters
@@ -243,8 +263,7 @@ kubectl --kubeconfig "$BASELINE_KUBECONFIG" delete namespace borg-orchestrator-e
 Delete only the two comparison clusters:
 
 ```bash
-kind delete cluster --name borg-experimental
-kind delete cluster --name borg-baseline
+kind delete cluster --name borg-experimental; kind delete cluster --name borg-baseline
 ```
 
 Optional: delete the older AIOpsLab validation cluster too:
