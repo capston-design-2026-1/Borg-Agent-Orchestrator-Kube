@@ -448,18 +448,14 @@ Both clusters now receive the same shared `borg-comparison-workload` application
 
 | Section | Meaning |
 |---|---|
-| Behavior scorecards | Queue pressure, CPU utilization, replica reaction, and capacity reaction as paired experimental/baseline summaries. |
-| Behavior difference ledger | Experimental value, baseline value, and experimental-minus-baseline delta for ready workers, pending pods, restarts, live resource usage, and requested resources. |
-| Pressure timeline | Rolling five-minute view split into three synchronized lanes: pending pods, CPU/memory utilization percent, and baseline HPA current/desired/max replicas. The server retains longer history, but the visible chart stays focused on the current operating window. |
-| Live resource mix | Metrics Server-backed CPU/memory usage and requested CPU/memory for each cluster, rendered as separate bars so CPU millicores and memory MiB are not blended into one misleading donut. |
-| Capacity matrix | CPU request pressure, memory request pressure, and live CPU usage are sharded into separate experimental/baseline gauge rows with percentage-point deltas. This avoids mixing scheduler demand and actual usage in one compressed chart. |
-| Pod phase and namespace charts | Scheduling/admission outcomes and where workload pressure is concentrated. |
-| Controller reactions | Latest Agent A/B/C decision/proposals plus Ray/Optuna status versus HPA replica movement and local Karpenter active/warm nodes. |
-| Node and workload inventory | Per-node readiness/schedulability/resources and the Kubernetes workload controllers discovered in both clusters. |
+| Research objective evidence | High-level status cards for Agent A safety, Agent B efficiency, Agent C admission, learning activity, and mirrored-stimulus fidelity. These cards use semantic labels like `healthy`, `watch`, or `mirrored` instead of assuming every negative delta is bad. |
+| Agent goal matrix | Agent A/B/C role, goal, trigger rule, live signal, proposal, selected control, reward, and baseline analogue. This is the main interpretability surface for the experimental controller. |
+| Control pressure timeline | Rolling five-minute objective window for risk/SLA, queue/pending pressure, estimated watts, and weighted reward. The static HPA replica lane was removed because a stable current/desired line was not useful as a primary graph. |
+| Controller response narrative | Latest shared intentional stimulus, experimental decision/proposals/learning state, and baseline HPA/local-Karpenter reaction. |
 
 The `Controller reactions` panel also shows `shared intentional stimulus`. This is the latest external exerciser operation applied to both clusters. It is the comparison input, not a controller output. Agent A/B/C decisions, Referee decisions, HPA scale changes, and local Karpenter node activation are separate reactions and are not mirrored.
 
-If HPA reads `stable at N replicas`, HPA is not broken. It means the latest `currentReplicas` and `desiredReplicas` match after HPA has already reacted. Use the dedicated HPA replica lane plus the `Baseline Autoscalers` table to see earlier scale movement, CPU target, replica headroom, and last scale time.
+The previous raw difference ledger was removed from the main dashboard because `experimental - baseline` is not a reliable visual quality signal. For example, a negative delta can be good when it means fewer pending pods, fewer restarts, lower energy, or lower request pressure. The dashboard now uses objective-specific interpretation instead.
 
 This dashboard is local-only. HPA is real Kubernetes HPA; Karpenter behavior is represented by the local Kind warm-node controller because upstream AWS Karpenter requires cloud provider APIs.
 
