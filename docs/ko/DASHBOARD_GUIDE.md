@@ -470,18 +470,14 @@ http://127.0.0.1:8876
 
 | 섹션 | 의미 |
 |---|---|
-| Behavior scorecards | queue pressure, CPU utilization, replica reaction, capacity reaction을 experimental/baseline 쌍으로 요약한다. |
-| Behavior difference ledger | ready worker, pending pod, restart, live resource usage, requested resource에 대해 experimental value, baseline value, experimental-minus-baseline delta를 보여준다. |
-| Pressure timeline | 최근 5분 rolling window를 세 개의 synchronized lane으로 나누어 보여준다: pending pod, CPU/memory utilization percent, baseline HPA current/desired/max replica. dashboard server는 더 긴 history를 유지하지만, 화면의 graph는 현재 operating window에 집중한다. |
-| Live resource mix | Metrics Server 기반 CPU/memory usage와 requested CPU/memory를 cluster별 bar로 나누어 보여준다. CPU millicore와 memory MiB를 하나의 donut에 섞지 않기 위한 구조다. |
-| Capacity matrix | CPU request pressure, memory request pressure, live CPU usage를 각각 별도 experimental/baseline gauge row로 나누고 percentage-point delta를 함께 보여준다. scheduler demand와 actual usage를 한 차트에 압축하지 않기 위한 구조다. |
-| Pod phase and namespace charts | pod scheduling/admission 결과와 workload pressure가 어느 namespace에 집중되는지 보여준다. |
-| Controller reactions | 최신 Agent A/B/C decision/proposals 및 Ray/Optuna 상태를 HPA replica movement와 local Karpenter active/warm node 상태와 비교한다. |
-| Node and workload inventory | node별 readiness/schedulability/resource와 두 cluster에서 발견된 Kubernetes workload controller를 보여준다. |
+| Research objective evidence | Agent A safety, Agent B efficiency, Agent C admission, learning activity, mirrored-stimulus fidelity를 high-level status card로 보여준다. 모든 negative delta를 나쁘다고 가정하지 않고 `healthy`, `watch`, `mirrored` 같은 semantic label을 사용한다. |
+| Agent goal matrix | Agent A/B/C의 role, goal, trigger rule, live signal, proposal, selected control, reward, baseline analogue를 보여준다. experimental controller를 해석하기 위한 핵심 영역이다. |
+| Control pressure timeline | 최근 5분 objective window에서 risk/SLA, queue/pending pressure, estimated watts, weighted reward를 보여준다. current/desired가 안정되면 거의 한 줄로만 보이는 static HPA replica lane은 primary graph에서 제거했다. |
+| Controller response narrative | 최신 shared intentional stimulus, experimental decision/proposals/learning state, baseline HPA/local-Karpenter reaction을 함께 보여준다. |
 
 `Controller reactions` 패널의 `shared intentional stimulus`는 두 cluster에 같이 적용된 최신 외부 exerciser operation을 의미한다. 이것은 비교를 위한 입력이며 controller output이 아니다. Agent A/B/C decision, Referee decision, HPA scaling, local Karpenter node activation은 각 cluster의 독립적인 반응이므로 mirror하지 않는다.
 
-HPA가 `stable at N replicas`로 보이면 HPA가 동작하지 않는다는 뜻이 아니다. 최신 sample에서 `currentReplicas`와 `desiredReplicas`가 이미 같아졌다는 뜻이다. 이전 scale movement, CPU target, replica headroom, last scale time은 Pressure timeline의 dedicated HPA replica lane과 `Baseline Autoscalers` table에서 확인해야 한다.
+기존 raw difference ledger는 main dashboard에서 제거했다. `experimental - baseline` 값은 품질 신호로 항상 올바르지 않다. 예를 들어 pending pod, restart, energy, request pressure가 더 낮아서 negative delta가 나오는 것은 오히려 좋은 결과일 수 있다. 이제 dashboard는 objective별 해석을 사용한다.
 
 이 dashboard는 local-only 비교용이다. HPA는 실제 Kubernetes HPA이고, Karpenter behavior는 upstream AWS Karpenter가 cloud provider API를 요구하기 때문에 Kind worker warm-node controller로 표현한다.
 
