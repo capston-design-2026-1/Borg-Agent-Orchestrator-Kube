@@ -69,5 +69,6 @@ def test_comparison_dashboard_exposes_expected_api_and_signals():
     assert "hpaDesired" in app
     assert "timelineCanvas" in app
     assert "resourcePieCanvas" in app
-    assert "capacityCanvas" in app
+    assert "capacityPanel" in app
+    assert "Capacity Matrix" in Path("orchestrator_stack/comparison_dashboard/index.html").read_text(encoding="utf-8")
     assert "shared intentional stimulus" in app
