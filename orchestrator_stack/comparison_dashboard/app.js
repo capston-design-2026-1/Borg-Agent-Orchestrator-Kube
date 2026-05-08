@@ -3,15 +3,12 @@ const historyRows = [];
 const palette = {
   experimental: '#16835f', baseline: '#d48a20', blue: '#2f6f9f', red: '#b44634', ink: '#10201a', muted: '#65756e', grid: 'rgba(16,32,26,.14)', panel: 'rgba(255,255,255,.58)'
 };
-const phaseColors = { Running:'#16835f', Pending:'#d48a20', Succeeded:'#2f6f9f', Failed:'#b44634', Unknown:'#65756e' };
 const PRESSURE_TIMELINE_WINDOW_MS = 5 * 60 * 1000;
 
 function esc(value) { return String(value ?? 'n/a').replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch])); }
 function num(value) { const n = Number(value); return Number.isFinite(n) ? n : null; }
 function fmt(value, digits = 3) { const n = num(value); return n === null ? 'n/a' : n.toFixed(digits); }
-function intFmt(value) { const n = num(value); return n === null ? 'n/a' : String(Math.round(n)); }
 function pct(value) { const n = num(value); return n === null ? 'n/a' : `${n.toFixed(1)}%`; }
-function pctPoints(value) { const n = num(value); return n === null ? 'n/a' : `${n >= 0 ? '+' : ''}${n.toFixed(1)} pts`; }
 function hpaDesired(cluster) { return (cluster.hpa || []).reduce((sum, item) => sum + Number(item.desired ?? item.current ?? item.min ?? 0), 0); }
 function hpaCurrent(cluster) { return (cluster.hpa || []).reduce((sum, item) => sum + Number(item.current ?? 0), 0); }
 function hpaMax(cluster) { return (cluster.hpa || []).reduce((sum, item) => sum + Number(item.max ?? 0), 0); }
@@ -42,22 +39,73 @@ function hpaReaction(cluster) {
   const cpuText = cpu === null || target === null ? 'CPU metric pending' : `CPU ${cpu.toFixed(0)}% / target ${target.toFixed(0)}%`;
   return { label: `HPA ${label}`, detail: `${cpuText}; ${headroom}; last scale ${lastScale}`, state, current, desired, max, cpu, target, lastScale };
 }
+function agentProposal(decision, agent) {
+  return (decision?.proposals || []).find(item => item.agent === agent) || {};
+}
+function proposalSummary(decision, agent) {
+  const proposal = agentProposal(decision, agent);
+  if (!proposal.kind) return 'no proposal';
+  const target = proposal.target ? ` -> ${proposal.target}` : '';
+  return `${proposal.kind}${target}, score ${fmt(proposal.score)}`;
+}
+function selectedSummary(decision, agent) {
+  if (decision?.agent === agent) return `selected ${decision.kind || 'action'}`;
+  if (!decision?.agent) return 'waiting';
+  return `observing; ${decision.agent} selected`;
+}
+function stimulusSummary(payload) {
+  const stimulus = payload.shared_stimulus || {};
+  const mirrorCount = stimulus.mirror_count ?? (stimulus.mirrors || []).length ?? 0;
+  const resource = stimulus.resources || {};
+  const size = [resource.cpu_request, resource.memory_request, resource.replicas ? `${resource.replicas} replicas` : null].filter(Boolean).join(' / ');
+  return {
+    title: stimulus.phase || stimulus.message || 'waiting for shared stimulus',
+    detail: `${stimulus.operation || 'n/a'} in ${stimulus.namespace || 'n/a'}; mirrored clusters ${mirrorCount}${size ? `; ${size}` : ''}`,
+  };
+}
+function objectiveStatus(kind, payload) {
+  const exp = payload.experimental || {};
+  const base = payload.baseline || {};
+  const reward = exp.reward_summary || {};
+  const stimulus = payload.shared_stimulus || {};
+  if (kind === 'safety') {
+    const risk = num(exp.max_risk) ?? 0;
+    const sla = num(exp.sla_violations) ?? 0;
+    if (sla === 0 && risk < 0.7) return ['healthy', 'good'];
+    if (sla === 0 && risk < 0.83) return ['mitigating', 'watch'];
+    return ['high risk', 'bad'];
+  }
+  if (kind === 'efficiency') {
+    const demand = num(exp.min_demand) ?? 1;
+    if (demand < 0.45) return ['saving opportunity', 'good'];
+    if (demand < 0.7) return ['balanced', 'neutral'];
+    return ['high demand', 'watch'];
+  }
+  if (kind === 'admission') {
+    const expPending = num(exp.pending_pods) ?? 0;
+    const basePending = num(base.pending_pods) ?? 0;
+    if (expPending < basePending) return ['better backlog', 'good'];
+    if (expPending === basePending) return ['matched backlog', 'neutral'];
+    return ['higher backlog', 'watch'];
+  }
+  if (kind === 'learning') {
+    const count = num(reward.count) ?? 0;
+    if ((exp.ray?.status === 'trained' || exp.optuna?.completed_trials > 0) && count > 0) return ['learning active', 'good'];
+    return ['waiting', 'watch'];
+  }
+  if (kind === 'fidelity') {
+    const mirrorCount = num(stimulus.mirror_count ?? (stimulus.mirrors || []).length) ?? 0;
+    return mirrorCount > 0 ? ['mirrored', 'good'] : ['not mirrored', 'bad'];
+  }
+  return ['observing', 'neutral'];
+}
 function metricHtml(rows) { return rows.map(([k, v]) => `<div><b>${esc(v)}</b><span>${esc(k)}</span></div>`).join(''); }
-function valueClass(value) { const n = num(value); if (n === null || Math.abs(n) < 0.001) return 'delta-neutral'; return n > 0 ? 'delta-positive' : 'delta-negative'; }
-function topEntries(obj, limit = 7) { return Object.entries(obj || {}).sort((a,b) => Number(b[1]) - Number(a[1]) || a[0].localeCompare(b[0])).slice(0, limit); }
 function latest() { return historyRows[historyRows.length - 1] || {}; }
 function compactAction(value) {
   const text = String(value || 'n/a');
   const parts = text.split(':');
   if (parts.length >= 3) return `${parts[0]}:${parts[2]}`;
   return text;
-}
-function compactNamespace(value) {
-  const text = String(value || 'unknown');
-  return text
-    .replace('borg-orchestrator-exercise', 'borg-exercise')
-    .replace('borg-comparison-workload', 'comparison-workload')
-    .replace('local-path-storage', 'local-path');
 }
 function displayTime(value) {
   if (!value) return 'waiting';
@@ -90,20 +138,6 @@ function setupCanvas(canvas) {
   if (canvas.width !== width || canvas.height !== height) { canvas.width = width; canvas.height = height; }
   ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
   return { ctx, w: rect.width, h: rect.height };
-}
-function axes(ctx, w, h, pad, max, label) {
-  ctx.clearRect(0,0,w,h);
-  ctx.fillStyle = 'rgba(255,255,255,.48)';
-  ctx.fillRect(pad.left, pad.top, w - pad.left - pad.right, h - pad.top - pad.bottom);
-  ctx.strokeStyle = palette.grid;
-  ctx.fillStyle = 'rgba(16,32,26,.62)';
-  ctx.font = '12px Avenir Next, sans-serif';
-  for (let i = 0; i <= 4; i++) {
-    const y = pad.top + (i / 4) * (h - pad.top - pad.bottom);
-    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(w - pad.right, y); ctx.stroke();
-    ctx.textAlign = 'right'; ctx.fillText((max - (i / 4) * max).toFixed(1), pad.left - 8, y + 4);
-  }
-  ctx.textAlign = 'center'; ctx.fillText(label, pad.left + (w - pad.left - pad.right) / 2, h - 12);
 }
 function scaledMax(values, floor = 1) {
   const realValues = values.map(num).filter(v => v !== null);
@@ -159,47 +193,55 @@ function drawPressureTimeline(canvasId, sourceRows) {
   const canvas = $(canvasId); if (!canvas) return;
   const { ctx, w, h } = setupCanvas(canvas);
   const rows = downsample(sourceRows);
-  const left = 68, right = 86, top = 24, bottom = 50, gap = 34;
-  const plotW = w - left - right;
-  const panelH = (h - top - bottom - gap * 2) / 3;
+  const left = 68, right = 86, top = 24, bottom = 50, gap = 24;
   const panels = [
     {
-      title: 'Backlog pressure',
-      unit: 'pending pods',
+      title: 'Safety risk',
+      unit: 'risk score / SLA count',
       side: 'left',
       y: top,
       series: [
-        { key:'experimentalPending', color:palette.experimental, label:'experimental pending pods', width:3 },
-        { key:'baselinePending', color:palette.baseline, label:'baseline pending pods', width:3 },
+        { key:'experimentalRisk', color:palette.red, label:'Agent A risk forecast', width:3 },
+        { key:'experimentalSla', color:'#6d372f', label:'experimental SLA violations', width:2.3, dash:[6, 5], stepped:true },
+      ],
+      maxFloor: 1,
+    },
+    {
+      title: 'Admission backlog',
+      unit: 'queue / pending pods',
+      side: 'left',
+      y: 0,
+      series: [
+        { key:'experimentalQueue', color:palette.blue, label:'Agent C queue length', width:3 },
+        { key:'experimentalPending', color:palette.experimental, label:'experimental pending pods', width:2.5 },
+        { key:'baselinePending', color:palette.baseline, label:'baseline pending pods', width:2.5 },
       ],
       maxFloor: 5,
     },
     {
-      title: 'Resource utilization',
-      unit: 'percent',
+      title: 'Efficiency signal',
+      unit: 'estimated watts',
       side: 'right',
-      y: top + panelH + gap,
+      y: 0,
       series: [
-        { key:'experimentalCpu', color:palette.blue, label:'experimental CPU %' },
-        { key:'baselineCpu', color:palette.red, label:'baseline CPU %' },
-        { key:'experimentalMem', color:'#72b79b', label:'experimental memory %' },
-        { key:'baselineMem', color:'#e0a64d', label:'baseline memory %' },
+        { key:'experimentalEnergy', color:palette.experimental, label:'Agent B estimated watts', width:2.8 },
       ],
-      maxFloor: 10,
+      maxFloor: 5,
     },
     {
-      title: 'Baseline HPA replica state',
-      unit: 'replicas',
+      title: 'Reward outcome',
+      unit: 'weighted total reward',
       side: 'right',
-      y: top + (panelH + gap) * 2,
+      y: 0,
       series: [
-        { key:'baselineHpaCurrent', color:'#111f1a', label:'baseline HPA current replicas', width:2.8, stepped:true },
-        { key:'baselineHpaDesired', color:'#8d6d2d', label:'baseline HPA desired replicas', width:2.8, dash:[8, 6], stepped:true },
-        { key:'baselineHpaMax', color:'rgba(16,32,26,.28)', label:'baseline HPA max replicas', width:1.8, dash:[2, 6], stepped:true },
+        { key:'experimentalReward', color:'#111f1a', label:'experimental weighted reward', width:3 },
       ],
       maxFloor: 5,
     },
   ];
+  const plotW = w - left - right;
+  const panelH = (h - top - bottom - gap * (panels.length - 1)) / panels.length;
+  panels.forEach((panel, index) => { panel.y = top + index * (panelH + gap); });
 
   ctx.clearRect(0,0,w,h);
   ctx.fillStyle = 'rgba(255,255,255,.48)';
@@ -222,7 +264,7 @@ function drawPressureTimeline(canvasId, sourceRows) {
     if (rows.length) drawPanelSeries(ctx, rows, panel, scale, item.series);
   });
   if (rows.length) {
-    const bottomPanel = { x:left, y:top + (panelH + gap) * 2, w:plotW, h:panelH };
+    const bottomPanel = { x:left, y:top + (panelH + gap) * (panels.length - 1), w:plotW, h:panelH };
     const xFor = index => rows.length <= 1 ? bottomPanel.x + bottomPanel.w / 2 : bottomPanel.x + (index / (rows.length - 1)) * bottomPanel.w;
     const ticks = [0, Math.floor((rows.length - 1) / 2), rows.length - 1];
     ctx.fillStyle = 'rgba(16,32,26,.58)';
@@ -241,263 +283,131 @@ function drawPressureTimeline(canvasId, sourceRows) {
   const legendSeries = panels.flatMap(panel => panel.series);
   $('timelineLegend').innerHTML = legendSeries.map(item => `<span><b style="color:${item.color}">■</b> ${esc(item.label)}</span>`).join('');
 }
-function drawLineChart(canvasId, series, label, sourceRows) {
-  const canvas = $(canvasId); if (!canvas) return;
-  const { ctx, w, h } = setupCanvas(canvas);
-  const pad = { left: 58, right: 26, top: 24, bottom: 42 };
-  const allRows = Array.isArray(sourceRows) ? sourceRows : historyRows;
-  const rows = downsample(allRows);
-  const values = rows.flatMap(row => series.map(item => num(row[item.key]))).filter(v => v !== null);
-  const max = Math.max(1, ...values) * 1.12;
-  const plotW = w - pad.left - pad.right;
-  const plotH = h - pad.top - pad.bottom;
-  const yFor = value => h - pad.bottom - (Number(value || 0) / max) * plotH;
-  const xFor = index => rows.length <= 1 ? pad.left + plotW / 2 : pad.left + (index / (rows.length - 1)) * plotW;
-  axes(ctx, w, h, pad, max, label);
-  if (rows.length) {
-    const ticks = [0, Math.floor((rows.length - 1) / 2), rows.length - 1];
-    ctx.fillStyle = 'rgba(16,32,26,.58)';
-    ctx.font = '11px Avenir Next, sans-serif';
-    ticks.forEach(index => {
-      const row = rows[index];
-      const x = xFor(index);
-      ctx.textAlign = index === 0 ? 'left' : index === rows.length - 1 ? 'right' : 'center';
-      ctx.fillText(displayTime(row.time), x, h - 28);
-    });
-  }
-  series.forEach(item => {
-    ctx.strokeStyle = item.color;
-    ctx.lineWidth = item.width || 2.6;
-    ctx.setLineDash(item.dash || []);
-    ctx.beginPath();
-    rows.forEach((row, index) => {
-      const x = xFor(index), y = yFor(row[item.key]);
-      if (index === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-    });
-    ctx.stroke();
-    ctx.setLineDash([]);
-  });
-  $('timelineLegend').innerHTML = series.map(item => `<span><b style="color:${item.color}">■</b> ${esc(item.label)}</span>`).join('');
-}
-function resourcePercent(used, allocatable) {
-  const u = num(used), a = num(allocatable);
-  return u === null || a === null || a <= 0 ? null : (u / a) * 100;
-}
-function resourceMetric(label, value, unit, percent, color) {
-  const width = percent === null ? 0 : Math.max(0, Math.min(100, percent));
-  return `
-    <div class="resource-row">
-      <div>
-        <span>${esc(label)}</span>
-        <b>${fmt(value, 1)}${esc(unit)}</b>
-      </div>
-      <em>${pct(percent)}</em>
-      <i><strong style="width:${width}%;background:${esc(color)}"></strong></i>
-    </div>
-  `;
-}
-function resourceClusterCard(label, cluster, tone) {
-  const res = cluster.resource_totals || {};
-  const pod = cluster.pod_summary || {};
-  const cpuUsedPct = num(res.usage_cpu_percent) ?? resourcePercent(res.usage_cpu_m, res.allocatable_cpu_m);
-  const memUsedPct = num(res.usage_memory_percent) ?? resourcePercent(res.usage_memory_mi, res.allocatable_memory_mi);
-  const cpuReqPct = num(pod.request_cpu_percent) ?? resourcePercent(pod.request_cpu_m, res.allocatable_cpu_m);
-  const memReqPct = num(pod.request_memory_percent) ?? resourcePercent(pod.request_memory_mi, res.allocatable_memory_mi);
-  return `
-    <article class="resource-card ${tone}">
-      <header>
-        <span>${esc(label)}</span>
-        <b>${esc(cluster.running_pods ?? 0)} running pods</b>
-      </header>
-      ${resourceMetric('CPU used', res.usage_cpu_m, 'm', cpuUsedPct, tone === 'experimental' ? palette.experimental : palette.baseline)}
-      ${resourceMetric('Memory used', res.usage_memory_mi, 'Mi', memUsedPct, tone === 'experimental' ? palette.blue : palette.red)}
-      ${resourceMetric('CPU requested', pod.request_cpu_m, 'm', cpuReqPct, tone === 'experimental' ? '#72b79b' : '#e0a64d')}
-      ${resourceMetric('Memory requested', pod.request_memory_mi, 'Mi', memReqPct, tone === 'experimental' ? '#6298bd' : '#c96957')}
-    </article>
-  `;
-}
-function renderResourceMix(payload) {
-  $('resourceMixPanel').innerHTML = `
-    ${resourceClusterCard('Experimental', payload.experimental || {}, 'experimental')}
-    ${resourceClusterCard('Baseline', payload.baseline || {}, 'baseline')}
-  `;
-}
-function pressureLabel(value) {
-  const n = num(value);
-  if (n === null) return ['unknown', 'capacity-unknown'];
-  if (n >= 85) return ['critical', 'capacity-hot'];
-  if (n >= 60) return ['watch', 'capacity-watch'];
-  return ['headroom', 'capacity-safe'];
-}
-function gaugeHtml(value, color) {
-  const n = num(value);
-  const width = n === null ? 0 : Math.max(0, Math.min(100, n));
-  return `<div class="capacity-bar"><i style="width:${width}%;background:${esc(color)}"></i></div>`;
-}
-function capacityCellHtml(label, value, color) {
-  const [stateLabel, stateClass] = pressureLabel(value);
-  return `
-    <div class="capacity-cell ${stateClass}">
-      <span>${esc(label)}</span>
-      <b>${pct(value)}</b>
-      ${gaugeHtml(value, color)}
-      <em>${esc(stateLabel)}</em>
-    </div>
-  `;
-}
-function renderCapacityPanel(payload) {
-  const exp = payload.experimental || {}, base = payload.baseline || {};
-  const expPod = exp.pod_summary || {}, basePod = base.pod_summary || {};
-  const expRes = exp.resource_totals || {}, baseRes = base.resource_totals || {};
-  const rows = [
-    {
-      title: 'CPU request pressure',
-      explainer: 'Scheduler demand before live usage: requested CPU as a share of allocatable CPU.',
-      exp: expPod.request_cpu_percent,
-      base: basePod.request_cpu_percent,
-      expColor: palette.experimental,
-      baseColor: palette.baseline,
-    },
-    {
-      title: 'Memory request pressure',
-      explainer: 'Declared memory pressure before pods become pending or are rejected.',
-      exp: expPod.request_memory_percent,
-      base: basePod.request_memory_percent,
-      expColor: palette.blue,
-      baseColor: palette.red,
-    },
-    {
-      title: 'Live CPU usage',
-      explainer: 'Actual usage from Metrics Server, separated from scheduler requests.',
-      exp: expRes.usage_cpu_percent,
-      base: baseRes.usage_cpu_percent,
-      expColor: '#72b79b',
-      baseColor: '#e0a64d',
-    },
-  ];
-  $('capacityPanel').innerHTML = rows.map(row => {
-    const delta = num(row.exp) === null || num(row.base) === null ? null : num(row.exp) - num(row.base);
-    const leader = delta === null ? 'insufficient telemetry' : delta > 0 ? 'experimental higher' : delta < 0 ? 'baseline higher' : 'matched';
-    return `
-      <article class="capacity-row">
-        <header>
-          <span>${esc(row.title)}</span>
-          <b>${esc(leader)}</b>
-        </header>
-        <div class="capacity-pair">
-          ${capacityCellHtml('Experimental', row.exp, row.expColor)}
-          ${capacityCellHtml('Baseline', row.base, row.baseColor)}
-        </div>
-        <footer>
-          <b class="${valueClass(delta)}">${pctPoints(delta)}</b>
-          <small>${esc(row.explainer)}</small>
-        </footer>
-      </article>
-    `;
-  }).join('');
-}
-function drawPhase(payload) {
-  const { ctx, w, h } = setupCanvas($('phaseCanvas'));
-  ctx.clearRect(0,0,w,h);
-  const clusters = [['Experimental', payload.experimental], ['Baseline', payload.baseline]];
-  const phases = ['Running', 'Pending', 'Succeeded', 'Failed', 'Unknown'];
-  const max = Math.max(1, ...clusters.map(([, cluster]) => phases.reduce((sum, phase) => sum + Number(cluster?.pod_summary?.phase_counts?.[phase] || 0), 0)));
-  const baseY = h - 54;
-  const barW = Math.min(120, w * .20);
-  clusters.forEach(([label, cluster], index) => {
-    const x = w * (.32 + index * .36) - barW / 2;
-    let y = baseY;
-    phases.forEach(phase => {
-      const value = Number(cluster?.pod_summary?.phase_counts?.[phase] || 0);
-      const segment = (value / max) * (h - 108);
-      y -= segment;
-      ctx.fillStyle = phaseColors[phase]; ctx.fillRect(x, y, barW, segment);
-    });
-    ctx.fillStyle = palette.ink; ctx.textAlign = 'center'; ctx.font = '700 16px Avenir Next, sans-serif'; ctx.fillText(label, x + barW / 2, h - 24);
-  });
-  ctx.textAlign = 'left'; ctx.font = '12px Avenir Next, sans-serif';
-  phases.forEach((phase, i) => { ctx.fillStyle = phaseColors[phase]; ctx.fillText('■', 18, 26 + i * 18); ctx.fillStyle = palette.muted; ctx.fillText(phase, 36, 26 + i * 18); });
-}
-function drawNamespace(payload) {
-  const { ctx, w, h } = setupCanvas($('namespaceCanvas'));
-  ctx.clearRect(0,0,w,h);
-  const expEntries = topEntries(payload.experimental?.pod_summary?.namespace_counts, 5);
-  const baseEntries = topEntries(payload.baseline?.pod_summary?.namespace_counts, 5);
-  const keys = Array.from(new Set([...expEntries, ...baseEntries].map(([key]) => key))).slice(0, 7);
-  const max = Math.max(1, ...keys.flatMap(key => [payload.experimental?.pod_summary?.namespace_counts?.[key] || 0, payload.baseline?.pod_summary?.namespace_counts?.[key] || 0]));
-  const pad = { left: Math.min(210, Math.max(148, w * 0.34)), right: 34, top: 24, bottom: 24 };
-  const rowH = (h - pad.top - pad.bottom) / Math.max(1, keys.length);
-  keys.forEach((key, i) => {
-    const y = pad.top + i * rowH + 5;
-    const expVal = Number(payload.experimental?.pod_summary?.namespace_counts?.[key] || 0);
-    const baseVal = Number(payload.baseline?.pod_summary?.namespace_counts?.[key] || 0);
-    ctx.fillStyle = palette.muted; ctx.font = '12px Avenir Next, sans-serif'; ctx.textAlign = 'right'; ctx.fillText(compactNamespace(key), pad.left - 12, y + 16, pad.left - 24);
-    ctx.fillStyle = palette.experimental; ctx.fillRect(pad.left, y, (w - pad.left - pad.right) * expVal / max, 12);
-    ctx.fillStyle = palette.baseline; ctx.fillRect(pad.left, y + 16, (w - pad.left - pad.right) * baseVal / max, 12);
-  });
-  ctx.fillStyle = palette.experimental; ctx.fillText('■ experimental', pad.left, h - 8);
-  ctx.fillStyle = palette.baseline; ctx.fillText('■ baseline', pad.left + 124, h - 8);
-}
 function drawCharts(payload, chartHistory) {
   drawPressureTimeline('timelineCanvas', chartHistory);
-  renderResourceMix(payload);
-  renderCapacityPanel(payload);
-  drawPhase(payload);
-  drawNamespace(payload);
 }
 
-function renderScorecards(payload) {
-  $('scorecards').innerHTML = (payload.scorecards || []).map(card => `
-    <article class="score-card">
-      <span>${esc(card.label)}</span>
-      <div class="score-values">
-        <div><span>experimental</span><b title="${esc(card.experimental)}">${esc(card.label === 'Replica reaction' ? compactAction(card.experimental) : card.experimental)}</b></div>
-        <div><span>baseline</span><b>${esc(card.baseline)}</b></div>
-      </div>
-      <small>${esc(card.interpretation)}</small>
+function renderObjectiveEvidence(payload) {
+  const target = $('objectiveEvidence');
+  if (!target) return;
+  const exp = payload.experimental || {};
+  const base = payload.baseline || {};
+  const decision = exp.decision || {};
+  const reward = exp.reward_summary || {};
+  const baseSummary = base.pod_summary || {};
+  const basePhases = baseSummary.phase_counts || {};
+  const hpa = hpaReaction(base);
+  const stimulus = stimulusSummary(payload);
+  const optuna = exp.optuna || {};
+  const ray = exp.ray || {};
+  const objectives = [
+    {
+      label: 'Agent A safety',
+      value: `risk ${fmt(exp.max_risk)} / SLA ${esc(exp.sla_violations ?? 0)}`,
+      baseline: `baseline failed ${esc(basePhases.Failed || 0)} / restarts ${esc(baseSummary.restarts || 0)}`,
+      note: 'Proactive risk mitigation should lower failure exposure before Kubernetes only sees restarts or failed pods.',
+      tone: 'safety',
+    },
+    {
+      label: 'Agent B efficiency',
+      value: `${fmt(exp.energy_watts, 1)}W ${exp.power_metric_kind ? `(${esc(exp.power_metric_kind)})` : ''}`,
+      baseline: `${hpa.label}; ${esc(base.karpenter?.active_nodes ?? 'n/a')} active / ${esc(base.karpenter?.warm_nodes ?? 'n/a')} warm`,
+      note: 'Efficiency is judged by estimated power and consolidation pressure, not just CPU percentage.',
+      tone: 'efficiency',
+    },
+    {
+      label: 'Agent C admission',
+      value: `queue ${esc(exp.queue_length ?? 0)} / pending ${esc(exp.pending_pods ?? 0)}`,
+      baseline: `baseline pending ${esc(base.pending_pods ?? 0)} / unscheduled ${esc(baseSummary.unscheduled || 0)}`,
+      note: 'Admission control is about preventing bad queue growth while preserving useful throughput.',
+      tone: 'admission',
+    },
+    {
+      label: 'Learning loop',
+      value: `reward avg ${fmt(reward.average_total)} / last ${fmt(reward.last_total)}`,
+      baseline: `Ray ${esc(ray.status || 'n/a')} / Optuna ${esc(optuna.completed_trials ?? 0)} trials`,
+      note: 'This shows whether policy/reward adaptation is active; HPA has no comparable learned policy state.',
+      tone: 'learning',
+    },
+    {
+      label: 'Experiment fidelity',
+      value: stimulus.title,
+      baseline: stimulus.detail,
+      note: 'The same intentional perturbation must be mirrored to both clusters; only controller reactions should differ.',
+      tone: 'fidelity',
+    },
+  ];
+  target.innerHTML = objectives.map(item => `
+    <article class="objective-card ${item.tone}">
+      <span>${esc(item.label)}</span>
+      <strong class="outcome-badge ${objectiveStatus(item.tone, payload)[1]}">${esc(objectiveStatus(item.tone, payload)[0])}</strong>
+      <b>${esc(item.value)}</b>
+      <em>${esc(item.baseline)}</em>
+      <small>${esc(item.note)}</small>
     </article>
   `).join('');
 }
-function renderLedger(payload) {
-  $('differenceLedger').innerHTML = (payload.differences || []).map(row => `
-    <article class="ledger-row">
-      <span>${esc(row.metric)}</span>
-      <b class="${valueClass(row.delta)}">${fmt(row.delta)}</b>
-      <small>exp ${fmt(row.experimental)} / base ${fmt(row.baseline)}</small>
-      <small>${esc(row.note)}</small>
-    </article>
-  `).join('');
-}
-function renderNodeTable(id, rows) {
-  $(id).innerHTML = (rows || []).map(node => `
-    <div>
-      <span>${esc(node.name)}</span>
-      <b>${esc(node.role)} / ready=${esc(node.ready)} / schedulable=${esc(!node.unschedulable)} / state=${esc(node.provisioning_state || 'direct')}<br>
-      cpu ${fmt(node.usage_cpu_m, 1)}m used, ${fmt(node.allocatable_cpu_m, 0)}m allocatable (${pct(node.usage_cpu_percent)}) / memory ${fmt(node.usage_memory_mi, 1)}Mi used, ${fmt(node.allocatable_memory_mi, 0)}Mi allocatable (${pct(node.usage_memory_percent)})</b>
-    </div>
-  `).join('') || '<div><span>nodes</span><b>not visible</b></div>';
-}
-function renderWorkloads(exp, base) {
+function renderAgentGoalMatrix(payload) {
+  const target = $('agentGoalMatrix');
+  if (!target) return;
+  const exp = payload.experimental || {};
+  const base = payload.baseline || {};
+  const decision = exp.decision || {};
+  const rewards = exp.reward_summary?.last_by_agent || {};
+  const baseSummary = base.pod_summary || {};
+  const hpa = hpaReaction(base);
   const rows = [
-    ...(exp.workloads || []).map(item => ({...item, cluster:'experimental'})),
-    ...(base.workloads || []).map(item => ({...item, cluster:'baseline'})),
-  ].slice(0, 28);
-  $('workloadInventory').innerHTML = rows.map(item => `
-    <div><span>${esc(item.cluster)} / ${esc(item.kind)}</span><b>${esc(item.namespace)}/${esc(item.name)} desired ${esc(item.desired)} ready ${esc(item.ready)} available ${esc(item.available)}</b></div>
-  `).join('') || '<div><span>workloads</span><b>no workload objects discovered</b></div>';
-}
-function renderAutoscaling(base) {
-  const karp = base.karpenter || {};
-  const reaction = hpaReaction(base);
-  $('hpaTable').innerHTML = (base.hpa || []).map(item => `
-    <div><span>${esc(item.namespace)}/${esc(item.name)}</span><b>target ${esc(item.target)} / replicas ${esc(item.current)} -> ${esc(item.desired)} / min ${esc(item.min)} max ${esc(item.max)} / cpu ${esc(item.cpu_utilization ?? 'n/a')}% target ${esc(item.target_cpu_utilization ?? 'n/a')}% / last scale ${esc(item.last_scale_time || 'n/a')}</b></div>
-  `).join('') || '<div><span>hpa</span><b>not installed or not ready</b></div>';
-  $('karpenterState').innerHTML = [
-    `<div><span>hpa mode</span><b>${esc(reaction.label)} / ${esc(reaction.detail)}</b></div>`,
-    `<div><span>mode</span><b>${esc(karp.mode || 'n/a')}</b></div>`,
-    `<div><span>last action</span><b>${esc((karp.actions || []).map(a => `${a.action}:${a.node}`).join(', ') || 'none')}</b></div>`,
-    `<div><span>nodes</span><b>${esc((karp.nodes || []).map(n => `${n.name}:${n.state}`).join(', ') || 'n/a')}</b></div>`,
-  ].join('');
+    {
+      agent: 'Agent A',
+      role: 'Safety / risk mitigator',
+      goal: 'Keep tasks alive under high node failure risk.',
+      trigger: 'risk >= 0.5 throttle, >= 0.7 migrate, >= 0.83 replicate',
+      signal: `max risk ${fmt(exp.max_risk)} on ${esc(exp.max_risk_node || 'n/a')}; SLA ${esc(exp.sla_violations ?? 0)}`,
+      proposal: proposalSummary(decision, 'AgentA'),
+      selected: selectedSummary(decision, 'AgentA'),
+      reward: fmt(rewards.AgentA),
+      baseline: `reactive evidence: failed pods ${(baseSummary.phase_counts || {}).Failed || 0}, restarts ${baseSummary.restarts || 0}`,
+      tone: 'safety',
+    },
+    {
+      agent: 'Agent B',
+      role: 'Efficiency / energy optimizer',
+      goal: 'Reduce waste through DVFS, memory ballooning, and power-state decisions.',
+      trigger: 'low demand selects sleep, DVFS, or memory balloon before wasting active capacity',
+      signal: `min demand ${fmt(exp.min_demand)} on ${esc(exp.min_demand_node || 'n/a')}; estimated power ${fmt(exp.energy_watts, 1)}W`,
+      proposal: proposalSummary(decision, 'AgentB'),
+      selected: selectedSummary(decision, 'AgentB'),
+      reward: fmt(rewards.AgentB),
+      baseline: `${hpa.label}; local Karpenter ${esc(base.karpenter?.active_nodes ?? 'n/a')} active / ${esc(base.karpenter?.warm_nodes ?? 'n/a')} warm`,
+      tone: 'efficiency',
+    },
+    {
+      agent: 'Agent C',
+      role: 'Admission / queue gatekeeper',
+      goal: 'Avoid saturation by admitting, queueing, deprioritizing, rejecting, or capping work.',
+      trigger: 'queue >= 8 queues, >= 80 deprioritizes, >= 120 applies resource cap',
+      signal: `queue ${esc(exp.queue_length ?? 0)}; pending ${esc(exp.pending_pods ?? 0)}; completed ${esc(exp.completed_tasks ?? 0)}`,
+      proposal: proposalSummary(decision, 'AgentC'),
+      selected: selectedSummary(decision, 'AgentC'),
+      reward: fmt(rewards.AgentC),
+      baseline: `pending ${esc(base.pending_pods ?? 0)} / unscheduled ${esc(baseSummary.unscheduled || 0)}; HPA handles replicas, not admission policy`,
+      tone: 'admission',
+    },
+  ];
+  target.innerHTML = rows.map(row => `
+    <article class="agent-goal-row ${row.tone}">
+      <div class="agent-title">
+        <span>${esc(row.role)}</span>
+        <b>${esc(row.agent)}</b>
+      </div>
+      <div><span>Goal</span><p>${esc(row.goal)}</p></div>
+      <div><span>Trigger logic</span><p>${esc(row.trigger)}</p></div>
+      <div><span>Live signal</span><p>${esc(row.signal)}</p></div>
+      <div><span>Proposal</span><p>${esc(row.proposal)}</p></div>
+      <div><span>Current control</span><p>${esc(row.selected)} / reward ${esc(row.reward)}</p></div>
+      <div><span>Baseline analogue</span><p>${esc(row.baseline)}</p></div>
+    </article>
+  `).join('');
 }
 function renderReactions(exp, base) {
   const decision = exp.decision || {};
@@ -535,15 +445,14 @@ function render(payload) {
   $('experimentalRisk').textContent = fmt(exp.max_risk);
   $('experimentalDecision').textContent = compactAction(exp.last_decision);
   $('experimentalDecision').title = exp.last_decision || 'n/a';
-  $('baselineHpa').textContent = hpa.label;
-  $('baselineHpa').title = hpa.detail;
+  const baselineController = $('baselineController');
+  if (baselineController) {
+    baselineController.textContent = 'HPA + local Karpenter';
+    baselineController.title = hpa.detail;
+  }
   $('baselineWarm').textContent = `${karp.active_nodes ?? 'n/a'} active / ${karp.warm_nodes ?? 'n/a'} warm`;
-  renderScorecards(payload);
-  renderLedger(payload);
-  renderNodeTable('experimentalNodes', exp.node_rows);
-  renderNodeTable('baselineNodes', base.node_rows);
-  renderWorkloads(exp, base);
-  renderAutoscaling(base);
+  renderObjectiveEvidence(payload);
+  renderAgentGoalMatrix(payload);
   renderReactions(exp, base);
   $('notes').textContent = (payload.notes || []).join(' ');
   const errors = [...(exp.errors || []), ...(base.errors || [])];
@@ -553,14 +462,18 @@ function render(payload) {
       time: new Date().toISOString(),
       experimentalPending: exp.pending_pods || 0,
       baselinePending: base.pending_pods || 0,
+      experimentalQueue: exp.queue_length || 0,
+      experimentalRisk: exp.max_risk || 0,
+      experimentalSla: exp.sla_violations || 0,
+      experimentalEnergy: exp.energy_watts || 0,
+      experimentalReward: exp.last_reward || 0,
+      experimentalMinDemand: exp.min_demand || 0,
       experimentalSchedulable: exp.schedulable_nodes || 0,
       baselineSchedulable: base.schedulable_nodes || 0,
       experimentalCpu: expRes.usage_cpu_percent || 0,
       baselineCpu: baseRes.usage_cpu_percent || 0,
       experimentalMem: expRes.usage_memory_percent || 0,
       baselineMem: baseRes.usage_memory_percent || 0,
-      baselineHpaCurrent: hpa.current || 0,
-      baselineHpaDesired: hpa.desired || 0,
     });
     if (historyRows.length > 7200) historyRows.shift();
   }
