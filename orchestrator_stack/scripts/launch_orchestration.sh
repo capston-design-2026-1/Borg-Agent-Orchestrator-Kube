@@ -45,6 +45,8 @@ EXERCISE_NAMESPACE="${EXERCISE_NAMESPACE:-borg-orchestrator-exercise}"
 EXERCISE_INTERVAL_ITERATIONS="${EXERCISE_INTERVAL_ITERATIONS:-3}"
 EXERCISE_RANDOMIZE="${EXERCISE_RANDOMIZE:-1}"
 EXERCISE_SEED="${EXERCISE_SEED:-}"
+MIRROR_EXERCISE_KUBECONFIG="${MIRROR_EXERCISE_KUBECONFIG:-}"
+MIRROR_EXERCISE_NAMESPACE="${MIRROR_EXERCISE_NAMESPACE:-}"
 
 if [[ ! -x "$PYTHON_BIN" ]]; then
   PYTHON_BIN="$(command -v python3)"
@@ -181,6 +183,13 @@ if [[ "$LIVE_K8S" == "1" ]]; then
     ARGS+=(--exercise-cluster --exercise-namespace "$EXERCISE_NAMESPACE" --exercise-interval-iterations "$EXERCISE_INTERVAL_ITERATIONS")
     if [[ "$EXERCISE_RANDOMIZE" == "1" ]]; then ARGS+=(--exercise-randomize); fi
     if [[ -n "$EXERCISE_SEED" ]]; then ARGS+=(--exercise-seed "$EXERCISE_SEED"); fi
+    if [[ -n "$MIRROR_EXERCISE_KUBECONFIG" ]]; then
+      IFS=',' read -r -a MIRROR_PATHS <<< "$MIRROR_EXERCISE_KUBECONFIG"
+      for mirror_path in "${MIRROR_PATHS[@]}"; do
+        [[ -n "$mirror_path" ]] && ARGS+=(--mirror-exercise-kubeconfig "$mirror_path")
+      done
+    fi
+    if [[ -n "$MIRROR_EXERCISE_NAMESPACE" ]]; then ARGS+=(--mirror-exercise-namespace "$MIRROR_EXERCISE_NAMESPACE"); fi
   fi
 else
   ARGS=(orchestrator_stack/run.py visualized-run --config "$CONFIG" --trials "$TRIALS" --event-dir "$EVENT_DIR")
