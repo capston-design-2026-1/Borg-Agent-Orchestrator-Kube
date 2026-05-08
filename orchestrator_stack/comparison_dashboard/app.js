@@ -10,6 +10,7 @@ function num(value) { const n = Number(value); return Number.isFinite(n) ? n : n
 function fmt(value, digits = 3) { const n = num(value); return n === null ? 'n/a' : n.toFixed(digits); }
 function intFmt(value) { const n = num(value); return n === null ? 'n/a' : String(Math.round(n)); }
 function pct(value) { const n = num(value); return n === null ? 'n/a' : `${n.toFixed(1)}%`; }
+function pctPoints(value) { const n = num(value); return n === null ? 'n/a' : `${n >= 0 ? '+' : ''}${n.toFixed(1)} pts`; }
 function hpaDesired(cluster) { return (cluster.hpa || []).reduce((sum, item) => sum + Number(item.desired ?? item.current ?? item.min ?? 0), 0); }
 function hpaCurrent(cluster) { return (cluster.hpa || []).reduce((sum, item) => sum + Number(item.current ?? 0), 0); }
 function metricHtml(rows) { return rows.map(([k, v]) => `<div><b>${esc(v)}</b><span>${esc(k)}</span></div>`).join(''); }
@@ -125,31 +126,79 @@ function drawResourcePie(payload) {
     ctx.fillText(`${row[0]} ${row[1]}`, x + 20, y, colW - 20);
   });
 }
-function drawCapacity(payload) {
-  const { ctx, w, h } = setupCanvas($('capacityCanvas'));
-  ctx.clearRect(0,0,w,h);
+function pressureLabel(value) {
+  const n = num(value);
+  if (n === null) return ['unknown', 'capacity-unknown'];
+  if (n >= 85) return ['critical', 'capacity-hot'];
+  if (n >= 60) return ['watch', 'capacity-watch'];
+  return ['headroom', 'capacity-safe'];
+}
+function gaugeHtml(value, color) {
+  const n = num(value);
+  const width = n === null ? 0 : Math.max(0, Math.min(100, n));
+  return `<div class="capacity-bar"><i style="width:${width}%;background:${esc(color)}"></i></div>`;
+}
+function capacityCellHtml(label, value, color) {
+  const [stateLabel, stateClass] = pressureLabel(value);
+  return `
+    <div class="capacity-cell ${stateClass}">
+      <span>${esc(label)}</span>
+      <b>${pct(value)}</b>
+      ${gaugeHtml(value, color)}
+      <em>${esc(stateLabel)}</em>
+    </div>
+  `;
+}
+function renderCapacityPanel(payload) {
+  const exp = payload.experimental || {}, base = payload.baseline || {};
+  const expPod = exp.pod_summary || {}, basePod = base.pod_summary || {};
+  const expRes = exp.resource_totals || {}, baseRes = base.resource_totals || {};
   const rows = [
-    ['Experimental CPU requests', payload.experimental?.pod_summary?.request_cpu_percent, palette.experimental],
-    ['Baseline CPU requests', payload.baseline?.pod_summary?.request_cpu_percent, palette.baseline],
-    ['Experimental memory requests', payload.experimental?.pod_summary?.request_memory_percent, palette.blue],
-    ['Baseline memory requests', payload.baseline?.pod_summary?.request_memory_percent, palette.red],
-    ['Experimental CPU used', payload.experimental?.resource_totals?.usage_cpu_percent, '#72b79b'],
-    ['Baseline CPU used', payload.baseline?.resource_totals?.usage_cpu_percent, '#e0a64d'],
+    {
+      title: 'CPU request pressure',
+      explainer: 'Scheduler demand before live usage: requested CPU as a share of allocatable CPU.',
+      exp: expPod.request_cpu_percent,
+      base: basePod.request_cpu_percent,
+      expColor: palette.experimental,
+      baseColor: palette.baseline,
+    },
+    {
+      title: 'Memory request pressure',
+      explainer: 'Declared memory pressure before pods become pending or are rejected.',
+      exp: expPod.request_memory_percent,
+      base: basePod.request_memory_percent,
+      expColor: palette.blue,
+      baseColor: palette.red,
+    },
+    {
+      title: 'Live CPU usage',
+      explainer: 'Actual usage from Metrics Server, separated from scheduler requests.',
+      exp: expRes.usage_cpu_percent,
+      base: baseRes.usage_cpu_percent,
+      expColor: '#72b79b',
+      baseColor: '#e0a64d',
+    },
   ];
-  const pad = { left: Math.min(186, Math.max(118, w * 0.36)), right: 42, top: 34, bottom: 24 };
-  const barH = 26;
-  ctx.font = '13px Avenir Next, sans-serif';
-  rows.forEach((row, index) => {
-    const y = pad.top + index * 48;
-    const value = Math.max(0, Math.min(150, Number(row[1]) || 0));
-    const width = (w - pad.left - pad.right) * Math.min(value, 100) / 100;
-    ctx.fillStyle = palette.muted; ctx.textAlign = 'right'; ctx.fillText(row[0], pad.left - 12, y + 18, pad.left - 22);
-    ctx.fillStyle = 'rgba(16,32,26,.08)'; ctx.fillRect(pad.left, y, w - pad.left - pad.right, barH);
-    ctx.fillStyle = row[2]; ctx.fillRect(pad.left, y, width, barH);
-    if (value > 100) { ctx.fillStyle = 'rgba(180,70,52,.25)'; ctx.fillRect(pad.left + w - pad.left - pad.right - 8, y, 8, barH); }
-    const valueX = Math.min(w - pad.right - 34, pad.left + width + 8);
-    ctx.fillStyle = palette.ink; ctx.textAlign = 'left'; ctx.fillText(pct(row[1]), valueX, y + 18);
-  });
+  $('capacityPanel').innerHTML = rows.map(row => {
+    const delta = num(row.exp) === null || num(row.base) === null ? null : num(row.exp) - num(row.base);
+    const leader = delta === null ? 'insufficient telemetry' : delta > 0 ? 'experimental higher' : delta < 0 ? 'baseline higher' : 'matched';
+    return `
+      <article class="capacity-row">
+        <header>
+          <span>${esc(row.title)}</span>
+          <b>${esc(leader)}</b>
+        </header>
+        <div class="capacity-pair">
+          ${capacityCellHtml('Experimental', row.exp, row.expColor)}
+          ${capacityCellHtml('Baseline', row.base, row.baseColor)}
+        </div>
+        <footer>
+          <b class="${valueClass(delta)}">${pctPoints(delta)}</b>
+          <small>${esc(row.explainer)}</small>
+        </footer>
+      </article>
+    `;
+  }).join('');
 }
 function drawPhase(payload) {
   const { ctx, w, h } = setupCanvas($('phaseCanvas'));
@@ -203,7 +252,7 @@ function drawCharts(payload) {
     { key:'baselineMem', color:'#e0a64d', label:'baseline memory %' },
   ], 'live comparison samples');
   drawResourcePie(payload);
-  drawCapacity(payload);
+  renderCapacityPanel(payload);
   drawPhase(payload);
   drawNamespace(payload);
 }
