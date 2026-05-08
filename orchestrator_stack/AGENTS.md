@@ -19,7 +19,9 @@ This directory is isolated from the baseline/advanced XGBoost tracks and owns th
 - Preserve objective portability: heuristic runner and RLlib wrapper must share reward semantics
 - Keep `orchestrator_stack/scripts/launch_orchestration.sh`, `docs/ORCHESTRATION_LAUNCH.md`, and `orchestrator_stack/dashboard/` aligned with architecture changes so the thesis demo path stays one command
 - Keep `docs/en/DASHBOARD_GUIDE.md` and `docs/ko/DASHBOARD_GUIDE.md` aligned whenever dashboard UI, event/state schemas, agent action semantics, reward formulas, Optuna/Ray display, or Kubernetes exerciser behavior changes
-- Use near per-file commits for orchestrator module changes (simulator, predictor, referee, optimizer, etc. committed separately when practical)
+- Use one tracked file per commit for orchestrator work. Treat simulator, predictor, referee, optimizer, dashboard, script, manifest, test, and documentation edits as separate commits even when they belong to one feature.
+- Before committing, verify `git diff --cached --name-only` lists exactly one intended file unless a mechanically inseparable exception from the repository root `AGENTS.md` applies.
+- Do not batch dashboard, script, Kubernetes manifest, test, and documentation files into one commit for convenience.
 
 ## Open-Source Integration Policy
 
