@@ -2,6 +2,32 @@
 
 For copy-paste startup, Prometheus links, dashboard links, k9s commands, and shutdown commands, use `docs/LOCAL_DUAL_CLUSTER_RUNBOOK.md`.
 
+## Top One-Liners
+
+Start the complete local comparison stack from one terminal:
+
+```bash
+cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && ./orchestrator_stack/scripts/start_local_dual_cluster_stack.sh
+```
+
+Stop the complete local comparison stack, including both Kind clusters:
+
+```bash
+cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && ./orchestrator_stack/scripts/stop_local_dual_cluster_stack.sh
+```
+
+Open k9s for the experimental Agent A/B/C cluster:
+
+```bash
+KUBECONFIG=~/Documents/borg_orchestrator_clusters/kubeconfig-experimental k9s
+```
+
+Open k9s for the HPA/local-Karpenter baseline cluster:
+
+```bash
+KUBECONFIG=~/Documents/borg_orchestrator_clusters/kubeconfig-baseline k9s
+```
+
 This repository supports a fully local comparison between:
 
 1. `borg-experimental`: a multi-node Kind cluster used by the experimental Borg orchestration architecture.
