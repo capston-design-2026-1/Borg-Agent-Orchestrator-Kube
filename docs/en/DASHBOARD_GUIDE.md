@@ -43,6 +43,17 @@ The live-mode flow is:
 | 8 | Layer 5 Optuna | Searches reward weights `alpha`, `beta`, and `gamma`. | Optuna card, objective graph, weight graph |
 | 9 | Ray/RLlib | Bootstraps/trains the multi-agent PPO policy. | Ray Status, Ray/RLlib panel, Ray RLlib PPO Policy card |
 
+Offline Google Cluster Trace frames can be converted into the same dashboard/runtime path with:
+
+```bash
+./.venv/bin/python orchestrator_stack/run.py build-google-trace \
+  --frames marlops-baseline/data/processed/google_trace/trace_frames.parquet \
+  --out orchestrator_stack/runtime/google_trace.json \
+  --max-rows 500
+```
+
+Runs backed by this adapter set `state.data_source.kind` to `Google Trace`; live Kubernetes/AIOpsLab runs set it to `AIOpsLab / Kubernetes`.
+
 ## Live Kubernetes Environment
 
 The current live orchestration target is a local Kind validation cluster, not a managed cloud Kubernetes cluster or a production multi-node deployment. The baseline inspected environment is recorded in `reports/evaluations/202605051249_kubernetes_environment_snapshot.md`, and the observability repair is recorded in `reports/evaluations/202605051339_observability_bootstrap_report.md`.
@@ -130,7 +141,7 @@ For thesis wording, the precise interpretation is:
 | Status badge: `Running`, `complete`, `failed` | Overall runtime state. `running` means the loop/demo is active, `complete` means a bounded run finished, and `failed` means an error occurred. | `state.status` |
 | `updated ...` | Last runtime state timestamp read by the dashboard. | `state.updated_at` |
 
-## Six Metrics Cards
+## Eight Metrics Cards
 
 | Card | Example | Meaning | Caveat |
 |---|---|---|---|
@@ -140,6 +151,10 @@ For thesis wording, the precise interpretation is:
 | Optuna | `1417.159` or `disabled` | Best Optuna objective score. | `NO_TUNE=1` can make disabled/skipped normal. |
 | Ray Status | `trained`, `disabled`, `idle` | Ray/RLlib PPO bootstrap status. | `NO_POLICY=1` or fast mode can make disabled normal. |
 | Max Risk | `0.590` | Highest current node failure/risk score. | Without XGBoost, this is telemetry-derived from Kubernetes/Prometheus utilization and pod health. |
+| Data Source | `Google Trace`, `AIOpsLab / Kubernetes`, `Synthetic Sample` | Provenance inferred from the trace row source fields and runtime mode. | It is a provenance label, not a quality score. |
+| Trace Rows | `500` | Number of loaded trace rows or live rows captured so far. | Live mode increments this as new Kubernetes snapshots are appended. |
+
+Runtime JSON is written with strict JSON encoding. Non-finite values from libraries such as Ray/RLlib are serialized as `null`, so the dashboard API stays parseable during failed or partially reported training iterations.
 
 ## Current Decision Panel
 
