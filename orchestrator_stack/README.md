@@ -87,6 +87,20 @@ If you have a live Prometheus endpoint, export query-range results into the same
 
 The query file must be a JSON object mapping output fields such as `cpu_util`, `mem_util`, `disk_util`, and `net_util` to PromQL expressions. The exporter merges Prometheus matrix results by timestamp and node label, then `build-trace` can convert the output into Layer 2 trace rows.
 
+### 3.6 Optional: Convert Prepared Google Cluster Trace Frames
+Prepared Google/Borg aggregate frames can now be converted into the same Layer 1 trace contract used by the simulator, XGBoost trainers, PPO training, Optuna tuning, and dashboard:
+
+```bash
+./.venv/bin/python orchestrator_stack/run.py build-google-trace \
+  --frames marlops-baseline/data/processed/google_trace/trace_frames.parquet \
+  --out orchestrator_stack/runtime/google_trace.json \
+  --max-rows 500 \
+  --max-nodes 32 \
+  --max-tasks-per-row 64
+```
+
+Accepted frame formats are `.json`, `.jsonl`, `.csv`, and `.parquet`. Required aggregate fields are timestamp (`timestamp` or `ts`), observed node count, active task count, mean CPU utilization, and mean memory utilization. The adapter preserves provenance with `source_platform=google_trace` and `telemetry_sources=["google_cluster_trace"]`, then validates the generated trace before writing it.
+
 ### 4. Generate Initial Assets (Synthetic Data & Models)
 Before running the orchestrator, you must generate the synthetic trace and training datasets:
 ```bash
