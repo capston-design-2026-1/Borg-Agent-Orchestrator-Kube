@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -10,6 +11,18 @@ KST = timezone(timedelta(hours=9))
 
 def kst_now_iso() -> str:
     return datetime.now(KST).isoformat(timespec="seconds")
+
+
+def json_safe(value: Any) -> Any:
+    if isinstance(value, float):
+        return value if math.isfinite(value) else None
+    if isinstance(value, dict):
+        return {str(key): json_safe(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [json_safe(item) for item in value]
+    if isinstance(value, tuple):
+        return [json_safe(item) for item in value]
+    return value
 
 
 class VisualizationState:
@@ -52,13 +65,13 @@ class VisualizationState:
     def write(self) -> None:
         self.state["updated_at"] = kst_now_iso()
         tmp = self.state_path.with_suffix(".json.tmp")
-        tmp.write_text(json.dumps(self.state, indent=2, sort_keys=True), encoding="utf-8")
+        tmp.write_text(json.dumps(json_safe(self.state), indent=2, sort_keys=True, allow_nan=False), encoding="utf-8")
         tmp.replace(self.state_path)
 
     def emit(self, kind: str, message: str, **data: Any) -> None:
         event = {"time": kst_now_iso(), "kind": kind, "stage": self.state.get("active_stage"), "message": message, **data}
         with self.events_path.open("a", encoding="utf-8") as handle:
-            handle.write(json.dumps(event, sort_keys=True) + "\n")
+            handle.write(json.dumps(json_safe(event), sort_keys=True, allow_nan=False) + "\n")
         self.write()
 
     def set_status(self, status: str, *, stage: str | None = None) -> None:
