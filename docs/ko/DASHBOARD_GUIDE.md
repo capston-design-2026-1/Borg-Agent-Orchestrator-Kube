@@ -273,19 +273,20 @@ Agent A는 node failure risk와 task survival을 담당한다.
 
 | Action | 발생 조건: heuristic policy | RLlib policy action id | payload | Twin transition 효과 | Reward 가능성 |
 |---|---|---:|---|---|---|
-| `noop` | `p_fail_scores`가 없거나 max risk `< 0.5` | 0 | 없음 | 상태 변경 없음 | 기본 `+1.0`; live telemetry penalty는 별도 적용 가능 |
-| `throttle` | max risk `>= 0.5` and `< 0.7` | 3 | 없음 | target node의 `cpu_util`과 `net_util`을 각각 `*0.85`로 낮춘다. | 선택된 action이고 `p_fail >= 0.5`이면 AgentA `+3.0` |
-| `migrate` | max risk `>= 0.7` and `< 0.83` | 1 | 없음 | 가장 부하가 큰 다른 on node에서 task 하나를 target으로 이동시키고 source load를 낮추며 target load를 소폭 올린다. | `p_fail > 0.75`이면 `+10.0`; `p_fail < 0.4`인데 migrate하면 `-20.0` |
+| `noop` | `p_fail_scores`가 없거나 max risk `< 0.5`, 또는 backlog/SLA pressure가 있는데 target node의 local pressure가 높지 않은 moderate risk (`max(cpu, mem) < 0.72`) | 0 | 없음 | 상태 변경 없음 | 기본 `+1.0`; live telemetry penalty는 별도 적용 가능 |
+| `throttle` | max risk `>= 0.5` and `< 0.7`. 단, backlog/SLA pressure에서는 Agent C admission 대응을 우선하고 target node pressure가 `>= 0.72`일 때만 계속 발생한다. | 3 | 없음 | target node의 `cpu_util`과 `net_util`을 각각 `*0.85`로 낮춘다. | 선택된 action이고 `p_fail >= 0.5`이면 AgentA `+3.0` |
+| `migrate` | max risk `>= 0.7` and `< 0.83` | 1 | 없음 | 가장 부하가 큰 다른 on node에서 task 하나를 target으로 이동시키고 source load를 낮추며 target load를 소폭 올린다. | `p_fail >= 0.7`이면 `+10.0`; `p_fail < 0.4`인데 migrate하면 `-20.0` |
 | `replicate` | max risk `>= 0.83` | 2 | 없음 | target node의 가장 urgent한 task를 낮은 부하 node에 replica로 추가한다. | `p_fail >= 0.83`이면 `+8.0` |
 
 Agent A에 항상 영향을 줄 수 있는 live telemetry reward/penalty는 다음과 같다.
 
 | 조건 | Reward 변화 | 의미 |
 |---|---:|---|
-| `sla_violations > 0` | bounded log-scaled pressure: `-min(180, 35 + 25*log1p(sla_violations))` | SLA violation은 safety pressure로 반영하지만, 의도적 backlog phase가 수천 단위의 음수 reward를 만들지는 않게 제한한다. |
+| `sla_violations > 0` | bounded log-scaled pressure: `-min(35, 5 + 5*log1p(sla_violations))` | SLA violation은 safety pressure로 반영하지만, 의도적 backlog phase가 전체 reward stream을 압도하지 않게 제한한다. |
+| SLA pressure가 있는 상태에서 유효한 Agent A safety action | bounded recovery credit: `min(16, 4 + 0.1*sla_violations)` | risk threshold에 맞는 throttle/migrate/replicate action은 active safety pressure 완화로 명시적 credit을 받는다. |
 | 죽은 task가 하나라도 있음 | `-100.0` | task survival failure penalty. |
 
-이 scaling은 live fault-injection mode에서 중요하다. `admission-cap` 같은 Agent C phase는 admission control을 시험하기 위해 의도적으로 unschedulable pod를 많이 만든다. 이런 pod는 safety pressure로 보여야 하지만, controlled pending pod `130`개 때문에 Agent A가 `-6499` 같은 값을 보이는 것은 dashboard 해석상 과도하다.
+이 scaling은 live fault-injection mode에서 중요하다. `admission-cap` 같은 Agent C phase는 admission control을 시험하기 위해 의도적으로 unschedulable pod를 많이 만든다. 이런 pod는 safety pressure로 보여야 하지만, moderate risk만으로 Agent A가 Agent C를 반복 preempt하거나 단일 backlog penalty가 dashboard를 지배하면 해석상 과도하다.
 
 ### Agent B: Efficiency Optimizer / Energy Agent
 
@@ -331,7 +332,7 @@ Agent A/B/C는 각자 proposal을 만들지만, 실제 selected action은 Refere
 
 | 우선순위 | 규칙 | 설명 |
 |---:|---|---|
-| 1 | Agent A safety action 우선 | `migrate`, `replicate`, `throttle`이 있으면 safety-first로 Agent A action이 lower-priority action을 preempt한다. |
+| 1 | Agent A safety action 우선 | `migrate`, `replicate`, gated `throttle`이 있으면 safety-first로 Agent A action이 lower-priority action을 preempt한다. Moderate throttle proposal은 backlog/SLA pressure에서 node-local CPU 또는 memory pressure도 높을 때만 유지된다. |
 | 2 | Agent C protective admission 우선 | `queue`, `reject`, `deprioritize`, `resource_cap`은 non-safety efficiency action보다 우선한다. |
 | 3 | Agent B efficiency action score 선택 | `power_state`, `dvfs`, `memory_balloon` 중 score가 높은 action을 고른다. |
 | 4 | deterministic priority fallback | meaningful action이 남아 있으면 `AgentA -> AgentC -> AgentB` 우선순위와 score로 선택한다. |
