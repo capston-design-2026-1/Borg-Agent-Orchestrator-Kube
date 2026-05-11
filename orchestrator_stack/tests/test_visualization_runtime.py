@@ -17,6 +17,37 @@ def test_visualized_run_cli_defaults():
     assert args.no_tune is True
 
 
+def test_build_google_trace_cli_options():
+    parser = build_parser()
+
+    args = parser.parse_args(
+        [
+            "build-google-trace",
+            "--frames",
+            "/tmp/frames.parquet",
+            "--out",
+            "/tmp/trace.json",
+            "--max-rows",
+            "10",
+            "--offset",
+            "5",
+            "--max-nodes",
+            "16",
+            "--max-tasks-per-row",
+            "32",
+            "--cell",
+            "cell-a",
+        ]
+    )
+
+    assert args.frames == "/tmp/frames.parquet"
+    assert args.max_rows == 10
+    assert args.offset == 5
+    assert args.max_nodes == 16
+    assert args.max_tasks_per_row == 32
+    assert args.cell == "cell-a"
+
+
 def test_dashboard_flow_diagram_uses_measured_card_connectors():
     app_js = Path("orchestrator_stack/dashboard/app.js").read_text(encoding="utf-8")
     styles = Path("orchestrator_stack/dashboard/styles.css").read_text(encoding="utf-8")
@@ -84,7 +115,11 @@ def test_dashboard_flow_diagram_uses_measured_card_connectors():
     assert "proposal-chip" in app_js
     assert 'id="repeatCount"' not in index_html
     assert "$('repeatCount')" not in app_js
-    assert "repeat(6, minmax(0, 1fr))" in styles
+    assert "repeat(8, minmax(0, 1fr))" in styles
+    assert 'id="dataSource"' in index_html
+    assert 'id="traceRows"' in index_html
+    assert "data_source" in app_js
+    assert "returned invalid JSON" in app_js
     assert "<path id=\"flow-" not in app_js
     assert "rail-label" not in app_js
     assert ".rail-label" not in styles
@@ -165,6 +200,20 @@ def test_visualization_state_writes_state_and_events(tmp_path: Path):
     assert payload["optuna"]["history"][-1]["trial"] == 0
     assert payload["ray"]["status"] == "trained"
     assert len(events) >= 4
+
+
+def test_visualization_state_writes_strict_json_for_non_finite_numbers(tmp_path: Path):
+    state = VisualizationState(tmp_path)
+
+    state.ray_update("complete", reward_mean=float("nan"), positive=float("inf"))
+
+    payload = json.loads((tmp_path / "state.json").read_text(encoding="utf-8"))
+    event = json.loads((tmp_path / "events.jsonl").read_text(encoding="utf-8").splitlines()[-1])
+
+    assert payload["ray"]["reward_mean"] is None
+    assert payload["ray"]["positive"] is None
+    assert event["reward_mean"] is None
+    assert event["positive"] is None
 
 
 def test_visualization_state_exports_persisted_optuna_history(tmp_path: Path):
