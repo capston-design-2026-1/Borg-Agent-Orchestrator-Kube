@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import math
 from hashlib import sha1
 from pathlib import Path
 from typing import Any
@@ -138,18 +139,21 @@ def train_multiagent_ppo(
         pass
 
     env_runners = last_result.get("env_runners", {})
-    objective_reward = float(
-        last_result.get(
-            "episode_reward_mean",
-            env_runners.get("episode_return_mean", env_runners.get("agent_episode_returns_mean", 0.0)),
-        )
+    raw_reward = last_result.get(
+        "episode_reward_mean",
+        env_runners.get("episode_return_mean", env_runners.get("agent_episode_returns_mean", 0.0)),
     )
+    try:
+        objective_reward = float(raw_reward)
+    except (TypeError, ValueError):
+        objective_reward = math.nan
+    reward_mean: float | None = objective_reward if math.isfinite(objective_reward) else None
 
     return {
         "status": "trained",
         "checkpoint": checkpoint_path,
         "train_iters": int(train_iters),
-        "episode_reward_mean": objective_reward,
+        "episode_reward_mean": reward_mean,
         "train_batch_size": int(train_batch_size),
         "minibatch_size": int(minibatch_size),
         "num_epochs": int(num_epochs),
@@ -201,11 +205,17 @@ def policy_training_reward_mean(training_summary: dict[str, Any]) -> float | Non
     if training_summary.get("status") != "trained":
         return None
     if "episode_reward_mean" in training_summary:
-        return float(training_summary["episode_reward_mean"])
+        value = training_summary["episode_reward_mean"]
+        if value is None:
+            return None
+        parsed = float(value)
+        return parsed if math.isfinite(parsed) else None
     stage_rewards = [
         float(stage["episode_reward_mean"])
         for stage in training_summary.get("stages", [])
-        if stage.get("status") == "trained" and "episode_reward_mean" in stage
+        if stage.get("status") == "trained"
+        and stage.get("episode_reward_mean") is not None
+        and math.isfinite(float(stage["episode_reward_mean"]))
     ]
     if not stage_rewards:
         return None
