@@ -43,6 +43,17 @@ cd /Users/theokim/Documents/github/kyunghee/Borg-Agent-Orchestrator && LIVE_K8S=
 | 8 | Layer 5 Optuna | reward weight `alpha/beta/gamma`를 trial별로 탐색한다. | Optuna 카드, Objective graph, Weight graph |
 | 9 | Ray/RLlib | multi-agent PPO policy를 bootstrap/training한다. | Ray Status, Ray/RLlib panel, Ray RLlib PPO Policy 카드 |
 
+오프라인 Google Cluster Trace frame은 같은 dashboard/runtime 경로로 변환할 수 있다.
+
+```bash
+./.venv/bin/python orchestrator_stack/run.py build-google-trace \
+  --frames marlops-baseline/data/processed/google_trace/trace_frames.parquet \
+  --out orchestrator_stack/runtime/google_trace.json \
+  --max-rows 500
+```
+
+이 adapter를 거친 실행은 `state.data_source.kind`가 `Google Trace`로 표시되고, live Kubernetes/AIOpsLab 실행은 `AIOpsLab / Kubernetes`로 표시된다.
+
 ## 실시간 Kubernetes 환경
 
 현재 live orchestration target은 local Kind validation cluster다. managed cloud Kubernetes나 production multi-node cluster가 아니다. baseline inspection 결과는 `reports/evaluations/202605051249_kubernetes_environment_snapshot.md`에 있고, observability 수정 검증은 `reports/evaluations/202605051339_observability_bootstrap_report.md`에 기록되어 있다.
@@ -130,7 +141,7 @@ live exerciser는 실제 Kubernetes mutation을 수행한다. 예를 들어 `bor
 | 상태 배지 `Running`, `complete`, `failed` | 런타임 전체 상태. `running`이면 루프 또는 demo가 진행 중이고, `complete`는 bounded run 완료, `failed`는 오류 발생이다. | `state.status` |
 | `updated ...` | dashboard가 마지막으로 읽은 runtime state timestamp. | `state.updated_at` |
 
-## Metrics 카드 6개
+## Metrics 카드 8개
 
 상단 metrics는 가장 빠르게 현재 상태를 판단하기 위한 요약 영역이다.
 
@@ -142,6 +153,10 @@ live exerciser는 실제 Kubernetes mutation을 수행한다. 예를 들어 `bor
 | Optuna | `1417.159` 또는 `disabled` | Optuna best objective score. | `NO_TUNE=1`이면 disabled/skipped로 보일 수 있다. |
 | Ray Status | `trained`, `disabled`, `idle` | Ray/RLlib PPO bootstrap 상태. | `NO_POLICY=1` 또는 fast mode에서는 disabled가 정상이다. |
 | Max Risk | `0.590` | 현재 node 중 가장 높은 failure/risk score. | XGBoost가 없으면 Kubernetes/Prometheus utilization과 pod health 기반 telemetry risk다. |
+| Data Source | `Google Trace`, `AIOpsLab / Kubernetes`, `Synthetic Sample` | trace row의 source field와 실행 mode로 추론한 provenance. | 품질 점수가 아니라 데이터 출처 라벨이다. |
+| Trace Rows | `500` | 로드된 trace row 수 또는 지금까지 수집된 live row 수. | live mode에서는 Kubernetes snapshot이 추가될 때마다 증가한다. |
+
+Runtime JSON은 strict JSON으로 기록된다. Ray/RLlib 같은 라이브러리가 `NaN` 또는 `inf` 값을 반환하면 `null`로 저장해 dashboard API가 계속 파싱 가능하도록 한다.
 
 ## Current Decision 패널
 
