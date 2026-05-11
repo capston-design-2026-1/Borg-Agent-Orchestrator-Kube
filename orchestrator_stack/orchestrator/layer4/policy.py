@@ -18,8 +18,22 @@ POLICY_SPACES = {
 }
 
 
+def _max_risk_node(obs: Observation) -> tuple[str | None, float]:
+    if not obs.p_fail_scores:
+        return None, 0.0
+    node_id, score = max(obs.p_fail_scores.items(), key=lambda kv: kv[1])
+    return node_id, float(score)
+
+
+def _node_pressure(obs: Observation, node_id: str | None) -> float:
+    node = next((candidate for candidate in obs.nodes if candidate.node_id == node_id), None)
+    return max(node.cpu_util, node.mem_util) if node is not None else 0.0
+
+
 def default_policy_actions(obs: Observation) -> dict[str, int]:
-    max_risk = max(obs.p_fail_scores.values(), default=0.0)
+    max_risk_node, max_risk = _max_risk_node(obs)
+    max_risk_pressure = _node_pressure(obs, max_risk_node)
+    backlog_pressure = obs.sla_violations > 0 or obs.queue_length >= 80
     min_demand = min(obs.demand_projection.values(), default=1.0)
 
     agent_a = 0
@@ -28,7 +42,7 @@ def default_policy_actions(obs: Observation) -> dict[str, int]:
     elif max_risk >= 0.7:
         agent_a = 1
     elif max_risk >= 0.5:
-        agent_a = 3
+        agent_a = 0 if backlog_pressure and max_risk_pressure < 0.72 else 3
 
     agent_b = 0
     if min_demand < 0.12:
