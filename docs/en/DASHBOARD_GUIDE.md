@@ -263,19 +263,20 @@ Default config weights are `alpha=1.0`, `beta=0.6`, and `gamma=0.8`; Optuna sear
 
 | Action | Heuristic trigger | RLlib action id | Payload | Twin transition effect | Possible reward |
 |---|---|---:|---|---|---|
-| `noop` | No `p_fail_scores` or max risk `< 0.5` | 0 | None | No state change. | Base `+1.0`; live telemetry penalties can still apply. |
-| `throttle` | max risk `>= 0.5` and `< 0.7` | 3 | None | Multiplies target node CPU and network utilization by `0.85`. | If selected and `p_fail >= 0.5`, AgentA gets `+3.0`. |
-| `migrate` | max risk `>= 0.7` and `< 0.83` | 1 | None | Moves one active task from the highest-loaded other on-node to the target; lowers source load and raises target load slightly. | `+10.0` if `p_fail > 0.75`; `-20.0` if migrating at `p_fail < 0.4`. |
+| `noop` | No `p_fail_scores`, max risk `< 0.5`, or moderate risk during backlog/SLA pressure when the target node is not locally hot (`max(cpu, mem) < 0.72`) | 0 | None | No state change. | Base `+1.0`; live telemetry penalties can still apply. |
+| `throttle` | max risk `>= 0.5` and `< 0.7`, unless backlog/SLA pressure says Agent C should handle admission first; still triggers when target node pressure is `>= 0.72` | 3 | None | Multiplies target node CPU and network utilization by `0.85`. | If selected and `p_fail >= 0.5`, AgentA gets `+3.0`. |
+| `migrate` | max risk `>= 0.7` and `< 0.83` | 1 | None | Moves one active task from the highest-loaded other on-node to the target; lowers source load and raises target load slightly. | `+10.0` if `p_fail >= 0.7`; `-20.0` if migrating at `p_fail < 0.4`. |
 | `replicate` | max risk `>= 0.83` | 2 | None | Replicates the most urgent task on the target node to the lowest-loaded other node. | `+8.0` if `p_fail >= 0.83`. |
 
 Live telemetry effects that can always affect Agent A:
 
 | Condition | Reward change | Meaning |
 |---|---:|---|
-| `sla_violations > 0` | bounded log-scaled pressure: `-min(180, 35 + 25*log1p(sla_violations))` | SLA violations are treated as safety pressure, but intentional backlog phases no longer create thousands of negative reward points. |
+| `sla_violations > 0` | bounded log-scaled pressure: `-min(35, 5 + 5*log1p(sla_violations))` | SLA violations are treated as safety pressure, but intentional backlog phases no longer dominate the whole reward stream. |
+| Valid Agent A safety action while SLA pressure exists | bounded recovery credit: `min(16, 4 + 0.1*sla_violations)` | A matching throttle/migrate/replicate action gets explicit credit for reducing active safety pressure. |
 | Any dead task | `-100.0` | Task survival failure penalty. |
 
-This scaling is important in live fault-injection mode. Agent C phases such as `admission-cap` intentionally create many unschedulable pods to test admission control. Those pods should create visible safety pressure, but they should not make Agent A show values like `-6499` just because `130` controlled pending pods were injected.
+This scaling is important in live fault-injection mode. Agent C phases such as `admission-cap` intentionally create many unschedulable pods to test admission control. Those pods should create visible safety pressure, but moderate risk should not let Agent A repeatedly preempt Agent C or make Agent A dominate the dashboard with a single backlog penalty.
 
 ### Agent B: Efficiency Optimizer / Energy Agent
 
@@ -317,7 +318,7 @@ Agent A/B/C each produce proposals, but the Referee selects exactly one final ac
 
 | Priority | Rule | Explanation |
 |---:|---|---|
-| 1 | Agent A safety action first | `migrate`, `replicate`, or `throttle` preempts lower-priority actions. |
+| 1 | Agent A safety action first | `migrate`, `replicate`, or gated `throttle` preempts lower-priority actions. Moderate throttle proposals are suppressed during backlog/SLA pressure unless node-local CPU or memory pressure is also high. |
 | 2 | Agent C protective admission second | `queue`, `reject`, `deprioritize`, and `resource_cap` override non-safety efficiency actions. |
 | 3 | Agent B efficiency action by score | Selects the highest-scoring `power_state`, `dvfs`, or `memory_balloon`. |
 | 4 | Deterministic priority fallback | Chooses by `AgentA -> AgentC -> AgentB` precedence and score. |
