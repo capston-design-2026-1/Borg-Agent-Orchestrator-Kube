@@ -1,7 +1,12 @@
 import json
 import pytest
 
-from orchestrator.layer2.simulator import TraceDrivenTwinBackend, sla_pressure_penalty, state_to_observation
+from orchestrator.layer2.simulator import (
+    TraceDrivenTwinBackend,
+    agent_a_sla_recovery_credit,
+    sla_pressure_penalty,
+    state_to_observation,
+)
 from orchestrator.types import ActionKind, AgentAction
 
 
@@ -224,6 +229,33 @@ def test_trace_driven_backend_bounds_intentional_sla_backlog_penalty():
 
     assert result.reward_by_agent["AgentA"] > -220.0
     assert result.reward_by_agent["AgentA"] == pytest.approx(1.0 + sla_pressure_penalty(130))
+    assert sla_pressure_penalty(130) > -45.0
+
+
+def test_trace_driven_backend_credits_valid_agent_a_sla_mitigation():
+    rows = [
+        {
+            "timestamp": 100,
+            "nodes": [{"node_id": "n1", "cpu_util": 0.76, "mem_util": 0.2, "disk_util": 0.0, "net_util": 0.0}],
+            "tasks": [],
+            "queue_length": 40,
+            "energy_price": 0.1,
+            "sla_violations": 10,
+            "completed_tasks": 0,
+            "energy_watts": 200.0,
+            "p_fail_scores": {"n1": 0.52},
+            "demand_projection": {"n1": 0.4},
+        }
+    ]
+
+    backend = TraceDrivenTwinBackend(rows)
+    backend.reset()
+    action = AgentAction("AgentA", ActionKind.THROTTLE, target="n1")
+    result = backend.step(action)
+
+    expected = 1.0 + 3.0 + sla_pressure_penalty(10) + agent_a_sla_recovery_credit(state_to_observation(rows[0]), action)
+    assert result.reward_by_agent["AgentA"] == pytest.approx(expected)
+    assert result.reward_by_agent["AgentA"] > 1.0 + 3.0 + sla_pressure_penalty(10)
 
 
 def test_trace_driven_backend_preserves_live_sla_risk_after_action_delta():
