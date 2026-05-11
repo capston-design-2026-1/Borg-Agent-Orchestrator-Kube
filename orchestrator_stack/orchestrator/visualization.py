@@ -279,7 +279,12 @@ def run_visualized_orchestration(
         data_source = _trace_provenance(trace, rows, config_path, config)
         state.state["data_source"] = data_source
         state.state["summary"]["data_source"] = data_source
-        state.emit("data_source", f"{data_source['kind']} rows={data_source['rows']}", **data_source)
+        state.emit(
+            "data_source",
+            f"{data_source['kind']} rows={data_source['rows']}",
+            source_kind=data_source["kind"],
+            **{key: value for key, value in data_source.items() if key != "kind"},
+        )
         state.stage("trace", "complete", detail=f"loaded {len(rows)} trace rows", progress=1.0)
 
         state.stage("brains", "running", detail="train XGBoost risk and demand predictors", progress=0.2)
