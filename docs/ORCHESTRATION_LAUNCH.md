@@ -89,6 +89,17 @@ The launcher passes that Prometheus URL into `live-kubernetes-run`, so live trac
 
 Live mode defaults to `MODE=full`: Ray/RLlib policy bootstrap and Optuna reward tuning run before the continuous Kubernetes loop. Use the repository `.venv` Python for this full mode because it contains Ray, Optuna, XGBoost, and Torch.
 
+For offline Google Cluster Trace evidence, convert prepared frame files before launching a finite visualized run:
+
+```bash
+./.venv/bin/python orchestrator_stack/run.py build-google-trace \
+  --frames marlops-baseline/data/processed/google_trace/trace_frames.parquet \
+  --out orchestrator_stack/runtime/google_trace.json \
+  --max-rows 500
+```
+
+The dashboard Data Source and Trace Rows cards distinguish `Google Trace`, `AIOpsLab / Kubernetes`, and synthetic/sample traces.
+
 Live mode also defaults to `EXERCISE_CLUSTER=1`. The launcher rotates safe synthetic Kubernetes workloads in the dedicated `borg-orchestrator-exercise` namespace so the live cluster does not stay idle. The rotation intentionally covers distinct action families: Agent B `power_state`, `dvfs`, and `memory_balloon`; Agent A `throttle`, `migrate`, and `replicate`; and Agent C `admission:queue`, `admission:deprioritize`, and `resource_cap`.
 
 What it does:
@@ -123,6 +134,7 @@ Detailed dashboard interpretation guides:
 The dashboard shows:
 
 - current orchestration stage
+- data source provenance and trace row count
 - per-step reward stream for Agent A, Agent B, Agent C, and weighted total score
 - learning-progress view with Optuna best-so-far lift, new-best events, trial timeline, and PPO reward mean
 - Optuna study name, full completed persistent-trial history, latest trial, best score, and best parameters
