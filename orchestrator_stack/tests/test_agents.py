@@ -20,6 +20,42 @@ def test_agent_a_throttles_live_moderate_risk():
     assert action.target == "node-1"
 
 
+def test_agent_a_defers_moderate_backlog_risk_without_node_pressure():
+    obs = Observation(
+        timestamp=1,
+        nodes=[NodeState("node-1", cpu_util=0.51, mem_util=0.44, disk_util=0.0, net_util=0.0)],
+        tasks=[],
+        p_fail_scores={"node-1": 0.52},
+        demand_projection={"node-1": 0.32},
+        queue_length=90,
+        energy_price=0.1,
+        sla_violations=1,
+    )
+
+    action = AgentARiskMitigator().act(obs)
+
+    assert action.kind == ActionKind.NOOP
+    assert action.score == 0.52
+
+
+def test_agent_a_still_throttles_moderate_backlog_risk_with_node_pressure():
+    obs = Observation(
+        timestamp=1,
+        nodes=[NodeState("node-1", cpu_util=0.74, mem_util=0.44, disk_util=0.0, net_util=0.0)],
+        tasks=[],
+        p_fail_scores={"node-1": 0.52},
+        demand_projection={"node-1": 0.32},
+        queue_length=90,
+        energy_price=0.1,
+        sla_violations=1,
+    )
+
+    action = AgentARiskMitigator().act(obs)
+
+    assert action.kind == ActionKind.THROTTLE
+    assert action.target == "node-1"
+
+
 def test_agent_c_caps_single_overloaded_node():
     obs = Observation(
         timestamp=1,
