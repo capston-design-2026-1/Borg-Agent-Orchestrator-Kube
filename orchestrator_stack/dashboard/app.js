@@ -1,6 +1,15 @@
 const $ = (id) => document.getElementById(id);
 const colors = { total: '#14211b', AgentA: '#b44634', AgentB: '#16835f', AgentC: '#2f6f9f', optuna: '#d48a20', learning: '#16835f', ray: '#745f9f', alpha: '#b44634', beta: '#16835f', gamma: '#2f6f9f' };
-async function getJSON(path) { const res = await fetch(path, { cache: 'no-store' }); return res.json(); }
+async function getJSON(path) {
+  const res = await fetch(path, { cache: 'no-store' });
+  const text = await res.text();
+  if (!res.ok) throw new Error(`${path} returned ${res.status}`);
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    throw new Error(`${path} returned invalid JSON: ${err.message}`);
+  }
+}
 let reloadingForVersion = false;
 async function reloadIfDashboardChanged() {
   if (reloadingForVersion) return;
@@ -756,6 +765,9 @@ function renderState(state, events) {
   $('optunaBest').textContent = state.optuna?.status === 'disabled' ? 'disabled' : fmt(state.optuna?.best_score);
   $('rayStatus').textContent = state.ray?.status || 'idle';
   $('maxRisk').textContent = fmt(state.cluster?.max_risk);
+  const dataSource = state.data_source || state.summary?.data_source || {};
+  $('dataSource').textContent = dataSource.kind || 'n/a';
+  $('traceRows').textContent = dataSource.rows ?? '0';
   $('decisionTime').textContent = state.decision?.time || 'waiting';
   $('decisionAction').textContent = state.decision?.agent ? `${state.decision.agent}:${state.decision.kind}` : 'n/a';
   $('decisionTarget').textContent = state.decision?.target || 'n/a';
@@ -826,8 +838,14 @@ function renderState(state, events) {
   $('optunaParamLegend').innerHTML = ['alpha','beta','gamma'].map(k => `<span><b style="color:${colors[k]}">■</b> ${k}</span>`).join('');
 
   const ray = state.ray || {};
-  $('rayBody').innerHTML = Object.entries(ray).map(([k,v]) => `<div><b>${k}</b><br>${v ?? 'n/a'}</div>`).join('');
-  $('artifacts').innerHTML = (state.artifacts || []).slice().reverse().map(a => `<a><b>${a.label}</b><br><span class="muted">${a.path}</span></a>`).join('') || '<span class="muted">No artifacts yet</span>';
+  const sourceDetails = Object.keys(dataSource).length ? [
+    ['data_source', dataSource.kind],
+    ['trace_rows', dataSource.rows],
+    ['trace_path', dataSource.trace_path],
+    ['telemetry_sources', (dataSource.telemetry_sources || []).join(', ') || 'n/a'],
+  ] : [];
+  $('rayBody').innerHTML = [...Object.entries(ray), ...sourceDetails].map(([k,v]) => `<div><b>${safeText(k)}</b><br>${safeText(v ?? 'n/a')}</div>`).join('');
+  $('artifacts').innerHTML = (state.artifacts || []).slice().reverse().map(a => `<a><b>${safeText(a.label)}</b><br><span class="muted">${safeText(a.path)}</span></a>`).join('') || '<span class="muted">No artifacts yet</span>';
   $('events').innerHTML = (events || []).slice().reverse().map(e => `<div class="event"><b>${e.time}</b> [${e.kind}] ${safeText(e.message)}<br><span>${safeText(eventDetail(e))}</span></div>`).join('');
 }
 async function tick() {
