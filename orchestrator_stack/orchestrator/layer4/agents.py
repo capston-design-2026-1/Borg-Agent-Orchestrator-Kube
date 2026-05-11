@@ -13,11 +13,16 @@ class AgentARiskMitigator:
         if not obs.p_fail_scores:
             return AgentAction("AgentA", ActionKind.NOOP, score=0.0, priority=self.priority)
         node_id, score = max(obs.p_fail_scores.items(), key=lambda kv: kv[1])
+        node = next((candidate for candidate in obs.nodes if candidate.node_id == node_id), None)
+        node_pressure = max(node.cpu_util, node.mem_util) if node is not None else 0.0
+        backlog_pressure = obs.sla_violations > 0 or obs.queue_length >= 80
         if score >= 0.83:
             return AgentAction("AgentA", ActionKind.REPLICATE, target=node_id, score=float(score), priority=self.priority)
         if score >= 0.7:
             return AgentAction("AgentA", ActionKind.MIGRATE, target=node_id, score=float(score), priority=self.priority)
         if score >= 0.5:
+            if backlog_pressure and node_pressure < 0.72:
+                return AgentAction("AgentA", ActionKind.NOOP, score=float(score), priority=self.priority)
             return AgentAction("AgentA", ActionKind.THROTTLE, target=node_id, score=float(score), priority=self.priority)
         return AgentAction("AgentA", ActionKind.NOOP, score=float(score), priority=self.priority)
 
