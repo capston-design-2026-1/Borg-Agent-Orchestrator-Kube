@@ -20,7 +20,26 @@ def sla_pressure_penalty(sla_violations: int | float) -> float:
     count = max(0.0, float(sla_violations))
     if count <= 0.0:
         return 0.0
-    return -min(180.0, 35.0 + (25.0 * math.log1p(count)))
+    return -min(35.0, 5.0 + (5.0 * math.log1p(count)))
+
+
+def is_valid_agent_a_safety_action(obs: Observation, action: AgentAction) -> bool:
+    if action.agent_name != "AgentA" or action.target is None:
+        return False
+    max_risk = max(obs.p_fail_scores.values(), default=0.0)
+    if action.kind == ActionKind.THROTTLE:
+        return max_risk >= 0.5
+    if action.kind == ActionKind.MIGRATE:
+        return max_risk >= 0.7
+    if action.kind == ActionKind.REPLICATE:
+        return max_risk >= 0.83
+    return False
+
+
+def agent_a_sla_recovery_credit(obs: Observation, action: AgentAction) -> float:
+    if obs.sla_violations <= 0 or not is_valid_agent_a_safety_action(obs, action):
+        return 0.0
+    return min(16.0, 4.0 + (0.1 * float(obs.sla_violations)))
 
 
 def telemetry_reward_adjustments(obs: Observation) -> dict[str, float]:
@@ -740,7 +759,7 @@ class TraceDrivenTwinBackend:
         demand = max(obs.demand_projection.values(), default=0.0)
 
         if action.agent_name == "AgentA":
-            if applied["migrated"] and p_fail > 0.75:
+            if applied["migrated"] and p_fail >= 0.7:
                 rewards["AgentA"] += 10.0
             if applied["replicated"] and p_fail >= 0.83:
                 rewards["AgentA"] += 8.0
@@ -769,6 +788,7 @@ class TraceDrivenTwinBackend:
         telemetry_delta = telemetry_reward_adjustments(obs)
         for agent_name, delta in telemetry_delta.items():
             rewards[agent_name] += delta
+        rewards["AgentA"] += agent_a_sla_recovery_credit(obs, action)
 
         if any(not task.alive for task in obs.tasks):
             rewards["AgentA"] -= 100.0
@@ -956,15 +976,10 @@ class AIOpsLabBackend(SimulatorBackend):
 
     def _reward_from_observation(self, obs: Observation, action: AgentAction) -> dict[str, float]:
         rewards = {"AgentA": 1.0, "AgentB": 1.0, "AgentC": 1.0}
-        max_risk = max(obs.p_fail_scores.values(), default=max((n.cpu_util + n.mem_util) / 2.0 for n in obs.nodes) if obs.nodes else 0.0)
         min_demand = min(obs.demand_projection.values(), default=min((n.cpu_util + n.mem_util) / 2.0 for n in obs.nodes) if obs.nodes else 0.0)
 
         if action.agent_name == "AgentA" and action.kind in {ActionKind.MIGRATE, ActionKind.REPLICATE, ActionKind.THROTTLE}:
-            is_valid_safety_action = (
-                (action.kind == ActionKind.THROTTLE and max_risk >= 0.5)
-                or (action.kind == ActionKind.MIGRATE and max_risk >= 0.7)
-                or (action.kind == ActionKind.REPLICATE and max_risk >= 0.83)
-            )
+            is_valid_safety_action = is_valid_agent_a_safety_action(obs, action)
             rewards["AgentA"] += 10.0 if is_valid_safety_action else -20.0
         if action.agent_name == "AgentB" and action.kind in {
             ActionKind.POWER_STATE,
@@ -986,6 +1001,7 @@ class AIOpsLabBackend(SimulatorBackend):
         telemetry_delta = telemetry_reward_adjustments(obs)
         for agent_name, delta in telemetry_delta.items():
             rewards[agent_name] += delta
+        rewards["AgentA"] += agent_a_sla_recovery_credit(obs, action)
 
         if any(not task.alive for task in obs.tasks):
             rewards["AgentA"] -= 100.0
