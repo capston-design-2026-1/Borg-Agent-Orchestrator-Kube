@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import time
 from dataclasses import replace
 from pathlib import Path
@@ -17,7 +18,7 @@ from orchestrator.layer4.referee import resolve
 from orchestrator.layer5.optuna_tuner import export_study_report
 from orchestrator.layer6.scoreboard import Scoreboard
 from orchestrator.main import ensure_trace_exists, run_episode, run_policy_training, train_brain_models
-from orchestrator.runtime_state import VisualizationState
+from orchestrator.runtime_state import VisualizationState, json_safe
 
 try:
     import optuna
@@ -118,13 +119,45 @@ def _write_live_summary(event_dir: str | Path, state: VisualizationState, *, sta
         "optuna": state.state.get("optuna"),
         "reward_summary": state.state.get("reward_summary"),
         "summary": state.state.get("summary"),
+        "data_source": state.state.get("data_source"),
         "errors": state.state.get("errors"),
     }
     out = Path(event_dir) / "summary.json"
     tmp = out.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps(summary, indent=2, sort_keys=True), encoding="utf-8")
+    tmp.write_text(json.dumps(json_safe(summary), indent=2, sort_keys=True, allow_nan=False), encoding="utf-8")
     tmp.replace(out)
     return out
+
+
+def _slug(value: str, *, fallback: str = "trace") -> str:
+    slug = re.sub(r"[^a-zA-Z0-9_.-]+", "_", value).strip("._-")
+    return slug[:80] or fallback
+
+
+def _trace_provenance(trace: str | Path, rows: list[dict[str, Any]], config_path: str | Path, config: OrchestratorConfig) -> dict[str, Any]:
+    first = rows[0] if rows else {}
+    telemetry_sources = first.get("telemetry_sources") if isinstance(first, dict) else None
+    source_platform = str(first.get("source_platform") or "") if isinstance(first, dict) else ""
+    source = str(first.get("source") or "") if isinstance(first, dict) else ""
+    source_tokens = {str(item).lower() for item in telemetry_sources} if isinstance(telemetry_sources, list) else set()
+    if "google_trace" in source_platform.lower() or "google" in source.lower() or "google_cluster_trace" in source_tokens:
+        kind = "Google Trace"
+    elif any("kubernetes" in token or "prometheus" in token for token in source_tokens) or config.use_aiopslab_backend:
+        kind = "AIOpsLab / Kubernetes"
+    elif "sample" in Path(trace).name or "synthetic" in Path(trace).name:
+        kind = "Synthetic Sample"
+    else:
+        kind = "Trace File"
+    return {
+        "kind": kind,
+        "trace_path": str(trace),
+        "config_path": str(config_path),
+        "rows": len(rows),
+        "telemetry_sources": sorted(source_tokens),
+        "source_platform": source_platform or None,
+        "source": source or None,
+        "aiopslab_backend": bool(config.use_aiopslab_backend),
+    }
 
 
 def _optuna_study_history(study: Any) -> list[dict[str, Any]]:
@@ -172,7 +205,10 @@ def _tune_rewards(config: OrchestratorConfig, rows: list[dict[str, Any]], state:
         return {"status": "skipped", "reason": "optuna is not installed"}
     config.optuna_storage_path.parent.mkdir(parents=True, exist_ok=True)
     storage = f"sqlite:///{config.optuna_storage_path.resolve()}"
-    study_name = "visualized_orchestrator_reward_weights"
+    trace_stem = _slug(Path(config.trace_path).stem)
+    run_stamp = str(state.state.get("started_at", "")).replace(":", "").replace("+", "_")
+    study_name = f"visualized_{trace_stem}_{_slug(run_stamp, fallback='run')}_reward_weights"
+    state.optuna_update("initializing", study=study_name, trials=trials, storage_path=str(config.optuna_storage_path))
     study = optuna.create_study(direction="maximize", storage=storage, study_name=study_name, load_if_exists=True)
     _sync_optuna_study_history(study, study_name, state, status="running")
 
@@ -240,6 +276,10 @@ def run_visualized_orchestration(
         trace = ensure_trace_exists(config)
         state.artifact(trace, "Layer 1 trace")
         rows = load_trace_rows(trace)
+        data_source = _trace_provenance(trace, rows, config_path, config)
+        state.state["data_source"] = data_source
+        state.state["summary"]["data_source"] = data_source
+        state.emit("data_source", f"{data_source['kind']} rows={data_source['rows']}", **data_source)
         state.stage("trace", "complete", detail=f"loaded {len(rows)} trace rows", progress=1.0)
 
         state.stage("brains", "running", detail="train XGBoost risk and demand predictors", progress=0.2)
@@ -270,9 +310,9 @@ def run_visualized_orchestration(
             tuning = _tune_rewards(config, rows, state, trials=trials)
             state.stage("optuna", "complete", detail=f"best score {float(tuning.get('score', 0.0)):.3f}", progress=1.0)
 
-        summary = {"trace": str(trace), "models": models, "episode": episode, "ppo": ppo, "reward_tuning": tuning}
+        summary = {"trace": str(trace), "models": models, "episode": episode, "ppo": ppo, "reward_tuning": tuning, "data_source": data_source}
         out = Path(event_dir) / "summary.json"
-        out.write_text(json.dumps(summary, indent=2, sort_keys=True), encoding="utf-8")
+        out.write_text(json.dumps(json_safe(summary), indent=2, sort_keys=True, allow_nan=False), encoding="utf-8")
         state.artifact(out, "launch summary")
         state.state["summary"].update(summary)
         state.set_status("complete", stage="complete")
@@ -325,6 +365,17 @@ def run_live_kubernetes_orchestration(
             "mirror_exercise_namespace": mirror_exercise_namespace if exercise_cluster and mirror_exercise_kubeconfigs else None,
         }
     )
+    state.state["data_source"] = {
+        "kind": "AIOpsLab / Kubernetes",
+        "trace_path": str(trace_out),
+        "config_path": str(config_path),
+        "rows": 0,
+        "telemetry_sources": ["kubernetes_api"] + (["prometheus_node_exporter"] if prometheus_base_url else []),
+        "source_platform": "kubernetes",
+        "source": "live_kubernetes",
+        "aiopslab_backend": bool(config.use_aiopslab_backend),
+    }
+    state.state["summary"]["data_source"] = dict(state.state["data_source"])
     if exercise_cluster and exercise_namespace not in namespace_prefixes:
         namespace_prefixes = (*namespace_prefixes, exercise_namespace)
     state.set_status("running", stage="live_boot")
@@ -409,6 +460,8 @@ def run_live_kubernetes_orchestration(
                 power_calibration=calibration,
             )
             trace_rows.append(row)
+            state.state["data_source"]["rows"] = len(trace_rows)
+            state.state["summary"]["data_source"] = dict(state.state["data_source"])
             write_kubernetes_trace(trace_rows, trace_out)
             if not trace_artifact_announced or (iteration + 1) % 10 == 0:
                 state.artifact(trace_out, "live Kubernetes trace")
