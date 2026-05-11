@@ -38,6 +38,35 @@ def cmd_build_trace(args: argparse.Namespace) -> None:
     print(json.dumps({"trace_path": str(out)}, indent=2))
 
 
+def cmd_build_google_trace(args: argparse.Namespace) -> None:
+    from orchestrator.layer1.google_trace import build_google_trace_file, load_google_trace_frames
+
+    rows = load_google_trace_frames(args.frames, limit=args.max_rows, offset=args.offset)
+    out = build_google_trace_file(
+        args.frames,
+        args.out,
+        limit=args.max_rows,
+        offset=args.offset,
+        max_nodes=args.max_nodes,
+        max_tasks_per_row=args.max_tasks_per_row,
+        interval_seconds=args.interval_seconds,
+        source_label=args.source_label,
+        cell=args.cell,
+    )
+    print(
+        json.dumps(
+            {
+                "trace_path": str(out),
+                "source": "google_cluster_trace",
+                "frame_rows": len(rows),
+                "max_nodes": args.max_nodes,
+                "max_tasks_per_row": args.max_tasks_per_row,
+            },
+            indent=2,
+        )
+    )
+
+
 def cmd_scrape_prometheus(args: argparse.Namespace) -> None:
     from orchestrator.layer1.prometheus import export_prometheus_metric_rows
 
@@ -318,6 +347,18 @@ def build_parser() -> argparse.ArgumentParser:
     p_build_trace.add_argument("--out", required=True)
     p_build_trace.add_argument("--interval-seconds", type=int, default=60)
     p_build_trace.set_defaults(func=cmd_build_trace)
+
+    p_build_google = sub.add_parser("build-google-trace")
+    p_build_google.add_argument("--frames", required=True, help="Prepared Google/Borg aggregate frames in JSON, JSONL, CSV, or Parquet")
+    p_build_google.add_argument("--out", required=True)
+    p_build_google.add_argument("--max-rows", type=int, help="Optional row limit for a fast slice")
+    p_build_google.add_argument("--offset", type=int, default=0)
+    p_build_google.add_argument("--max-nodes", type=int, default=32)
+    p_build_google.add_argument("--max-tasks-per-row", type=int, default=64)
+    p_build_google.add_argument("--interval-seconds", type=int, default=300)
+    p_build_google.add_argument("--source-label", default="google_cluster_trace")
+    p_build_google.add_argument("--cell")
+    p_build_google.set_defaults(func=cmd_build_google_trace)
 
     p_scrape = sub.add_parser("scrape-prometheus")
     p_scrape.add_argument("--base-url", required=True)
